@@ -20,7 +20,8 @@ import {
   Send,
   Headset
 } from 'lucide-react';
-import { Showcase, Product, Banner } from '../../types';
+import { Showcase, Product, Banner, ChatbotProfile } from '../../types';
+import { chatbotProfileService } from '../../services/chatbotProfileService';
 
 interface PublicLandingPageProps {
   showcases: Showcase[];
@@ -56,11 +57,25 @@ export const PublicLandingPage: React.FC<PublicLandingPageProps> = ({
   const [touchStartX, setTouchStartX] = useState<number | null>(null);
   const [touchEndX, setTouchEndX] = useState<number | null>(null);
 
+  // Public Chatbot Profile State
+  const [botProfile, setBotProfile] = useState<ChatbotProfile>(() => 
+    chatbotProfileService.getProfile('public-support')
+  );
+
+  useEffect(() => {
+    const unsubscribe = chatbotProfileService.subscribe((updated) => {
+      if (updated.id === 'public-support') {
+        setBotProfile(updated);
+      }
+    });
+    return unsubscribe;
+  }, []);
+
   // Chat State
   const [chatMessages, setChatMessages] = useState<Array<{ sender: 'bot' | 'user'; text: string; time: string }>>([
     {
       sender: 'bot',
-      text: 'Olá! Sou o Assistente Virtual da OmniBrand Afiliados.\n\nComo posso te ajudar hoje? Você pode me perguntar sobre marcas, produtos, preços, disponibilidade de estoque ou comparar opções!',
+      text: `Olá! Sou ${chatbotProfileService.getProfile('public-support').name}, sua consultora virtual na OmniBrand Afiliados.\n\nComo posso te ajudar hoje? Você pode me perguntar sobre marcas, produtos, preços, disponibilidade de estoque ou comparar opções!`,
       time: 'Agora'
     }
   ]);
@@ -571,18 +586,22 @@ export const PublicLandingPage: React.FC<PublicLandingPageProps> = ({
             {/* Chat Header */}
             <div className="p-4 border-b border-slate-800 bg-slate-900/90 flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div 
-                  className="w-9 h-9 rounded-xl flex items-center justify-center text-white shadow-md"
-                  style={{ backgroundColor: buttonColor }}
-                >
-                  <Headset className="w-5 h-5" />
+                <div className="relative">
+                  <img 
+                    src={botProfile.avatarUrl} 
+                    alt={botProfile.name}
+                    className="w-10 h-10 rounded-2xl object-cover border border-slate-700 shadow-md"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = botProfile.defaultAvatarUrl;
+                    }}
+                  />
+                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 absolute -bottom-0.5 -right-0.5 border-2 border-slate-900 animate-pulse" />
                 </div>
                 <div>
                   <h3 className="font-bold text-sm text-white flex items-center gap-2">
-                    <span>Atendimento OmniBrand</span>
-                    <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                    <span>{botProfile.name}</span>
                   </h3>
-                  <p className="text-[11px] text-slate-400">Suporte rápido ao visitante</p>
+                  <p className="text-[11px] text-slate-400">{botProfile.role || 'Suporte rápido ao visitante'}</p>
                 </div>
               </div>
 
@@ -600,28 +619,48 @@ export const PublicLandingPage: React.FC<PublicLandingPageProps> = ({
               {chatMessages.map((msg, idx) => (
                 <div
                   key={idx}
-                  className={`flex flex-col max-w-[88%] ${
-                    msg.sender === 'user' ? 'ml-auto items-end' : 'mr-auto items-start'
+                  className={`flex items-start gap-2.5 max-w-[90%] ${
+                    msg.sender === 'user' ? 'ml-auto flex-row-reverse' : 'mr-auto flex-row'
                   }`}
                 >
-                  <div
-                    className={`p-3.5 rounded-2xl text-xs leading-relaxed whitespace-pre-line ${
-                      msg.sender === 'user'
-                        ? 'text-white rounded-br-xs'
-                        : 'bg-slate-800 text-slate-100 border border-slate-700/80 rounded-bl-xs shadow-xs'
-                    }`}
-                    style={msg.sender === 'user' ? { backgroundColor: buttonColor } : undefined}
-                  >
-                    {msg.text}
+                  {msg.sender === 'bot' && (
+                    <img 
+                      src={botProfile.avatarUrl} 
+                      alt={botProfile.name}
+                      className="w-7 h-7 rounded-xl object-cover border border-slate-700 shrink-0 mt-0.5"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = botProfile.defaultAvatarUrl;
+                      }}
+                    />
+                  )}
+                  <div className={`flex flex-col ${msg.sender === 'user' ? 'items-end' : 'items-start'}`}>
+                    <div
+                      className={`p-3.5 rounded-2xl text-xs leading-relaxed whitespace-pre-line ${
+                        msg.sender === 'user'
+                          ? 'text-white rounded-br-xs'
+                          : 'bg-slate-800 text-slate-100 border border-slate-700/80 rounded-tl-xs shadow-xs'
+                      }`}
+                      style={msg.sender === 'user' ? { backgroundColor: buttonColor } : undefined}
+                    >
+                      {msg.text}
+                    </div>
+                    <span className="text-[10px] text-slate-500 mt-1 px-1">{msg.time}</span>
                   </div>
-                  <span className="text-[10px] text-slate-500 mt-1 px-1">{msg.time}</span>
                 </div>
               ))}
 
               {/* Typing Indicator */}
               {isTyping && (
-                <div className="flex flex-col max-w-[85%] mr-auto items-start">
-                  <div className="p-3.5 rounded-2xl bg-slate-800 text-slate-300 border border-slate-700/80 rounded-bl-xs flex items-center gap-1.5">
+                <div className="flex items-start gap-2.5 max-w-[85%] mr-auto">
+                  <img 
+                    src={botProfile.avatarUrl} 
+                    alt={botProfile.name}
+                    className="w-7 h-7 rounded-xl object-cover border border-slate-700 shrink-0 mt-0.5"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = botProfile.defaultAvatarUrl;
+                    }}
+                  />
+                  <div className="p-3.5 rounded-2xl bg-slate-800 text-slate-300 border border-slate-700/80 rounded-tl-xs flex items-center gap-1.5">
                     <span className="text-xs text-slate-400 font-medium">Consultando catálogo</span>
                     <span className="w-1.5 h-1.5 rounded-full bg-orange-400 animate-bounce" style={{ animationDelay: '0ms' }} />
                     <span className="w-1.5 h-1.5 rounded-full bg-orange-400 animate-bounce" style={{ animationDelay: '150ms' }} />
@@ -953,10 +992,20 @@ export const PublicLandingPage: React.FC<PublicLandingPageProps> = ({
         {/* Chat de Atendimento Button */}
         <button
           onClick={() => setIsChatOpen(true)}
-          className="flex flex-col items-center justify-center gap-1 text-slate-300 hover:text-white transition-colors cursor-pointer relative"
+          className="flex flex-col items-center justify-center gap-1 text-slate-300 hover:text-white transition-colors cursor-pointer relative group"
         >
-          <Headset className="w-5 h-5 text-orange-400" />
-          <span className="text-[11px] font-semibold">Chat de Atendimento</span>
+          <div className="relative">
+            <img 
+              src={botProfile.avatarUrl} 
+              alt={botProfile.name}
+              className="w-5 h-5 rounded-full object-cover border border-orange-400/80 shadow-xs group-hover:scale-105 transition-transform"
+              onError={(e) => {
+                (e.target as HTMLImageElement).src = botProfile.defaultAvatarUrl;
+              }}
+            />
+            <span className="w-2 h-2 rounded-full bg-emerald-500 absolute -bottom-0.5 -right-0.5 border border-slate-900" />
+          </div>
+          <span className="text-[11px] font-semibold">{botProfile.name || 'Chat de Atendimento'}</span>
         </button>
 
         {/* Menu Button */}

@@ -173,3 +173,18 @@ export interface ReplenishmentReport {
   items: ReplenishmentItem[];
   summaryNote: string;
 }
+
+// ==========================================
+// Perfis Visuais dos Chatbots
+// ==========================================
+
+export interface ChatbotProfile {
+  id: string; // 'public-support' | 'admin-assistant'
+  name: string;
+  role: string;
+  description: string;
+  avatarUrl: string;
+  defaultAvatarUrl: string;
+  updatedAt?: string;
+}
+

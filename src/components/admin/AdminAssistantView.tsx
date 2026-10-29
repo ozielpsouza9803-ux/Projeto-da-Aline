@@ -28,10 +28,11 @@ import {
   SlidersHorizontal,
   Store
 } from 'lucide-react';
-import { Product, Showcase, AdminActionProposal, ReplenishmentReport, ReplenishmentItem } from '../../types';
+import { Product, Showcase, AdminActionProposal, ReplenishmentReport, ReplenishmentItem, ChatbotProfile } from '../../types';
 import { fetchProductsFromSupabase, fetchShowcasesFromSupabase, getAdminAccessToken } from '../../services/supabaseClient';
 import { storageService } from '../../services/storage';
 import { formatBRL } from '../../services/chatbotQueryService';
+import { chatbotProfileService } from '../../services/chatbotProfileService';
 
 interface ChatMessage {
   id: string;
@@ -44,6 +45,20 @@ interface ChatMessage {
 }
 
 export const AdminAssistantView: React.FC = () => {
+  // Admin Chatbot Profile State
+  const [adminBotProfile, setAdminBotProfile] = useState<ChatbotProfile>(() => 
+    chatbotProfileService.getProfile('admin-assistant')
+  );
+
+  useEffect(() => {
+    const unsubscribe = chatbotProfileService.subscribe((updated) => {
+      if (updated.id === 'admin-assistant') {
+        setAdminBotProfile(updated);
+      }
+    });
+    return unsubscribe;
+  }, []);
+
   // Real catalog state
   const [products, setProducts] = useState<Product[]>([]);
   const [showcases, setShowcases] = useState<Showcase[]>([]);
@@ -793,25 +808,35 @@ export const AdminAssistantView: React.FC = () => {
         }}
         className="rounded-2xl border p-5 sm:p-6 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4"
       >
-        <div>
-          <div className="flex flex-wrap items-center gap-2.5">
-            <div className="p-2 bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 rounded-xl">
-              <Sparkles className="w-5 h-5" />
-            </div>
-            <h1 className="text-xl sm:text-2xl font-bold tracking-tight">
-              Assistente de Gerência com IA
-            </h1>
-            <span className="px-2.5 py-1 text-[11px] font-semibold bg-emerald-100/70 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300 rounded-full border border-emerald-300/40 flex items-center gap-1">
-              <ShieldCheck className="w-3.5 h-3.5" />
-              Catálogo Supabase Conectado
-            </span>
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="relative">
+            <img 
+              src={adminBotProfile.avatarUrl} 
+              alt={adminBotProfile.name}
+              className="w-12 h-12 rounded-2xl object-cover border-2 border-indigo-500 shadow-sm"
+              onError={(e) => {
+                (e.target as HTMLImageElement).src = adminBotProfile.defaultAvatarUrl;
+              }}
+            />
+            <span className="w-3 h-3 rounded-full bg-emerald-500 absolute -bottom-0.5 -right-0.5 border-2 border-white dark:border-slate-900" />
           </div>
-          <p 
-            style={{ color: 'var(--admin-text-secondary, #64748b)' }}
-            className="text-xs sm:text-sm mt-1"
-          >
-            Central de apoio administrativo: prepare propostas de preços, fotos, banners e consulte estoques com aprovação explícita.
-          </p>
+          <div>
+            <div className="flex flex-wrap items-center gap-2">
+              <h1 className="text-xl sm:text-2xl font-bold tracking-tight">
+                {adminBotProfile.name}
+              </h1>
+              <span className="px-2.5 py-1 text-[11px] font-semibold bg-emerald-100/70 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300 rounded-full border border-emerald-300/40 flex items-center gap-1">
+                <ShieldCheck className="w-3.5 h-3.5" />
+                Catálogo Supabase Conectado
+              </span>
+            </div>
+            <p 
+              style={{ color: 'var(--admin-text-secondary, #64748b)' }}
+              className="text-xs sm:text-sm mt-0.5"
+            >
+              {adminBotProfile.role} • {adminBotProfile.description}
+            </p>
+          </div>
         </div>
 
         {/* Right Header: Server Status & Dropdown "Ações do Assistente" */}
@@ -1013,10 +1038,25 @@ export const AdminAssistantView: React.FC = () => {
           className="px-6 py-3.5 border-b flex items-center justify-between"
         >
           <div className="flex items-center gap-2.5">
-            <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
-            <span className="text-xs font-bold uppercase tracking-wider">
-              Canal de Conversa com o Assistente
-            </span>
+            <div className="relative">
+              <img 
+                src={adminBotProfile.avatarUrl} 
+                alt={adminBotProfile.name}
+                className="w-7 h-7 rounded-lg object-cover border border-indigo-400"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src = adminBotProfile.defaultAvatarUrl;
+                }}
+              />
+              <span className="w-2 h-2 rounded-full bg-emerald-500 absolute -bottom-0.5 -right-0.5 border border-white" />
+            </div>
+            <div>
+              <span className="text-xs font-bold block leading-tight">
+                {adminBotProfile.name}
+              </span>
+              <span style={{ color: 'var(--admin-text-secondary, #64748b)' }} className="text-[10px]">
+                {adminBotProfile.role}
+              </span>
+            </div>
           </div>
           <span 
             style={{ color: 'var(--admin-text-secondary, #64748b)' }}
@@ -1033,12 +1073,21 @@ export const AdminAssistantView: React.FC = () => {
               key={msg.id}
               className={`flex items-start gap-3 ${msg.sender === 'user' ? 'flex-row-reverse' : 'flex-row'}`}
             >
-              <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ${
-                msg.sender === 'user'
-                  ? 'bg-slate-700 text-white'
-                  : 'bg-indigo-600 text-white shadow-xs'
-              }`}>
-                {msg.sender === 'user' ? <User className="w-4 h-4" /> : <Bot className="w-4 h-4" />}
+              <div className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0 overflow-hidden shadow-xs">
+                {msg.sender === 'user' ? (
+                  <div className="w-full h-full bg-slate-700 text-white flex items-center justify-center">
+                    <User className="w-4 h-4" />
+                  </div>
+                ) : (
+                  <img 
+                    src={adminBotProfile.avatarUrl} 
+                    alt={adminBotProfile.name}
+                    className="w-full h-full object-cover border border-indigo-400/60"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = adminBotProfile.defaultAvatarUrl;
+                    }}
+                  />
+                )}
               </div>
 
               <div className={`max-w-[85%] sm:max-w-[75%] rounded-2xl p-3.5 text-xs ${

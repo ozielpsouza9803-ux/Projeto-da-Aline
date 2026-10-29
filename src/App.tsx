@@ -42,6 +42,7 @@ import { SecurityView } from './components/admin/SecurityView';
 import { SettingsView } from './components/admin/SettingsView';
 import { StockManagementView } from './components/admin/StockManagementView';
 import { AdminAssistantView } from './components/admin/AdminAssistantView';
+import { ChatbotProfilesView } from './components/admin/ChatbotProfilesView';
 import { PublicStorefront } from './components/public/PublicStorefront';
 import { PublicLandingPage } from './components/public/PublicLandingPage';
 
@@ -267,6 +268,8 @@ export default function App() {
   // Tab titles mapping
   const tabTitles: Record<string, string> = {
     overview: 'Visão Geral',
+    assistant: 'Assistente de Gerência',
+    chatbots: 'Perfis dos Chatbots',
     showcases: 'Vitrines Multimarcas',
     products: 'Produtos & Catálogo',
     stock: 'Estoque e Produtos',
@@ -373,6 +376,10 @@ export default function App() {
 
               {currentTab === 'assistant' && (
                 <AdminAssistantView />
+              )}
+
+              {currentTab === 'chatbots' && (
+                <ChatbotProfilesView />
               )}
 
               {currentTab === 'showcases' && (
