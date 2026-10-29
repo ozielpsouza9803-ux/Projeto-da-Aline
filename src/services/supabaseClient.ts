@@ -233,7 +233,7 @@ export const deleteShowcaseFromSupabase = async (id: string): Promise<{ success:
 // product_images cols: id, product_id, image_url, created_at
 export const fetchProductsFromSupabase = async (): Promise<Product[] | null> => {
   try {
-    const { data: prodData, error: prodErr } = await supabase.from('products').select('id, brand_id, name, description, price, category, affiliate_url, is_active, created_at');
+    const { data: prodData, error: prodErr } = await supabase.from('products').select('id, brand_id, name, description, price, promotional_price, category, affiliate_url, is_active, created_at');
     if (prodErr) {
       console.warn('Supabase fetch products note:', prodErr.message);
       return null;
@@ -255,14 +255,17 @@ export const fetchProductsFromSupabase = async (): Promise<Product[] | null> => 
     return prodData.map((item: any) => {
       const pId = String(item.id);
       const galleryPhotos = imagesByProductId[pId] || [];
+      const rawPrice = Number(item.price || 0);
+      const rawPromo = item.promotional_price !== null && item.promotional_price !== undefined ? Number(item.promotional_price) : undefined;
+      
       return {
         id: pId,
         showcaseId: String(item.brand_id || '11111111-1111-4111-a111-111111111111'),
         name: item.name || '',
         sku: `SKU-${pId.substring(0, 8)}`,
         description: item.description || '',
-        price: Number(item.price || 0),
-        promotionalPrice: undefined,
+        price: rawPrice,
+        promotionalPrice: rawPromo,
         category: item.category || 'Geral',
         photos: galleryPhotos.length > 0 ? galleryPhotos : ['https://images.unsplash.com/photo-1523293182086-7651a899d37f?w=600&auto=format&fit=crop&q=80'],
         affiliateUrl: item.affiliate_url || 'https://www.natura.com.br',
@@ -285,6 +288,7 @@ export const upsertProductToSupabase = async (product: Product): Promise<{ succe
     name: product.name,
     description: product.description,
     price: product.price,
+    promotional_price: product.promotionalPrice ?? null,
     category: product.category,
     affiliate_url: product.affiliateUrl,
     is_active: product.isActive
