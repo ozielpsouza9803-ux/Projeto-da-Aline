@@ -80,3 +80,96 @@ export interface AdminSettings {
   showcasePosition?: 'above_banner' | 'below_banner';
 }
 
+// ==========================================
+// Assistente de Gerência com IA - Tipagens (Etapa 1)
+// ==========================================
+
+export type AdminActionType =
+  | 'update_price'
+  | 'set_promotion'
+  | 'update_photos'
+  | 'create_banner'
+  | 'update_banner'
+  | 'update_carousel'
+  | 'create_product';
+
+export type ProposalStatus = 'pending' | 'approved' | 'rejected';
+
+export interface PriceProposalData {
+  price: number;
+  promotionalPrice?: number;
+}
+
+export interface PromotionProposalData {
+  price: number;
+  promotionalPrice?: number;
+  discountPercentage?: number;
+  savingsAmount?: number;
+}
+
+export interface PhotosProposalData {
+  photos: string[];
+}
+
+export interface BannerProposalData {
+  id?: string;
+  title: string;
+  subtitle: string;
+  imageUrl: string;
+  ctaText: string;
+  ctaUrl: string;
+  order: number;
+  isActive: boolean;
+  showcaseId: string;
+}
+
+export interface CarouselProposalData {
+  showcaseId?: string;
+  bannerOrder?: { bannerId: string; order: number }[];
+  showcasePosition?: 'above_banner' | 'below_banner';
+  featuredShowcaseIds?: string[];
+}
+
+export interface AdminActionProposal<TBefore = any, TAfter = any> {
+  id: string;
+  type: AdminActionType;
+  title: string;
+  entityType: 'product' | 'banner' | 'showcase';
+  entityId: string;
+  entityName: string;
+  justification: string;
+  previousData: TBefore;
+  proposedData: TAfter;
+  status: ProposalStatus;
+  createdAt: string;
+  reviewedAt?: string;
+  feedback?: string;
+}
+
+export interface ReplenishmentItem {
+  productId: string;
+  productName: string;
+  sku: string;
+  category: string;
+  showcaseId: string;
+  showcaseName?: string;
+  currentStock: number;
+  stockStatus: 'available' | 'low' | 'out_of_stock';
+  reorderThreshold: number;
+  suggestedQuantity: number;
+  unitPrice: number;
+  estimatedCost: number;
+  alertReason: string;
+  priority: 'baixa' | 'media' | 'alta' | 'critica';
+}
+
+export interface ReplenishmentReport {
+  id: string;
+  generatedAt: string;
+  totalAlerts: number;
+  outOfStockCount: number;
+  lowStockCount: number;
+  totalEstimatedInvestment: number;
+  items: ReplenishmentItem[];
+  summaryNote: string;
+}

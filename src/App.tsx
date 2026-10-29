@@ -24,6 +24,7 @@ import {
   signOutAdmin,
   supabase
 } from './services/supabaseClient';
+import { adminThemeService, AdminThemePreference } from './services/adminThemeService';
 
 import { Sidebar } from './components/admin/Sidebar';
 import { Header } from './components/admin/Header';
@@ -40,6 +41,7 @@ import { ChartsView } from './components/admin/ChartsView';
 import { SecurityView } from './components/admin/SecurityView';
 import { SettingsView } from './components/admin/SettingsView';
 import { StockManagementView } from './components/admin/StockManagementView';
+import { AdminAssistantView } from './components/admin/AdminAssistantView';
 import { PublicStorefront } from './components/public/PublicStorefront';
 import { PublicLandingPage } from './components/public/PublicLandingPage';
 
@@ -61,6 +63,7 @@ export default function App() {
   const [clicks, setClicks] = useState<ClickRecord[]>(storageService.getClicks());
   const [commissions, setCommissions] = useState<CommissionRecord[]>(storageService.getCommissions());
   const [settings, setSettings] = useState<AdminSettings>(storageService.getSettings());
+  const [adminTheme, setAdminTheme] = useState<AdminThemePreference>(adminThemeService.getPreference());
 
   // Check Supabase Auth User & Load Supabase Data on Mount
   useEffect(() => {
@@ -321,7 +324,11 @@ export default function App() {
           onOpenAuthModal={() => setIsAuthModalOpen(true)}
         />
       ) : (
-        <div className="min-h-screen bg-slate-50 text-slate-900 flex font-sans selection:bg-orange-500 selection:text-white">
+        <div 
+          id="omnibrand-admin-container"
+          style={adminThemeService.getStyles(adminTheme)} 
+          className="min-h-screen flex font-sans transition-colors duration-200"
+        >
           {/* Sidebar */}
           <Sidebar
             currentTab={currentTab}
@@ -362,6 +369,10 @@ export default function App() {
                   commissions={commissions}
                   onNavigate={setCurrentTab}
                 />
+              )}
+
+              {currentTab === 'assistant' && (
+                <AdminAssistantView />
               )}
 
               {currentTab === 'showcases' && (
@@ -448,6 +459,8 @@ export default function App() {
                   settings={settings}
                   onSaveSettings={handleSaveSettings}
                   onResetDefaults={handleResetDefaults}
+                  currentTheme={adminTheme}
+                  onApplyTheme={(newTheme) => setAdminTheme(newTheme)}
                 />
               )}
             </main>

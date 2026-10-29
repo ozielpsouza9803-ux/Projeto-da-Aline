@@ -225,15 +225,28 @@ export const BannersView: React.FC<BannersViewProps> = ({
       {/* Modal for Banner CRUD */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-slate-200 animate-in fade-in zoom-in-95 duration-200">
-            <div className="p-6 border-b border-slate-100 flex items-center justify-between">
-              <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+          <div 
+            style={{ 
+              backgroundColor: 'var(--admin-card-bg, #ffffff)', 
+              borderColor: 'var(--admin-border, #e2e8f0)', 
+              color: 'var(--admin-text-primary, #0f172a)' 
+            }}
+            className="rounded-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto shadow-2xl border animate-in fade-in zoom-in-95 duration-200"
+          >
+            <div 
+              style={{ borderColor: 'var(--admin-border, #e2e8f0)' }}
+              className="p-6 border-b flex items-center justify-between"
+            >
+              <h3 
+                style={{ color: 'var(--admin-text-primary, #0f172a)' }}
+                className="text-lg font-bold flex items-center gap-2"
+              >
                 <ImageIcon className="w-5 h-5 text-orange-500" />
                 {editingBanner ? 'Editar Banner' : 'Cadastrar Novo Banner'}
               </h3>
               <button 
                 onClick={() => setIsModalOpen(false)}
-                className="p-2 rounded-lg text-slate-400 hover:bg-slate-100 transition-colors"
+                className="p-2 rounded-lg text-slate-400 hover:bg-slate-500/10 transition-colors"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -343,11 +356,18 @@ export const BannersView: React.FC<BannersViewProps> = ({
                 />
               </div>
 
-              <div className="pt-4 flex items-center justify-end gap-3 border-t border-slate-100">
+              <div 
+                style={{ borderColor: 'var(--admin-border, #e2e8f0)' }}
+                className="pt-4 flex items-center justify-end gap-3 border-t"
+              >
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2.5 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-50 text-xs font-semibold transition-colors"
+                  style={{ 
+                    borderColor: 'var(--admin-border, #e2e8f0)',
+                    color: 'var(--admin-text-secondary, #64748b)'
+                  }}
+                  className="px-4 py-2.5 rounded-xl border text-xs font-semibold transition-colors hover:opacity-80"
                 >
                   Cancelar
                 </button>

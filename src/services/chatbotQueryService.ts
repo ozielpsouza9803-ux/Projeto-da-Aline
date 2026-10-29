@@ -30,6 +30,15 @@ export interface ChatbotSearchParams {
 }
 
 /**
+ * Standard Brazilian Real (BRL) currency formatter.
+ * Guarantees complete values (e.g. 'R$ 119,90') with comma decimal and two decimal places.
+ */
+export function formatBRL(value: number): string {
+  if (value === undefined || value === null || isNaN(value)) return 'R$ 0,00';
+  return `R$ ${value.toFixed(2).replace('.', ',')}`;
+}
+
+/**
  * Calculates standardized stock status based on stockQuantity
  */
 export function calculateStockStatus(quantity: number = 0): 'available' | 'low' | 'out_of_stock' {
@@ -41,6 +50,7 @@ export function calculateStockStatus(quantity: number = 0): 'available' | 'low' 
 /**
  * Normalizes a Product model into a safe, public-facing PublicChatProduct object.
  * Strictly excludes sensitive analytics (clicksCount, conversionsCount, admin credentials).
+ * Preserves price as normal price and promotionalPrice as promotional price without automatic swapping.
  */
 export function normalizePublicChatProduct(product: Product, showcases: Showcase[]): PublicChatProduct {
   const brand = showcases.find(s => s.id === product.showcaseId);
@@ -48,20 +58,13 @@ export function normalizePublicChatProduct(product: Product, showcases: Showcase
   const qty = product.stockQuantity ?? (product.isActive ? 10 : 0);
   const status = calculateStockStatus(qty);
 
-  let normalPrice = Number(product.price || 0);
+  const normalPrice = Number(product.price || 0);
   let promoPrice = (product.promotionalPrice !== undefined && product.promotionalPrice !== null && Number(product.promotionalPrice) > 0)
     ? Number(product.promotionalPrice)
     : undefined;
 
-  // Swap if promoPrice was stored higher than normalPrice
-  if (promoPrice !== undefined && promoPrice > normalPrice) {
-    const temp = normalPrice;
-    normalPrice = promoPrice;
-    promoPrice = temp;
-  }
-
-  // If promoPrice equals normalPrice, ignore promoPrice
-  if (promoPrice !== undefined && promoPrice === normalPrice) {
+  // If promoPrice is equal to or greater than normalPrice, it does not represent an active discount
+  if (promoPrice !== undefined && promoPrice >= normalPrice) {
     promoPrice = undefined;
   }
 
@@ -345,7 +348,10 @@ export const chatbotQueryService = {
       const stockStatusStr = p.stockStatus === 'available' ? 'Disponível' : p.stockStatus === 'low' ? 'Estoque Baixo' : 'Esgotado';
 
       if (isStockQuery) {
-        return `Informações de estoque para **${p.name}** (${p.brandName}):\n\n• **Quantidade em estoque:** ${p.stockQuantity} unidades disponíveis\n• **Situação:** ${stockStatusStr}\n• **Preço atual:** ${hasDiscount ? `${currentPriceStr} (Preço Promocional! Normal: ${normalPriceStr})` : normalPriceStr}`;
+        if (hasDiscount) {
+          return `Informações de estoque para **${p.name}** (${p.brandName}):\n\n• **Quantidade em estoque:** ${p.stockQuantity} unidades disponíveis\n• **Situação:** ${stockStatusStr}\n• **Preço atual:** ${currentPriceStr} (Preço Promocional)\n• **Preço normal:** ${normalPriceStr}\n• **Economia:** ${savingsStr}`;
+        }
+        return `Informações de estoque para **${p.name}** (${p.brandName}):\n\n• **Quantidade em estoque:** ${p.stockQuantity} unidades disponíveis\n• **Situação:** ${stockStatusStr}\n• **Preço atual:** ${currentPriceStr}`;
       }
 
       if (isDiscountQuery) {
@@ -357,10 +363,17 @@ export const chatbotQueryService = {
       }
 
       if (isPriceQuery) {
-        return `O preço do **${p.name}** (${p.brandName}) é:\n\n• **Preço atual:** ${currentPriceStr}${hasDiscount ? ` (Preço Promocional! Preço normal: ${normalPriceStr} - Economia de ${savingsStr})` : ''}\n• **Disponibilidade em estoque:** ${p.stockQuantity} unidades (${stockStatusStr})\n\nVocê pode adquirir este produto com segurança na vitrine oficial da marca.`;
+        if (hasDiscount) {
+          return `O preço do **${p.name}** (${p.brandName}) é:\n\n• **Preço atual:** ${currentPriceStr} (Preço Promocional)\n• **Preço normal:** ${normalPriceStr}\n• **Economia:** ${savingsStr}\n• **Disponibilidade em estoque:** ${p.stockQuantity} unidades (${stockStatusStr})\n\nVocê pode adquirir este produto com segurança na vitrine oficial da marca.`;
+        } else {
+          return `O preço do **${p.name}** (${p.brandName}) é:\n\n• **Preço atual:** ${currentPriceStr}\n• **Disponibilidade em estoque:** ${p.stockQuantity} unidades (${stockStatusStr})\n\nVocê pode adquirir este produto com segurança na vitrine oficial da marca.`;
+        }
       }
 
-      return `Encontrei o produto ideal em nosso catálogo:\n\n• **${p.name}** (${p.brandName})\n• **Categoria:** ${p.category}\n• **Preço:** ${hasDiscount ? `${currentPriceStr} (Preço Promocional! Normal: ${normalPriceStr})` : normalPriceStr}\n• **Estoque:** ${p.stockQuantity} un (${stockStatusStr})\n• **Descrição:** ${p.description}\n\nAcesse a vitrine da ${p.brandName} para saber mais!`;
+      if (hasDiscount) {
+        return `Encontrei o produto ideal em nosso catálogo:\n\n• **${p.name}** (${p.brandName})\n• **Categoria:** ${p.category}\n• **Preço atual:** ${currentPriceStr} (Preço Promocional)\n• **Preço normal:** ${normalPriceStr}\n• **Economia:** ${savingsStr}\n• **Estoque:** ${p.stockQuantity} un (${stockStatusStr})\n• **Descrição:** ${p.description}\n\nAcesse a vitrine da ${p.brandName} para saber mais!`;
+      }
+      return `Encontrei o produto ideal em nosso catálogo:\n\n• **${p.name}** (${p.brandName})\n• **Categoria:** ${p.category}\n• **Preço atual:** ${currentPriceStr}\n• **Estoque:** ${p.stockQuantity} un (${stockStatusStr})\n• **Descrição:** ${p.description}\n\nAcesse a vitrine da ${p.brandName} para saber mais!`;
     }
 
     // 9. Category or Brand Filtering Output
@@ -380,8 +393,8 @@ export const chatbotQueryService = {
       const itemsList = filteredProds.map(p => {
         const hasDiscount = p.promotionalPrice !== undefined && p.promotionalPrice !== null && p.promotionalPrice < p.price;
         const priceStr = hasDiscount
-          ? `${formatBRL(p.promotionalPrice!)} (Preço Promocional! Normal: ${formatBRL(p.price)})`
-          : formatBRL(p.price);
+          ? `Preço atual: ${formatBRL(p.promotionalPrice!)} (Preço normal: ${formatBRL(p.price)} | Economia: ${formatBRL(p.price - p.promotionalPrice!)})`
+          : `Preço: ${formatBRL(p.price)}`;
         return `• **${p.name}** (${p.brandName}) - Categoria: ${p.category} - ${priceStr}`;
       }).join('\n');
 

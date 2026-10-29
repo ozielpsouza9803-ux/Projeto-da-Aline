@@ -1,1 +1,41 @@
 @import "tailwindcss";
+
+/* ==========================================================================
+   Suporte de Tema para Caixas de Entrada de Valores e Textos (Painel Admin)
+   Aplica os temas escuro e claro aos campos de preço, estoque e valores.
+   Escopado exclusivamente ao painel administrativo (#omnibrand-admin-container).
+   ========================================================================== */
+
+#omnibrand-admin-container input[type="number"],
+#omnibrand-admin-container input[type="text"],
+#omnibrand-admin-container input[type="url"],
+#omnibrand-admin-container input[type="email"],
+#omnibrand-admin-container input[type="password"],
+#omnibrand-admin-container select,
+#omnibrand-admin-container textarea {
+  background-color: var(--admin-input-bg, #ffffff) !important;
+  color: var(--admin-text-primary, #0f172a) !important;
+  border-color: var(--admin-card-border, #cbd5e1) !important;
+}
+
+#omnibrand-admin-container input[type="number"]::placeholder,
+#omnibrand-admin-container input[type="text"]::placeholder,
+#omnibrand-admin-container input[type="url"]::placeholder,
+#omnibrand-admin-container input[type="email"]::placeholder,
+#omnibrand-admin-container input[type="password"]::placeholder,
+#omnibrand-admin-container textarea::placeholder {
+  color: var(--admin-text-secondary, #94a3b8) !important;
+  opacity: 0.65;
+}
+
+#omnibrand-admin-container input[type="number"]:focus,
+#omnibrand-admin-container input[type="text"]:focus,
+#omnibrand-admin-container input[type="url"]:focus,
+#omnibrand-admin-container input[type="email"]:focus,
+#omnibrand-admin-container input[type="password"]:focus,
+#omnibrand-admin-container select:focus,
+#omnibrand-admin-container textarea:focus {
+  outline: none !important;
+  border-color: var(--admin-accent, #f59e0b) !important;
+  box-shadow: 0 0 0 2px var(--admin-accent-glow, rgba(245, 158, 11, 0.25)) !important;
+}

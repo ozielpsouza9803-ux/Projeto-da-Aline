@@ -38,6 +38,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 }) => {
   const menuItems = [
     { id: 'overview', label: 'Visão Geral', icon: LayoutDashboard },
+    { id: 'assistant', label: 'Assistente de Gerência', icon: Sparkles },
     { id: 'showcases', label: 'Vitrines', icon: Store },
     { id: 'products', label: 'Produtos', icon: Package },
     { id: 'stock', label: 'Estoque e Produtos', icon: Boxes },
@@ -61,15 +62,30 @@ export const Sidebar: React.FC<SidebarProps> = ({
       )}
 
       {/* Sidebar Container */}
-      <aside className={`
-        fixed top-0 bottom-0 left-0 z-50 w-72 bg-slate-900 text-slate-100 flex flex-col border-r border-slate-800 transition-transform duration-300 ease-in-out
-        lg:translate-x-0 ${isMobileOpen ? 'translate-x-0' : '-translate-x-full'}
-      `}>
+      <aside 
+        style={{ 
+          backgroundColor: 'var(--admin-sidebar-bg, #060c1e)', 
+          borderColor: 'var(--admin-card-border, #1c2d5a)' 
+        }}
+        className={`
+          fixed top-0 bottom-0 left-0 z-50 w-72 text-slate-100 flex flex-col border-r transition-transform duration-300 ease-in-out
+          lg:translate-x-0 ${isMobileOpen ? 'translate-x-0' : '-translate-x-full'}
+        `}
+      >
         {/* Brand Header */}
-        <div className="p-6 border-b border-slate-800 flex items-center justify-between">
+        <div 
+          style={{ borderColor: 'var(--admin-card-border, #1c2d5a)' }}
+          className="p-6 border-b flex items-center justify-between"
+        >
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-orange-500 via-pink-500 to-indigo-600 flex items-center justify-center shadow-md">
-              <Sparkles className="w-5 h-5 text-white" />
+            <div 
+              style={{ 
+                backgroundColor: 'var(--admin-accent, #f59e0b)',
+                boxShadow: '0 0 15px var(--admin-accent-glow, rgba(245,158,11,0.3))'
+              }}
+              className="w-10 h-10 rounded-xl flex items-center justify-center"
+            >
+              <Sparkles className="w-5 h-5 text-slate-950" />
             </div>
             <div>
               <h1 className="font-bold text-base tracking-tight text-white flex items-center gap-1.5">
@@ -97,14 +113,19 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   setCurrentTab(item.id);
                   setIsMobileOpen(false);
                 }}
+                style={isActive ? { 
+                  backgroundColor: 'var(--admin-accent, #f59e0b)', 
+                  color: 'var(--admin-accent-text, #0f172a)',
+                  boxShadow: '0 0 14px var(--admin-accent-glow, rgba(245,158,11,0.3))' 
+                } : {}}
                 className={`
-                  w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-sm font-medium transition-all duration-150 text-left
+                  w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-sm font-semibold transition-all duration-150 text-left
                   ${isActive 
-                    ? 'bg-gradient-to-r from-orange-500/20 to-pink-500/20 text-orange-400 border border-orange-500/30 shadow-xs' 
-                    : 'text-slate-300 hover:bg-slate-800/60 hover:text-white'}
+                    ? 'border-0' 
+                    : 'text-slate-300 hover:bg-white/10 hover:text-white'}
                 `}
               >
-                <Icon className={`w-5 h-5 shrink-0 ${isActive ? 'text-orange-400' : 'text-slate-400'}`} />
+                <Icon className={`w-5 h-5 shrink-0 ${isActive ? 'text-inherit' : 'text-slate-400'}`} />
                 <span className="truncate">{item.label}</span>
               </button>
             );

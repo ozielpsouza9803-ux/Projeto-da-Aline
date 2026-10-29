@@ -1,8 +1,9 @@
 import express from 'express';
 import { createServer as createViteServer } from 'vite';
 import { GoogleGenAI } from '@google/genai';
+import { createClient } from '@supabase/supabase-js';
 import dotenv from 'dotenv';
-import { chatbotQueryService } from './src/services/chatbotQueryService.js';
+import { chatbotQueryService, formatBRL } from './src/services/chatbotQueryService.js';
 
 dotenv.config();
 
@@ -40,10 +41,16 @@ app.post('/api/chat', async (req, res) => {
 
     const productsFormatted = products.length > 0
       ? products.map(p => {
-          const normalFormatted = `R$ ${p.price.toFixed(2).replace('.', ',')}`;
-          const promoFormatted = p.promotionalPrice ? `R$ ${p.promotionalPrice.toFixed(2).replace('.', ',')}` : null;
-          const savingsFormatted = (p.promotionalPrice && p.promotionalPrice < p.price) ? `R$ ${(p.price - p.promotionalPrice).toFixed(2).replace('.', ',')}` : null;
-          return `- PRODUTO: "${p.name}" | Marca: ${p.brandName} | Categoria: ${p.category} | Preço Normal: ${normalFormatted}${promoFormatted ? ` | Preço Promocional (Preço Atual): ${promoFormatted} (Economia de ${savingsFormatted})` : ''} | Estoque: ${p.stockQuantity} un (${p.stockStatus === 'available' ? 'Disponível' : p.stockStatus === 'low' ? 'Estoque Baixo' : 'Esgotado'}) | SKU: ${p.sku} | Descrição: ${p.description}`;
+          const hasDiscount = p.promotionalPrice !== undefined && p.promotionalPrice !== null && p.promotionalPrice < p.price;
+          const normalFormatted = formatBRL(p.price);
+          const currentFormatted = formatBRL(hasDiscount ? p.promotionalPrice! : p.price);
+          const savingsFormatted = hasDiscount ? formatBRL(p.price - p.promotionalPrice!) : null;
+
+          const priceInfo = hasDiscount
+            ? `Preço Atual: ${currentFormatted} (Preço Promocional) | Preço Normal: ${normalFormatted} | Economia: ${savingsFormatted}`
+            : `Preço Atual: ${normalFormatted}`;
+
+          return `- PRODUTO: "${p.name}" | Marca: ${p.brandName} | Categoria: ${p.category} | ${priceInfo} | Estoque: ${p.stockQuantity} un (${p.stockStatus === 'available' ? 'Disponível' : p.stockStatus === 'low' ? 'Estoque Baixo' : 'Esgotado'}) | SKU: ${p.sku} | Descrição: ${p.description}`;
         }).join('\n')
       : 'Nenhum produto ativo no momento.';
 
@@ -177,6 +184,178 @@ ${productsFormatted}
         reply: 'Desculpe, enfrentamos uma breve instabilidade no assistente virtual. Por favor, navegue diretamente por nossas vitrines ou tente novamente em alguns instantes.'
       });
     }
+  }
+});
+
+// ==========================================
+// ASSISTENTE DE GERÊNCIA - AUTENTICAÇÃO NO SERVIDOR & CONSULTAS REAIS
+// ==========================================
+
+const SUPABASE_URL = process.env.SUPABASE_URL || 'https://spqwrnywdlkrfrslfmwl.supabase.co';
+const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY || 'sb_publishable_JGX27g41zq4QHaW6i5rYVw_KNMOHgq0';
+const serverSupabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+/**
+ * Middleware para verificação estrita de autenticação de administrador no servidor.
+ * Valida o JWT do Supabase Auth e confirma se a role do perfil é 'admin'.
+ * Não confia em permissões ou variáveis controladas apenas pelo navegador.
+ */
+async function verifyServerAdminAuth(req: express.Request, res: express.Response, next: express.NextFunction) {
+  const authHeader = req.headers.authorization;
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return res.status(401).json({
+      error: 'Não autorizado',
+      message: 'Token de administrador ausente no cabeçalho Authorization.'
+    });
+  }
+
+  const token = authHeader.split(' ')[1]?.trim();
+  if (!token) {
+    return res.status(401).json({
+      error: 'Não autorizado',
+      message: 'Token de autorização vazio ou malformatado.'
+    });
+  }
+
+  try {
+    // 1. Validação do token junto ao Supabase Auth
+    const { data: { user }, error: authError } = await serverSupabase.auth.getUser(token);
+    if (authError || !user) {
+      return res.status(401).json({
+        error: 'Sessão inválida ou expirada',
+        message: 'O token fornecido não foi validado pelo Supabase Auth ou expirou.'
+      });
+    }
+
+    // 2. Verificação no banco de dados se a role é 'admin'
+    const { data: profile, error: profileError } = await serverSupabase
+      .from('profiles')
+      .select('id, role')
+      .eq('id', user.id)
+      .single();
+
+    if (profileError || !profile || profile.role !== 'admin') {
+      return res.status(403).json({
+        error: 'Acesso negado',
+        message: 'Usuário autenticado não possui privilégios de administrador (role admin).'
+      });
+    }
+
+    (req as any).adminUser = user;
+    (req as any).adminProfile = profile;
+    next();
+  } catch (err: any) {
+    return res.status(500).json({
+      error: 'Erro na verificação de autenticação',
+      message: err.message || 'Falha ao validar privilégios de administrador no servidor.'
+    });
+  }
+}
+
+// Rota de verificação do status de autenticação do administrador no servidor
+app.get('/api/admin/assistant/verify-auth', verifyServerAdminAuth, (req, res) => {
+  const user = (req as any).adminUser;
+  return res.json({
+    authenticated: true,
+    user: {
+      id: user.id,
+      email: user.email,
+      role: 'admin'
+    }
+  });
+});
+
+// Rota de consulta real de catálogo para o Assistente de Gerência (Somente Leitura)
+app.post('/api/admin/assistant/catalog-query', verifyServerAdminAuth, async (req, res) => {
+  try {
+    const { query = '', brandId, category } = req.body;
+    const products = await chatbotQueryService.searchProducts({ query, brandId, category });
+    
+    // Formatar com dados reais para o painel de gerência
+    const formatted = products.map(p => {
+      const hasDiscount = p.promotionalPrice !== undefined && p.promotionalPrice !== null && p.promotionalPrice < p.price;
+      return {
+        id: p.id,
+        name: p.name,
+        brandName: p.brandName,
+        brandId: p.brandId,
+        category: p.category,
+        sku: p.sku,
+        description: p.description,
+        price: p.price,
+        promotionalPrice: p.promotionalPrice,
+        priceFormatted: formatBRL(p.price),
+        promotionalPriceFormatted: hasDiscount ? formatBRL(p.promotionalPrice!) : null,
+        savingsFormatted: hasDiscount ? formatBRL(p.price - p.promotionalPrice!) : null,
+        stockQuantity: p.stockQuantity,
+        stockStatus: p.stockStatus,
+        photos: p.photos,
+        isAvailable: p.isAvailable
+      };
+    });
+
+    return res.json({
+      success: true,
+      total: formatted.length,
+      products: formatted
+    });
+  } catch (err: any) {
+    return res.status(500).json({
+      error: 'Erro ao consultar catálogo',
+      message: err.message
+    });
+  }
+});
+
+// Rota de geração de relatório de reposição a partir dos dados reais do Supabase (Somente Leitura)
+app.post('/api/admin/assistant/replenishment-report', verifyServerAdminAuth, async (_req, res) => {
+  try {
+    const products = await chatbotQueryService.searchProducts({});
+    const lowStockItems = products.filter(p => p.stockQuantity <= 5 || p.stockStatus === 'low' || p.stockStatus === 'out_of_stock');
+
+    let totalInvestment = 0;
+    const items = lowStockItems.map(p => {
+      const isOut = p.stockQuantity === 0 || p.stockStatus === 'out_of_stock';
+      const suggestedQty = isOut ? 10 : Math.max(10 - p.stockQuantity, 5);
+      const unitCost = p.promotionalPrice && p.promotionalPrice < p.price ? p.promotionalPrice : p.price;
+      const itemCost = unitCost * suggestedQty;
+      totalInvestment += itemCost;
+
+      return {
+        productId: p.id,
+        productName: p.name,
+        sku: p.sku,
+        category: p.category,
+        showcaseId: p.brandId,
+        showcaseName: p.brandName,
+        currentStock: p.stockQuantity,
+        stockStatus: p.stockStatus,
+        reorderThreshold: 5,
+        suggestedQuantity: suggestedQty,
+        unitPrice: unitCost,
+        estimatedCost: itemCost,
+        alertReason: isOut
+          ? 'Produto esgotado. Afiliados estão gerando tráfego para página sem estoque.'
+          : `Estoque em nível crítico (${p.stockQuantity} un restantes). Abaixo do limite de segurança de 5 un.`,
+        priority: isOut ? ('critica' as const) : ('alta' as const)
+      };
+    });
+
+    return res.json({
+      id: `rep-${Date.now()}`,
+      generatedAt: new Date().toISOString(),
+      totalAlerts: items.length,
+      outOfStockCount: items.filter(i => i.stockStatus === 'out_of_stock').length,
+      lowStockCount: items.filter(i => i.stockStatus === 'low').length,
+      totalEstimatedInvestment: totalInvestment,
+      items,
+      summaryNote: `${items.length} produtos do catálogo real necessitam de reposição com base no estoque atual do Supabase.`
+    });
+  } catch (err: any) {
+    return res.status(500).json({
+      error: 'Erro ao gerar relatório de reposição',
+      message: err.message
+    });
   }
 });
 

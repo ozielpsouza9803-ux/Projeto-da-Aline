@@ -26,12 +26,18 @@ export const Header: React.FC<HeaderProps> = ({
   isAdminSession
 }) => {
   return (
-    <header className="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b border-slate-200 px-4 lg:px-8 py-3.5 flex items-center justify-between gap-4 shadow-xs">
+    <header 
+      style={{ 
+        backgroundColor: 'var(--admin-header-bg, rgba(255, 255, 255, 0.95))', 
+        borderColor: 'var(--admin-card-border, #e2e8f0)' 
+      }}
+      className="sticky top-0 z-30 backdrop-blur-md border-b px-4 lg:px-8 py-3.5 flex items-center justify-between gap-4 shadow-xs"
+    >
       {/* Left: Mobile Toggle & Breadcrumb Title */}
       <div className="flex items-center gap-3">
         <button
           onClick={onOpenMobileSidebar}
-          className="lg:hidden p-2 rounded-lg text-slate-600 hover:bg-slate-100 transition-colors"
+          className="lg:hidden p-2 rounded-lg text-slate-400 hover:bg-white/10 transition-colors"
           aria-label="Abrir Menu"
         >
           <Menu className="w-6 h-6" />
@@ -40,9 +46,12 @@ export const Header: React.FC<HeaderProps> = ({
           <div className="flex items-center gap-1.5 text-xs text-slate-400 font-medium">
             <span>OmniBrand Admin</span>
             <span>/</span>
-            <span className="text-slate-600 font-semibold">{currentTabTitle}</span>
+            <span style={{ color: 'var(--admin-text-secondary, #94a3b8)' }} className="font-semibold">{currentTabTitle}</span>
           </div>
-          <h2 className="text-lg lg:text-xl font-bold tracking-tight text-slate-900">
+          <h2 
+            style={{ color: 'var(--admin-text-primary, #0f172a)' }}
+            className="text-lg lg:text-xl font-bold tracking-tight"
+          >
             {currentTabTitle}
           </h2>
         </div>
@@ -56,7 +65,12 @@ export const Header: React.FC<HeaderProps> = ({
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           placeholder="Buscar vitrines, produtos..."
-          className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all"
+          style={{ 
+            backgroundColor: 'var(--admin-input-bg, #f8fafc)', 
+            borderColor: 'var(--admin-card-border, #e2e8f0)',
+            color: 'var(--admin-text-primary, #0f172a)'
+          }}
+          className="w-full pl-9 pr-4 py-2 border rounded-xl text-xs placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all"
         />
       </div>
 

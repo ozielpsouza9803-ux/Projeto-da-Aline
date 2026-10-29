@@ -265,15 +265,28 @@ export const ProductsView: React.FC<ProductsViewProps> = ({
       {/* Modal for Product CRUD */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-slate-200 animate-in fade-in zoom-in-95 duration-200">
-            <div className="p-6 border-b border-slate-100 flex items-center justify-between">
-              <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+          <div 
+            style={{ 
+              backgroundColor: 'var(--admin-card-bg, #ffffff)', 
+              borderColor: 'var(--admin-card-border, #e2e8f0)',
+              color: 'var(--admin-text-primary, #0f172a)'
+            }}
+            className="rounded-2xl max-w-xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border animate-in fade-in zoom-in-95 duration-200"
+          >
+            <div 
+              style={{ borderColor: 'var(--admin-card-border, #e2e8f0)' }}
+              className="p-6 border-b flex items-center justify-between"
+            >
+              <h3 
+                style={{ color: 'var(--admin-text-primary, #0f172a)' }}
+                className="text-lg font-bold flex items-center gap-2"
+              >
                 <Package className="w-5 h-5 text-orange-500" />
                 {editingProduct ? 'Editar Produto' : 'Cadastrar Novo Produto'}
               </h3>
               <button 
                 onClick={() => setIsModalOpen(false)}
-                className="p-2 rounded-lg text-slate-400 hover:bg-slate-100 transition-colors"
+                className="p-2 rounded-lg text-slate-400 hover:bg-white/10 transition-colors"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -289,83 +302,154 @@ export const ProductsView: React.FC<ProductsViewProps> = ({
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">Vitrine Destino</label>
+                  <label 
+                    style={{ color: 'var(--admin-text-primary, #0f172a)' }}
+                    className="block text-xs font-semibold mb-1"
+                  >
+                    Vitrine Destino
+                  </label>
                   <select
                     value={showcaseId}
                     onChange={(e) => setShowcaseId(e.target.value)}
-                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-orange-500/20"
+                    style={{
+                      backgroundColor: 'var(--admin-input-bg, #f8fafc)',
+                      color: 'var(--admin-text-primary, #0f172a)',
+                      borderColor: 'var(--admin-card-border, #e2e8f0)'
+                    }}
+                    className="w-full px-3.5 py-2.5 border rounded-xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
                   >
                     {showcases.map(s => (
-                      <option key={s.id} value={s.id}>{s.name}</option>
+                      <option key={s.id} value={s.id} className="bg-slate-900 text-white">{s.name}</option>
                     ))}
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">SKU / Código</label>
+                  <label 
+                    style={{ color: 'var(--admin-text-primary, #0f172a)' }}
+                    className="block text-xs font-semibold mb-1"
+                  >
+                    SKU / Código
+                  </label>
                   <input
                     type="text"
                     required
                     value={sku}
                     onChange={(e) => setSku(e.target.value)}
-                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-orange-500/20"
+                    style={{
+                      backgroundColor: 'var(--admin-input-bg, #f8fafc)',
+                      color: 'var(--admin-text-primary, #0f172a)',
+                      borderColor: 'var(--admin-card-border, #e2e8f0)'
+                    }}
+                    className="w-full px-3.5 py-2.5 border rounded-xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">Nome do Produto</label>
+                <label 
+                  style={{ color: 'var(--admin-text-primary, #0f172a)' }}
+                  className="block text-xs font-semibold mb-1"
+                >
+                  Nome do Produto
+                </label>
                 <input
                   type="text"
                   required
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="Ex: Kaiak Masculino 100ml"
-                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-orange-500/20"
+                  style={{
+                    backgroundColor: 'var(--admin-input-bg, #f8fafc)',
+                    color: 'var(--admin-text-primary, #0f172a)',
+                    borderColor: 'var(--admin-card-border, #e2e8f0)'
+                  }}
+                  className="w-full px-3.5 py-2.5 border rounded-xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
                 />
               </div>
 
               <div className="grid grid-cols-3 gap-4">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">Preço (R$)</label>
+                  <label 
+                    style={{ color: 'var(--admin-text-primary, #0f172a)' }}
+                    className="block text-xs font-semibold mb-1"
+                  >
+                    Preço (R$)
+                  </label>
                   <input
                     type="number"
                     step="0.01"
                     required
                     value={price}
                     onChange={(e) => setPrice(Number(e.target.value))}
-                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-orange-500/20"
+                    style={{
+                      backgroundColor: 'var(--admin-input-bg, #f8fafc)',
+                      color: 'var(--admin-text-primary, #0f172a)',
+                      borderColor: 'var(--admin-card-border, #e2e8f0)'
+                    }}
+                    className="w-full px-3.5 py-2.5 border rounded-xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">Preço Promo (Opcional)</label>
+                  <label 
+                    style={{ color: 'var(--admin-text-primary, #0f172a)' }}
+                    className="block text-xs font-semibold mb-1"
+                  >
+                    Preço Promo (Opcional)
+                  </label>
                   <input
                     type="number"
                     step="0.01"
                     value={promotionalPrice || ''}
                     onChange={(e) => setPromotionalPrice(e.target.value ? Number(e.target.value) : undefined)}
-                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-orange-500/20"
+                    placeholder="0,00"
+                    style={{
+                      backgroundColor: 'var(--admin-input-bg, #f8fafc)',
+                      color: 'var(--admin-text-primary, #0f172a)',
+                      borderColor: 'var(--admin-card-border, #e2e8f0)'
+                    }}
+                    className="w-full px-3.5 py-2.5 border rounded-xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">Categoria</label>
+                  <label 
+                    style={{ color: 'var(--admin-text-primary, #0f172a)' }}
+                    className="block text-xs font-semibold mb-1"
+                  >
+                    Categoria
+                  </label>
                   <input
                     type="text"
                     required
                     value={category}
                     onChange={(e) => setCategory(e.target.value)}
-                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-orange-500/20"
+                    style={{
+                      backgroundColor: 'var(--admin-input-bg, #f8fafc)',
+                      color: 'var(--admin-text-primary, #0f172a)',
+                      borderColor: 'var(--admin-card-border, #e2e8f0)'
+                    }}
+                    className="w-full px-3.5 py-2.5 border rounded-xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">Descrição Detalhada</label>
+                <label 
+                  style={{ color: 'var(--admin-text-primary, #0f172a)' }}
+                  className="block text-xs font-semibold mb-1"
+                >
+                  Descrição Detalhada
+                </label>
                 <textarea
                   rows={3}
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   placeholder="Benefícios, notas olfativas, modo de uso..."
-                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-orange-500/20 resize-none"
+                  style={{
+                    backgroundColor: 'var(--admin-input-bg, #f8fafc)',
+                    color: 'var(--admin-text-primary, #0f172a)',
+                    borderColor: 'var(--admin-card-border, #e2e8f0)'
+                  }}
+                  className="w-full px-3.5 py-2.5 border rounded-xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500/20 resize-none"
                 />
               </div>
 

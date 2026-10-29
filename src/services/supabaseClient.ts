@@ -124,6 +124,15 @@ export const checkIsAdminRole = async (userId: string): Promise<boolean> => {
   }
 };
 
+export const getAdminAccessToken = async (): Promise<string | null> => {
+  try {
+    const { data: { session } } = await supabase.auth.getSession();
+    return session?.access_token || null;
+  } catch {
+    return null;
+  }
+};
+
 // ==========================================
 // STORAGE UPLOAD HELPER ("storefront-media")
 // ==========================================
@@ -229,11 +238,13 @@ export const deleteShowcaseFromSupabase = async (id: string): Promise<{ success:
 };
 
 // 2. PRODUCTS & PRODUCT_IMAGES
-// products cols: id, brand_id, name, description, price, category, affiliate_url, is_active, created_at
+// products cols in Supabase: id, brand_id, name, description, price, original_price, category, affiliate_url, is_active, created_at
 // product_images cols: id, product_id, image_url, created_at
 export const fetchProductsFromSupabase = async (): Promise<Product[] | null> => {
   try {
-    const { data: prodData, error: prodErr } = await supabase.from('products').select('id, brand_id, name, description, price, promotional_price, category, affiliate_url, is_active, created_at');
+    const { data: prodData, error: prodErr } = await supabase
+      .from('products')
+      .select('id, brand_id, name, description, price, original_price, category, affiliate_url, is_active, created_at');
     if (prodErr) {
       console.warn('Supabase fetch products note:', prodErr.message);
       return null;
@@ -255,8 +266,15 @@ export const fetchProductsFromSupabase = async (): Promise<Product[] | null> => 
     return prodData.map((item: any) => {
       const pId = String(item.id);
       const galleryPhotos = imagesByProductId[pId] || [];
-      const rawPrice = Number(item.price || 0);
-      const rawPromo = item.promotional_price !== null && item.promotional_price !== undefined ? Number(item.promotional_price) : undefined;
+
+      // If original_price exists and is greater than 0, it represents normal price and price is current/promotional price
+      let normalPrice = Number(item.price || 0);
+      let promoPrice: number | undefined = undefined;
+
+      if (item.original_price !== null && item.original_price !== undefined && Number(item.original_price) > 0) {
+        normalPrice = Number(item.original_price);
+        promoPrice = Number(item.price || 0);
+      }
       
       return {
         id: pId,
@@ -264,8 +282,8 @@ export const fetchProductsFromSupabase = async (): Promise<Product[] | null> => 
         name: item.name || '',
         sku: `SKU-${pId.substring(0, 8)}`,
         description: item.description || '',
-        price: rawPrice,
-        promotionalPrice: rawPromo,
+        price: normalPrice,
+        promotionalPrice: promoPrice,
         category: item.category || 'Geral',
         photos: galleryPhotos.length > 0 ? galleryPhotos : ['https://images.unsplash.com/photo-1523293182086-7651a899d37f?w=600&auto=format&fit=crop&q=80'],
         affiliateUrl: item.affiliate_url || 'https://www.natura.com.br',

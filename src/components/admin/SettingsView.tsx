@@ -9,18 +9,42 @@ import {
   Key, 
   Terminal, 
   ExternalLink,
-  AlertCircle
+  AlertCircle,
+  Palette,
+  Moon,
+  Sun,
+  Eye,
+  RotateCcw,
+  Sparkles
 } from 'lucide-react';
 import { AdminSettings } from '../../types';
 import { testSupabaseConnection } from '../../services/supabaseClient';
+import { 
+  adminThemeService, 
+  ADMIN_THEMES, 
+  ADMIN_ACCENTS, 
+  AdminThemeId, 
+  AdminAccentId, 
+  AdminThemeMode, 
+  AdminThemePreference,
+  DEFAULT_ADMIN_THEME 
+} from '../../services/adminThemeService';
 
 interface SettingsViewProps {
   settings: AdminSettings;
   onSaveSettings: (settings: AdminSettings) => void;
   onResetDefaults: () => void;
+  currentTheme?: AdminThemePreference;
+  onApplyTheme?: (theme: AdminThemePreference) => void;
 }
 
-export const SettingsView: React.FC<SettingsViewProps> = ({ settings, onSaveSettings, onResetDefaults }) => {
+export const SettingsView: React.FC<SettingsViewProps> = ({ 
+  settings, 
+  onSaveSettings, 
+  onResetDefaults,
+  currentTheme,
+  onApplyTheme
+}) => {
   const [siteName, setSiteName] = useState(settings.siteName);
   const [adminEmail, setAdminEmail] = useState(settings.adminEmail);
   const [supabaseUrl, setSupabaseUrl] = useState(settings.supabaseUrl);
@@ -35,6 +59,43 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ settings, onSaveSett
 
   const [primaryButtonColor, setPrimaryButtonColor] = useState(settings.primaryButtonColor || '#f97316');
   const [showcasePosition, setShowcasePosition] = useState<'above_banner' | 'below_banner'>(settings.showcasePosition || 'below_banner');
+
+  // Appearance / Theme State
+  const [activeTheme, setActiveTheme] = useState<AdminThemePreference>(
+    currentTheme || adminThemeService.getPreference()
+  );
+  const [previewThemeId, setPreviewThemeId] = useState<AdminThemeId>(activeTheme.themeId);
+  const [previewAccentId, setPreviewAccentId] = useState<AdminAccentId>(activeTheme.accentId);
+  const [previewMode, setPreviewMode] = useState<AdminThemeMode>(activeTheme.mode);
+  const [themeFeedback, setThemeFeedback] = useState<string | null>(null);
+
+  const handleApplyTheme = () => {
+    const newPref: AdminThemePreference = {
+      themeId: previewThemeId,
+      accentId: previewAccentId,
+      mode: previewMode
+    };
+    adminThemeService.savePreference(newPref);
+    setActiveTheme(newPref);
+    if (onApplyTheme) {
+      onApplyTheme(newPref);
+    }
+    setThemeFeedback('Tema aplicado com sucesso! Preferência salva no armazenamento local.');
+    setTimeout(() => setThemeFeedback(null), 4000);
+  };
+
+  const handleResetTheme = () => {
+    const defaultPref = adminThemeService.resetPreference();
+    setPreviewThemeId(defaultPref.themeId);
+    setPreviewAccentId(defaultPref.accentId);
+    setPreviewMode(defaultPref.mode);
+    setActiveTheme(defaultPref);
+    if (onApplyTheme) {
+      onApplyTheme(defaultPref);
+    }
+    setThemeFeedback('Tema restaurado para o padrão inicial: Azul-marinho, Dourado e Modo Escuro.');
+    setTimeout(() => setThemeFeedback(null), 4000);
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -157,6 +218,281 @@ CREATE POLICY "Auth Upload Storage" ON storage.objects FOR INSERT WITH CHECK (bu
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Seção Aparência do Painel Administrativo */}
+        <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
+            <div>
+              <h4 className="font-bold text-slate-900 text-sm flex items-center gap-2">
+                <Palette className="w-4 h-4 text-indigo-600" /> Aparência do Painel Administrativo
+              </h4>
+              <p className="text-xs text-slate-500 mt-0.5">
+                Personalize temas, cores de destaque e modos claro/escuro aplicados exclusivamente ao painel administrativo.
+              </p>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-[11px] px-2.5 py-1 rounded-full bg-slate-100 text-slate-700 font-semibold border border-slate-200">
+                Tema Ativo: {ADMIN_THEMES[activeTheme.themeId]?.name} ({activeTheme.mode === 'dark' ? 'Escuro' : 'Claro'})
+              </span>
+            </div>
+          </div>
+
+          {themeFeedback && (
+            <div className="p-3 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs rounded-xl flex items-center gap-2">
+              <Check className="w-4 h-4 text-emerald-600 shrink-0" />
+              <span>{themeFeedback}</span>
+            </div>
+          )}
+
+          {/* 1. Modo: Claro ou Escuro */}
+          <div>
+            <label className="block text-xs font-bold text-slate-800 uppercase tracking-wider mb-2">
+              1. Modo de Visualização:
+            </label>
+            <div className="grid grid-cols-2 gap-3 max-w-sm">
+              <button
+                type="button"
+                onClick={() => setPreviewMode('dark')}
+                className={`flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border text-xs font-semibold transition-all ${
+                  previewMode === 'dark'
+                    ? 'bg-slate-900 text-white border-slate-900 shadow-sm ring-2 ring-indigo-500/30'
+                    : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
+                }`}
+              >
+                <Moon className="w-4 h-4 text-indigo-400" />
+                <span>Modo Escuro</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setPreviewMode('light')}
+                className={`flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border text-xs font-semibold transition-all ${
+                  previewMode === 'light'
+                    ? 'bg-amber-500 text-white border-amber-500 shadow-sm ring-2 ring-amber-500/30'
+                    : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
+                }`}
+              >
+                <Sun className="w-4 h-4 text-amber-500" />
+                <span>Modo Claro</span>
+              </button>
+            </div>
+          </div>
+
+          {/* 2. Temas Visuais (6 temas) */}
+          <div>
+            <label className="block text-xs font-bold text-slate-800 uppercase tracking-wider mb-2">
+              2. Escolha o Tema Visual:
+            </label>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+              {Object.values(ADMIN_THEMES).map((theme) => {
+                const isSelected = previewThemeId === theme.id;
+                const palette = previewMode === 'dark' ? theme.dark : theme.light;
+                return (
+                  <button
+                    key={theme.id}
+                    type="button"
+                    onClick={() => setPreviewThemeId(theme.id)}
+                    className={`p-3.5 rounded-xl border-2 text-left transition-all flex flex-col justify-between ${
+                      isSelected
+                        ? 'border-indigo-600 bg-indigo-50/20 ring-2 ring-indigo-500/20'
+                        : 'border-slate-200 hover:border-slate-300 bg-slate-50/50'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center gap-2">
+                        <span 
+                          style={{ backgroundColor: palette.bg, borderColor: palette.cardBorder }}
+                          className="w-5 h-5 rounded-full border shadow-xs" 
+                        />
+                        <span className="text-xs font-bold text-slate-900">{theme.name}</span>
+                      </div>
+                      {isSelected && (
+                        <Check className="w-4 h-4 text-indigo-600" />
+                      )}
+                    </div>
+                    <span className="text-[11px] text-slate-500 leading-tight">
+                      {theme.description}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* 3. Cores de Destaque (6 cores) */}
+          <div>
+            <label className="block text-xs font-bold text-slate-800 uppercase tracking-wider mb-2">
+              3. Cor de Destaque dos Botões e Menus:
+            </label>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
+              {Object.values(ADMIN_ACCENTS).map((accent) => {
+                const isSelected = previewAccentId === accent.id;
+                return (
+                  <button
+                    key={accent.id}
+                    type="button"
+                    onClick={() => setPreviewAccentId(accent.id)}
+                    className={`p-3 rounded-xl border-2 flex flex-col items-center gap-2 transition-all ${
+                      isSelected
+                        ? 'border-indigo-600 bg-indigo-50/20 ring-2 ring-indigo-500/20'
+                        : 'border-slate-200 hover:border-slate-300 bg-slate-50/50'
+                    }`}
+                  >
+                    <span 
+                      style={{ backgroundColor: accent.colorHex }}
+                      className="w-7 h-7 rounded-full shadow-xs flex items-center justify-center text-white"
+                    >
+                      {isSelected && <Check className="w-4 h-4" />}
+                    </span>
+                    <span className="text-xs font-bold text-slate-800">{accent.name}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* 4. Pré-visualização Interativa em Tempo Real */}
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <label className="block text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
+                <Eye className="w-4 h-4 text-indigo-600" /> 4. Pré-visualização em Tempo Real:
+              </label>
+              <span className="text-[11px] text-slate-500">
+                Prévia: <strong className="text-slate-800">{ADMIN_THEMES[previewThemeId]?.name}</strong> + <strong className="text-slate-800">{ADMIN_ACCENTS[previewAccentId]?.name}</strong> ({previewMode === 'dark' ? 'Modo Escuro' : 'Modo Claro'})
+              </span>
+            </div>
+
+            {/* Mock Layout Preview */}
+            {(() => {
+              const previewPalette = previewMode === 'dark' ? ADMIN_THEMES[previewThemeId].dark : ADMIN_THEMES[previewThemeId].light;
+              const previewAccent = ADMIN_ACCENTS[previewAccentId];
+              return (
+                <div 
+                  style={{ 
+                    backgroundColor: previewPalette.bg,
+                    borderColor: previewPalette.cardBorder,
+                    color: previewPalette.textPrimary
+                  }}
+                  className="rounded-xl border p-4 shadow-inner overflow-hidden transition-all duration-200"
+                >
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+                    {/* Mini Sidebar Preview */}
+                    <div 
+                      style={{ 
+                        backgroundColor: previewPalette.sidebarBg, 
+                        borderColor: previewPalette.cardBorder 
+                      }}
+                      className="rounded-lg border p-3 flex flex-col justify-between space-y-2"
+                    >
+                      <div className="flex items-center gap-2 pb-2 border-b" style={{ borderColor: previewPalette.cardBorder }}>
+                        <span 
+                          style={{ backgroundColor: previewAccent.colorHex, color: previewAccent.textOnAccent }}
+                          className="w-6 h-6 rounded-md flex items-center justify-center text-[10px] font-bold"
+                        >
+                          <Sparkles className="w-3.5 h-3.5" />
+                        </span>
+                        <span className="text-xs font-bold" style={{ color: previewPalette.textPrimary }}>OmniBrand</span>
+                      </div>
+                      <div className="space-y-1">
+                        <div 
+                          style={{ 
+                            backgroundColor: previewAccent.colorHex, 
+                            color: previewAccent.textOnAccent,
+                            boxShadow: `0 0 10px ${previewAccent.glowRgba}`
+                          }}
+                          className="px-2 py-1 rounded-md text-[10px] font-bold"
+                        >
+                          Visão Geral
+                        </div>
+                        <div 
+                          style={{ color: previewPalette.textSecondary }}
+                          className="px-2 py-1 text-[10px]"
+                        >
+                          Produtos
+                        </div>
+                        <div 
+                          style={{ color: previewPalette.textSecondary }}
+                          className="px-2 py-1 text-[10px]"
+                        >
+                          Banners
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Mini Content Area Preview */}
+                    <div className="md:col-span-3 space-y-2">
+                      {/* Mini Header Preview */}
+                      <div 
+                        style={{ 
+                          backgroundColor: previewPalette.headerBg, 
+                          borderColor: previewPalette.cardBorder 
+                        }}
+                        className="rounded-lg border p-2.5 flex items-center justify-between"
+                      >
+                        <span className="text-xs font-bold" style={{ color: previewPalette.textPrimary }}>Painel Administrativo</span>
+                        <span 
+                          style={{ backgroundColor: previewAccent.badgeBg, color: previewAccent.badgeText }}
+                          className="text-[10px] px-2 py-0.5 rounded-full font-semibold"
+                        >
+                          {previewAccent.name}
+                        </span>
+                      </div>
+
+                      {/* Mini Card Preview */}
+                      <div 
+                        style={{ 
+                          backgroundColor: previewPalette.cardBg, 
+                          borderColor: previewPalette.cardBorder 
+                        }}
+                        className="rounded-lg border p-3 flex items-center justify-between"
+                      >
+                        <div>
+                          <span className="text-[10px] block" style={{ color: previewPalette.textSecondary }}>Vendas do Mês</span>
+                          <strong className="text-sm font-bold" style={{ color: previewPalette.textPrimary }}>R$ 14.890,00</strong>
+                        </div>
+                        <button
+                          type="button"
+                          style={{ 
+                            backgroundColor: previewAccent.colorHex, 
+                            color: previewAccent.textOnAccent,
+                            boxShadow: `0 0 10px ${previewAccent.glowRgba}`
+                          }}
+                          className="px-3 py-1.5 rounded-lg text-xs font-bold transition-transform hover:scale-105"
+                        >
+                          Botão de Ação
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })()}
+          </div>
+
+          {/* 5. Botões de Ação para Aplicar / Restaurar */}
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2 border-t border-slate-100">
+            <span className="text-xs text-slate-500">
+              Clique em <strong>Aplicar tema</strong> para salvar e ativar visualmente no painel.
+            </span>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={handleResetTheme}
+                className="px-4 py-2.5 rounded-xl border border-slate-300 hover:bg-slate-100 text-slate-700 text-xs font-semibold transition-colors flex items-center gap-1.5"
+              >
+                <RotateCcw className="w-3.5 h-3.5" />
+                <span>Restaurar Padrão</span>
+              </button>
+              <button
+                type="button"
+                onClick={handleApplyTheme}
+                className="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition-colors shadow-sm flex items-center gap-1.5"
+              >
+                <Check className="w-4 h-4" />
+                <span>Aplicar tema</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
         {/* General Settings */}
         <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs space-y-4">
           <h4 className="font-bold text-slate-900 text-sm flex items-center gap-2 border-b border-slate-100 pb-3">

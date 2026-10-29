@@ -445,15 +445,28 @@ export const StockManagementView: React.FC<StockManagementViewProps> = ({
       {/* Edit Modal */}
       {editingProduct && (
         <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-md w-full shadow-2xl border border-slate-200 animate-in fade-in zoom-in-95 duration-150">
-            <div className="p-5 border-b border-slate-100 flex items-center justify-between">
-              <h3 className="font-bold text-slate-900 text-sm flex items-center gap-2">
+          <div 
+            style={{ 
+              backgroundColor: 'var(--admin-card-bg, #ffffff)', 
+              borderColor: 'var(--admin-card-border, #e2e8f0)',
+              color: 'var(--admin-text-primary, #0f172a)'
+            }}
+            className="rounded-2xl max-w-md w-full shadow-2xl border animate-in fade-in zoom-in-95 duration-150"
+          >
+            <div 
+              style={{ borderColor: 'var(--admin-card-border, #e2e8f0)' }}
+              className="p-5 border-b flex items-center justify-between"
+            >
+              <h3 
+                style={{ color: 'var(--admin-text-primary, #0f172a)' }}
+                className="font-bold text-sm flex items-center gap-2"
+              >
                 <Package className="w-4 h-4 text-orange-500" />
                 <span>Ajustar Estoque & Informações</span>
               </h3>
               <button
                 onClick={() => setEditingProduct(null)}
-                className="p-1.5 rounded-lg text-slate-400 hover:bg-slate-100 transition-colors"
+                className="p-1.5 rounded-lg text-slate-400 hover:bg-white/10 transition-colors"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -468,55 +481,107 @@ export const StockManagementView: React.FC<StockManagementViewProps> = ({
               )}
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">Produto</label>
-                <div className="text-xs font-bold text-slate-900 bg-slate-50 p-3 rounded-xl border border-slate-200">
+                <label 
+                  style={{ color: 'var(--admin-text-primary, #0f172a)' }}
+                  className="block text-xs font-semibold mb-1"
+                >
+                  Produto
+                </label>
+                <div 
+                  style={{
+                    backgroundColor: 'var(--admin-input-bg, #f8fafc)',
+                    borderColor: 'var(--admin-card-border, #e2e8f0)',
+                    color: 'var(--admin-text-primary, #0f172a)'
+                  }}
+                  className="text-xs font-bold p-3 rounded-xl border"
+                >
                   {editingProduct.name}
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">SKU / Código</label>
+                <label 
+                  style={{ color: 'var(--admin-text-primary, #0f172a)' }}
+                  className="block text-xs font-semibold mb-1"
+                >
+                  SKU / Código
+                </label>
                 <input
                   type="text"
                   required
                   value={editSku}
                   onChange={(e) => setEditSku(e.target.value)}
-                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-orange-500/20"
+                  style={{
+                    backgroundColor: 'var(--admin-input-bg, #f8fafc)',
+                    color: 'var(--admin-text-primary, #0f172a)',
+                    borderColor: 'var(--admin-card-border, #e2e8f0)'
+                  }}
+                  className="w-full px-3.5 py-2.5 border rounded-xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">Preço Normal (R$)</label>
+                  <label 
+                    style={{ color: 'var(--admin-text-primary, #0f172a)' }}
+                    className="block text-xs font-semibold mb-1"
+                  >
+                    Preço Normal (R$)
+                  </label>
                   <input
                     type="number"
                     step="0.01"
                     required
                     value={editPrice}
                     onChange={(e) => setEditPrice(Number(e.target.value))}
-                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-orange-500/20"
+                    style={{
+                      backgroundColor: 'var(--admin-input-bg, #f8fafc)',
+                      color: 'var(--admin-text-primary, #0f172a)',
+                      borderColor: 'var(--admin-card-border, #e2e8f0)'
+                    }}
+                    className="w-full px-3.5 py-2.5 border rounded-xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">Preço Promo (R$)</label>
+                  <label 
+                    style={{ color: 'var(--admin-text-primary, #0f172a)' }}
+                    className="block text-xs font-semibold mb-1"
+                  >
+                    Preço Promo (R$)
+                  </label>
                   <input
                     type="number"
                     step="0.01"
                     value={editPromoPrice || ''}
                     onChange={(e) => setEditPromoPrice(e.target.value ? Number(e.target.value) : undefined)}
                     placeholder="Opcional"
-                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-orange-500/20"
+                    style={{
+                      backgroundColor: 'var(--admin-input-bg, #f8fafc)',
+                      color: 'var(--admin-text-primary, #0f172a)',
+                      borderColor: 'var(--admin-card-border, #e2e8f0)'
+                    }}
+                    className="w-full px-3.5 py-2.5 border rounded-xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">Quantidade em Estoque</label>
+                <label 
+                  style={{ color: 'var(--admin-text-primary, #0f172a)' }}
+                  className="block text-xs font-semibold mb-1"
+                >
+                  Quantidade em Estoque
+                </label>
                 <div className="flex items-center gap-2">
                   <button
                     type="button"
                     onClick={() => setEditStockQuantity(prev => Math.max(0, prev - 1))}
-                    className="p-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold transition-colors"
+                    style={{
+                      backgroundColor: 'var(--admin-input-bg, #f8fafc)',
+                      borderColor: 'var(--admin-card-border, #e2e8f0)',
+                      color: 'var(--admin-text-primary, #0f172a)'
+                    }}
+                    className="p-2.5 rounded-xl border hover:opacity-80 font-bold transition-colors"
                   >
                     <Minus className="w-4 h-4" />
                   </button>
@@ -526,12 +591,22 @@ export const StockManagementView: React.FC<StockManagementViewProps> = ({
                     required
                     value={editStockQuantity}
                     onChange={(e) => setEditStockQuantity(Math.max(0, parseInt(e.target.value) || 0))}
-                    className="flex-1 text-center font-bold text-base px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-orange-500/20 tabular-nums"
+                    style={{
+                      backgroundColor: 'var(--admin-input-bg, #f8fafc)',
+                      color: 'var(--admin-text-primary, #0f172a)',
+                      borderColor: 'var(--admin-card-border, #e2e8f0)'
+                    }}
+                    className="flex-1 text-center font-bold text-base px-3.5 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 tabular-nums"
                   />
                   <button
                     type="button"
                     onClick={() => setEditStockQuantity(prev => prev + 1)}
-                    className="p-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold transition-colors"
+                    style={{
+                      backgroundColor: 'var(--admin-input-bg, #f8fafc)',
+                      borderColor: 'var(--admin-card-border, #e2e8f0)',
+                      color: 'var(--admin-text-primary, #0f172a)'
+                    }}
+                    className="p-2.5 rounded-xl border hover:opacity-80 font-bold transition-colors"
                   >
                     <Plus className="w-4 h-4" />
                   </button>
@@ -539,27 +614,35 @@ export const StockManagementView: React.FC<StockManagementViewProps> = ({
                 <div className="mt-2 text-[11px] font-medium text-slate-500">
                   Situação resultante:{' '}
                   {editStockQuantity > 5 ? (
-                    <span className="text-emerald-600 font-bold">Disponível</span>
+                    <span className="text-emerald-500 font-bold">Disponível</span>
                   ) : editStockQuantity > 0 ? (
-                    <span className="text-amber-600 font-bold">Estoque Baixo</span>
+                    <span className="text-amber-500 font-bold">Estoque Baixo</span>
                   ) : (
-                    <span className="text-rose-600 font-bold">Esgotado</span>
+                    <span className="text-rose-500 font-bold">Esgotado</span>
                   )}
                 </div>
               </div>
 
-              <div className="pt-3 flex items-center justify-end gap-2 border-t border-slate-100">
+              <div 
+                style={{ borderColor: 'var(--admin-card-border, #e2e8f0)' }}
+                className="pt-3 flex items-center justify-end gap-2 border-t"
+              >
                 <button
                   type="button"
                   onClick={() => setEditingProduct(null)}
-                  className="px-4 py-2 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-50 text-xs font-semibold transition-colors"
+                  className="px-4 py-2 rounded-xl border border-slate-300 text-slate-400 hover:bg-white/10 text-xs font-semibold transition-colors"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
                   disabled={isSaving}
-                  className="px-4 py-2 rounded-xl bg-orange-500 hover:bg-orange-600 text-white text-xs font-semibold transition-colors shadow-md flex items-center gap-1.5"
+                  style={{
+                    backgroundColor: 'var(--admin-accent, #f59e0b)',
+                    color: 'var(--admin-accent-text, #0f172a)',
+                    boxShadow: '0 0 10px var(--admin-accent-glow, rgba(245, 158, 11, 0.25))'
+                  }}
+                  className="px-4 py-2 rounded-xl text-xs font-semibold transition-colors shadow-md flex items-center gap-1.5"
                 >
                   {isSaving ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
                   <span>Salvar Estoque</span>
