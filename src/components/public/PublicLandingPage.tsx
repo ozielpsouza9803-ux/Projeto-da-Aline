@@ -5,6 +5,7 @@ import {
   Sparkles, 
   ChevronRight, 
   ChevronLeft,
+  ChevronDown,
   Menu, 
   X, 
   Lock, 
@@ -620,17 +621,11 @@ export const PublicLandingPage: React.FC<PublicLandingPageProps> = ({
         </div>
       </aside>
 
-      {/* 3. Backdrop Overlay & Modal Drawer for Support Chat */}
       {isChatOpen && (
         <div 
-          className="fixed inset-0 bg-black/75 backdrop-blur-md z-50 transition-opacity duration-300 flex items-end sm:items-center justify-center p-0 sm:p-4"
-          onClick={() => setIsChatOpen(false)}
-          aria-hidden="true"
+          className="fixed inset-0 sm:inset-auto sm:bottom-6 sm:right-6 sm:w-[400px] sm:h-[600px] z-50 sm:rounded-3xl shadow-2xl flex flex-col overflow-hidden border border-slate-800 bg-slate-900"
+          onClick={() => {}}
         >
-          <div 
-            className="w-full sm:max-w-md bg-slate-900 border border-slate-800 sm:rounded-3xl rounded-t-3xl shadow-2xl flex flex-col h-[80vh] max-h-[600px] overflow-hidden"
-            onClick={(e) => e.stopPropagation()}
-          >
             {/* Chat Header */}
             <div className="p-4 border-b border-slate-800 bg-slate-900/90 flex items-center justify-between">
               <div className="flex items-center gap-3">
@@ -809,22 +804,22 @@ export const PublicLandingPage: React.FC<PublicLandingPageProps> = ({
               Início
             </button>
             <button 
-              onClick={() => onGoToStorefront()} 
+              onClick={() => {
+                if (currentCustomer) {
+                  if (onGoToCustomerAccount) onGoToCustomerAccount();
+                } else {
+                  if (onOpenCustomerAuthModal) onOpenCustomerAuthModal();
+                }
+              }}
               className="hover:text-orange-400 transition-colors cursor-pointer"
             >
-              Vitrine Completa
+              Clientes
             </button>
             <button 
-              onClick={() => scrollToSection('marcas-section')} 
+              onClick={() => setIsChatOpen(true)} 
               className="hover:text-orange-400 transition-colors cursor-pointer"
             >
-              Marcas ({activeShowcases.length})
-            </button>
-            <button 
-              onClick={() => scrollToSection('como-funciona-section')} 
-              className="hover:text-orange-400 transition-colors cursor-pointer"
-            >
-              Como Funciona
+              Chat de Atendimento
             </button>
           </nav>
 

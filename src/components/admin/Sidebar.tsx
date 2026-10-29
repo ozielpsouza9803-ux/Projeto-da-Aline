@@ -39,7 +39,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   isAdminSession
 }) => {
   const menuItems = [
-    { id: 'overview', label: 'Visão Geral', icon: LayoutDashboard },
+    { id: 'overview', label: 'Início do Painel', icon: LayoutDashboard },
     { id: 'assistant', label: 'Assistente de Gerência', icon: Sparkles },
     { id: 'chatbots', label: 'Perfis dos Chatbots', icon: Bot },
     { id: 'customers', label: 'Clientes VIP', icon: Crown },

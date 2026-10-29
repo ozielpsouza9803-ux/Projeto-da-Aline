@@ -278,7 +278,7 @@ export default function App() {
 
   // Tab titles mapping
   const tabTitles: Record<string, string> = {
-    overview: 'Visão Geral',
+    overview: 'Início do Painel',
     assistant: 'Assistente de Gerência',
     chatbots: 'Perfis dos Chatbots',
     customers: 'Gestão de Clientes VIP',
@@ -377,10 +377,6 @@ export default function App() {
             <Header
               currentTabTitle={tabTitles[currentTab] || 'Painel'}
               onOpenMobileSidebar={() => setIsMobileOpen(true)}
-              onOpenStorefront={() => {
-                setSelectedPreviewShowcaseId(undefined);
-                setViewMode('public');
-              }}
               onOpenAuthModal={() => setIsAuthModalOpen(true)}
               onLogout={handleLogout}
               searchQuery={searchQuery}

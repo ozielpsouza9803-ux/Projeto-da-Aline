@@ -75,15 +75,15 @@ export const OverviewView: React.FC<OverviewViewProps> = ({
 
       {/* KPI Cards Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs flex flex-col justify-between">
+        <div style={{ backgroundColor: 'var(--admin-card-bg)', borderColor: 'var(--admin-card-border)' }} className="p-6 rounded-2xl border shadow-xs flex flex-col justify-between">
           <div className="flex items-center justify-between mb-4">
-            <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total de Cliques</span>
+            <span style={{ color: 'var(--admin-text-secondary)' }} className="text-xs font-semibold uppercase tracking-wider">Total de Cliques</span>
             <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
               <MousePointerClick className="w-5 h-5" />
             </div>
           </div>
           <div>
-            <div className="text-2xl font-bold text-slate-900 tracking-tight tabular-nums">
+            <div style={{ color: 'var(--admin-text-primary)' }} className="text-2xl font-bold tracking-tight tabular-nums">
               {totalClicks.toLocaleString()}
             </div>
             <div className="flex items-center gap-1.5 text-xs text-emerald-600 font-medium mt-1">
@@ -92,32 +92,32 @@ export const OverviewView: React.FC<OverviewViewProps> = ({
           </div>
         </div>
 
-        <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs flex flex-col justify-between">
+        <div style={{ backgroundColor: 'var(--admin-card-bg)', borderColor: 'var(--admin-card-border)' }} className="p-6 rounded-2xl border shadow-xs flex flex-col justify-between">
           <div className="flex items-center justify-between mb-4">
-            <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Conversões</span>
+            <span style={{ color: 'var(--admin-text-secondary)' }} className="text-xs font-semibold uppercase tracking-wider">Conversões</span>
             <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
               <TrendingUp className="w-5 h-5" />
             </div>
           </div>
           <div>
-            <div className="text-2xl font-bold text-slate-900 tracking-tight tabular-nums">
+            <div style={{ color: 'var(--admin-text-primary)' }} className="text-2xl font-bold tracking-tight tabular-nums">
               {totalConversions}
             </div>
             <div className="flex items-center gap-1.5 text-xs text-slate-500 font-medium mt-1">
-              <span>Taxa de conversão: <strong className="text-slate-800 tabular-nums">{conversionRate}%</strong></span>
+              <span style={{ color: 'var(--admin-text-secondary)' }}>Taxa de conversão: <strong style={{ color: 'var(--admin-text-primary)' }} className="tabular-nums">{conversionRate}%</strong></span>
             </div>
           </div>
         </div>
 
-        <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs flex flex-col justify-between">
+        <div style={{ backgroundColor: 'var(--admin-card-bg)', borderColor: 'var(--admin-card-border)' }} className="p-6 rounded-2xl border shadow-xs flex flex-col justify-between">
           <div className="flex items-center justify-between mb-4">
-            <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Comissões Acumuladas</span>
+            <span style={{ color: 'var(--admin-text-secondary)' }} className="text-xs font-semibold uppercase tracking-wider">Comissões Acumuladas</span>
             <div className="w-10 h-10 rounded-xl bg-orange-50 text-orange-600 flex items-center justify-center">
               <DollarSign className="w-5 h-5" />
             </div>
           </div>
           <div>
-            <div className="text-2xl font-bold text-slate-900 tracking-tight tabular-nums">
+            <div style={{ color: 'var(--admin-text-primary)' }} className="text-2xl font-bold tracking-tight tabular-nums">
               R$ {totalCommissionAmount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
             </div>
             <div className="flex items-center gap-1.5 text-xs text-emerald-600 font-medium mt-1">
@@ -126,19 +126,19 @@ export const OverviewView: React.FC<OverviewViewProps> = ({
           </div>
         </div>
 
-        <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs flex flex-col justify-between">
+        <div style={{ backgroundColor: 'var(--admin-card-bg)', borderColor: 'var(--admin-card-border)' }} className="p-6 rounded-2xl border shadow-xs flex flex-col justify-between">
           <div className="flex items-center justify-between mb-4">
-            <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Vitrines Ativas</span>
+            <span style={{ color: 'var(--admin-text-secondary)' }} className="text-xs font-semibold uppercase tracking-wider">Vitrines Ativas</span>
             <div className="w-10 h-10 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center">
               <Store className="w-5 h-5" />
             </div>
           </div>
           <div>
-            <div className="text-2xl font-bold text-slate-900 tracking-tight tabular-nums">
+            <div style={{ color: 'var(--admin-text-primary)' }} className="text-2xl font-bold tracking-tight tabular-nums">
               {showcases.filter(s => s.isActive).length} / {showcases.length}
             </div>
             <div className="flex items-center gap-1.5 text-xs text-slate-500 font-medium mt-1">
-              <span>{products.length} produtos cadastrados</span>
+              <span style={{ color: 'var(--admin-text-secondary)' }}>{products.length} produtos cadastrados</span>
             </div>
           </div>
         </div>

@@ -1,11 +1,10 @@
 import React from 'react';
-import { Menu, Search, ExternalLink, Sparkles, ShieldCheck, Lock, LogOut } from 'lucide-react';
+import { Menu, Search, ShieldCheck, Lock, LogOut } from 'lucide-react';
 import { User as SupabaseUser } from '@supabase/supabase-js';
 
 interface HeaderProps {
   currentTabTitle: string;
   onOpenMobileSidebar: () => void;
-  onOpenStorefront: () => void;
   onOpenAuthModal: () => void;
   onLogout: () => void;
   searchQuery: string;
@@ -17,7 +16,6 @@ interface HeaderProps {
 export const Header: React.FC<HeaderProps> = ({
   currentTabTitle,
   onOpenMobileSidebar,
-  onOpenStorefront,
   onOpenAuthModal,
   onLogout,
   searchQuery,
@@ -74,18 +72,10 @@ export const Header: React.FC<HeaderProps> = ({
         />
       </div>
 
-      {/* Right: Storefront preview button & Admin profile / Logout button */}
+      {/* Right: Admin profile / Logout button */}
       <div className="flex items-center gap-2 sm:gap-3">
-        <button
-          type="button"
-          onClick={onOpenStorefront}
-          className="flex items-center gap-1.5 sm:gap-2 px-3 py-2 rounded-xl bg-orange-50 hover:bg-orange-100 text-orange-700 text-xs font-semibold transition-colors border border-orange-200 cursor-pointer"
-        >
-          <Sparkles className="w-3.5 h-3.5 text-orange-600 shrink-0" />
-          <span className="hidden sm:inline">Ver Vitrine Pública</span>
-          <span className="sm:hidden text-[11px]">Vitrine</span>
-          <ExternalLink className="w-3.5 h-3.5 text-orange-500 shrink-0" />
-        </button>
+        {/* Empty space placeholder */}
+        <div className="flex-1" />
 
         <div className="flex items-center gap-2 pl-2 border-l border-slate-200">
           {isAdminSession ? (
