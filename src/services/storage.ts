@@ -67,6 +67,7 @@ const INITIAL_PRODUCTS: Product[] = [
     isActive: true,
     clicksCount: 342,
     conversionsCount: 28,
+    stockQuantity: 18,
     createdAt: '2026-01-16'
   },
   {
@@ -85,6 +86,7 @@ const INITIAL_PRODUCTS: Product[] = [
     isActive: true,
     clicksCount: 512,
     conversionsCount: 45,
+    stockQuantity: 3, // Estoque Baixo
     createdAt: '2026-01-18'
   },
   {
@@ -103,6 +105,7 @@ const INITIAL_PRODUCTS: Product[] = [
     isActive: true,
     clicksCount: 890,
     conversionsCount: 76,
+    stockQuantity: 25,
     createdAt: '2026-01-21'
   },
   {
@@ -121,6 +124,7 @@ const INITIAL_PRODUCTS: Product[] = [
     isActive: true,
     clicksCount: 420,
     conversionsCount: 39,
+    stockQuantity: 0, // Esgotado
     createdAt: '2026-01-22'
   },
   {
@@ -139,6 +143,7 @@ const INITIAL_PRODUCTS: Product[] = [
     isActive: true,
     clicksCount: 230,
     conversionsCount: 31,
+    stockQuantity: 4, // Estoque Baixo
     createdAt: '2026-02-02'
   }
 ];

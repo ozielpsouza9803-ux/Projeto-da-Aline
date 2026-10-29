@@ -27,6 +27,8 @@ export interface Product {
   isActive: boolean;
   clicksCount: number;
   conversionsCount: number;
+  stockQuantity?: number;
+  stockStatus?: 'available' | 'low' | 'out_of_stock';
   createdAt: string;
 }
 

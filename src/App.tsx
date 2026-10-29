@@ -39,6 +39,7 @@ import { ReportsView } from './components/admin/ReportsView';
 import { ChartsView } from './components/admin/ChartsView';
 import { SecurityView } from './components/admin/SecurityView';
 import { SettingsView } from './components/admin/SettingsView';
+import { StockManagementView } from './components/admin/StockManagementView';
 import { PublicStorefront } from './components/public/PublicStorefront';
 import { PublicLandingPage } from './components/public/PublicLandingPage';
 
@@ -265,6 +266,7 @@ export default function App() {
     overview: 'Visão Geral',
     showcases: 'Vitrines Multimarcas',
     products: 'Produtos & Catálogo',
+    stock: 'Estoque e Produtos',
     banners: 'Banners e Carrosséis',
     clicks: 'Cliques & Origens',
     commissions: 'Comissões & Extrato',
@@ -381,6 +383,15 @@ export default function App() {
                   showcases={showcases}
                   onSaveProduct={handleSaveProduct}
                   onDeleteProduct={handleDeleteProduct}
+                  searchQuery={searchQuery}
+                />
+              )}
+
+              {currentTab === 'stock' && (
+                <StockManagementView
+                  products={products}
+                  showcases={showcases}
+                  onSaveProduct={handleSaveProduct}
                   searchQuery={searchQuery}
                 />
               )}
