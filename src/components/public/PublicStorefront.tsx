@@ -9,9 +9,13 @@ import {
   ChevronRight,
   ChevronLeft,
   X,
-  Lock
+  Lock,
+  Crown,
+  Zap,
+  User
 } from 'lucide-react';
-import { Showcase, Product, Banner } from '../../types';
+import { Showcase, Product, Banner, CustomerProfile } from '../../types';
+import { customerService } from '../../services/customerService';
 
 interface PublicStorefrontProps {
   showcases: Showcase[];
@@ -25,6 +29,8 @@ interface PublicStorefrontProps {
   onLogout?: () => void;
   onOpenAuthModal?: () => void;
   showcasePosition?: 'above_banner' | 'below_banner';
+  currentCustomer?: CustomerProfile | null;
+  onOpenCustomerAuthModal?: () => void;
 }
 
 export const PublicStorefront: React.FC<PublicStorefrontProps> = ({
@@ -38,7 +44,9 @@ export const PublicStorefront: React.FC<PublicStorefrontProps> = ({
   isAdminSession,
   onLogout,
   onOpenAuthModal,
-  showcasePosition = 'below_banner'
+  showcasePosition = 'below_banner',
+  currentCustomer,
+  onOpenCustomerAuthModal
 }) => {
   const activeShowcases = showcases.filter(s => s.isActive);
   const [activeShowcaseId, setActiveShowcaseId] = useState<string>(
@@ -49,6 +57,42 @@ export const PublicStorefront: React.FC<PublicStorefrontProps> = ({
   const [activeProductModal, setActiveProductModal] = useState<Product | null>(null);
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
   const [currentBannerIndex, setCurrentBannerIndex] = useState(0);
+  const [pegarAgoraAlert, setPegarAgoraAlert] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    isVipSuccess?: boolean;
+    productUrl?: string;
+  } | null>(null);
+
+  const handlePegarAgora = (product: Product) => {
+    if (!currentCustomer) {
+      setPegarAgoraAlert({
+        isOpen: true,
+        title: 'Acesso Restrito a Membros',
+        message: 'Você precisa entrar na sua Conta Cliente para utilizar o recurso exclusivo "Pegar agora" (Priority Checkout VIP).'
+      });
+      return;
+    }
+
+    if (!customerService.canPegarAgora(currentCustomer.email)) {
+      setPegarAgoraAlert({
+        isOpen: true,
+        title: 'Recurso Exclusivo para Clientes VIP',
+        message: `Olá, ${currentCustomer.name}. Sua conta atual possui o status de Cliente Padrão. O "Pegar agora" garante atendimento prioritário e é restrito a Clientes VIP autorizados pelo administrador.`
+      });
+      return;
+    }
+
+    // Success VIP
+    setPegarAgoraAlert({
+      isOpen: true,
+      title: 'Prioridade VIP Confirmada!',
+      message: `Parabéns, ${currentCustomer.name}! Seu acesso prioritário "Pegar agora" foi ativado com sucesso para "${product.name}". Redirecionando com prioridade VIP...`,
+      isVipSuccess: true,
+      productUrl: product.affiliateUrl
+    });
+  };
 
   const currentShowcase = showcases.find(s => s.id === activeShowcaseId) || showcases[0];
   const showcaseProducts = products.filter(p => p.showcaseId === currentShowcase?.id && p.isActive);
@@ -193,6 +237,29 @@ export const PublicStorefront: React.FC<PublicStorefrontProps> = ({
         </div>
 
         <div className="flex items-center gap-2">
+          {currentCustomer ? (
+            <button
+              type="button"
+              onClick={onOpenCustomerAuthModal}
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-2 transition-all shadow-xs ${currentCustomer.isVip ? 'bg-amber-500 text-slate-950' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}`}
+            >
+              {currentCustomer.isVip && <Crown className="w-3.5 h-3.5 fill-slate-950" />}
+              <span>{currentCustomer.name}</span>
+              <span className={`text-[10px] px-2 py-0.5 rounded-full ${currentCustomer.isVip ? 'bg-slate-950 text-amber-300' : 'bg-slate-200 text-slate-600'}`}>
+                {currentCustomer.isVip ? 'VIP' : 'Padrão'}
+              </span>
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={onOpenCustomerAuthModal}
+              className="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer"
+            >
+              <User className="w-4 h-4" />
+              <span>Entrar / Conta</span>
+            </button>
+          )}
+
           {onGoToLanding && (
             <button
               type="button"
@@ -305,7 +372,7 @@ export const PublicStorefront: React.FC<PublicStorefrontProps> = ({
                   </div>
                 </div>
 
-                <div className="px-5 pb-5 pt-0">
+                <div className="px-5 pb-5 pt-0 space-y-2">
                   <button
                     onClick={() => handleAffiliateClick(product.affiliateUrl)}
                     className="w-full py-2.5 rounded-xl bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-white font-bold text-xs transition-all shadow-md flex items-center justify-center gap-2"
@@ -313,6 +380,13 @@ export const PublicStorefront: React.FC<PublicStorefrontProps> = ({
                     <ShoppingBag className="w-4 h-4" />
                     <span>Comprar na {currentShowcase?.name}</span>
                     <ExternalLink className="w-3.5 h-3.5" />
+                  </button>
+                  <button
+                    onClick={() => handlePegarAgora(product)}
+                    className="w-full py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs transition-all shadow-sm flex items-center justify-center gap-1.5 cursor-pointer"
+                  >
+                    <Crown className="w-4 h-4 fill-slate-950" />
+                    <span>Pegar agora (VIP)</span>
                   </button>
                 </div>
               </div>
@@ -384,12 +458,76 @@ export const PublicStorefront: React.FC<PublicStorefrontProps> = ({
                   <ExternalLink className="w-4 h-4" />
                 </button>
                 <button
+                  onClick={() => handlePegarAgora(activeProductModal)}
+                  className="w-full py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs transition-all shadow-sm flex items-center justify-center gap-1.5 cursor-pointer"
+                >
+                  <Crown className="w-4 h-4 fill-slate-950" />
+                  <span>Pegar agora (VIP)</span>
+                </button>
+                <button
                   onClick={() => setActiveProductModal(null)}
                   className="w-full py-2.5 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-50 text-xs font-semibold transition-colors"
                 >
                   Fechar
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Pegar Agora VIP Modal / Alert */}
+      {pegarAgoraAlert?.isOpen && (
+        <div className="fixed inset-0 z-50 bg-slate-900/70 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-amber-200 animate-in fade-in zoom-in-95 duration-200 text-center space-y-4">
+            <div className={`w-14 h-14 rounded-2xl mx-auto flex items-center justify-center shadow-md ${pegarAgoraAlert.isVipSuccess ? 'bg-amber-500 text-slate-950' : 'bg-slate-900 text-white'}`}>
+              <Crown className="w-7 h-7 fill-current" />
+            </div>
+            <div>
+              <h3 className="text-lg font-bold text-slate-900 mb-1 flex items-center justify-center gap-1.5">
+                <span>{pegarAgoraAlert.title}</span>
+              </h3>
+              <p className="text-xs text-slate-600 leading-relaxed mt-2">
+                {pegarAgoraAlert.message}
+              </p>
+            </div>
+
+            <div className="space-y-2 pt-2">
+              {pegarAgoraAlert.isVipSuccess && pegarAgoraAlert.productUrl ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    const url = pegarAgoraAlert.productUrl!;
+                    setPegarAgoraAlert(null);
+                    window.open(url, '_blank');
+                  }}
+                  className="w-full py-3 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-extrabold text-xs transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer"
+                >
+                  <Crown className="w-4 h-4 fill-slate-950" />
+                  <span>Acessar Vitrine Prioritária Agora</span>
+                  <ExternalLink className="w-4 h-4" />
+                </button>
+              ) : !currentCustomer ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setPegarAgoraAlert(null);
+                    if (onOpenCustomerAuthModal) onOpenCustomerAuthModal();
+                  }}
+                  className="w-full py-3 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer"
+                >
+                  <User className="w-4 h-4" />
+                  <span>Entrar ou Cadastrar Conta</span>
+                </button>
+              ) : null}
+
+              <button
+                type="button"
+                onClick={() => setPegarAgoraAlert(null)}
+                className="w-full py-2.5 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-50 text-xs font-semibold transition-colors cursor-pointer"
+              >
+                Fechar
+              </button>
             </div>
           </div>
         </div>

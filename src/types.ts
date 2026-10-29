@@ -188,3 +188,27 @@ export interface ChatbotProfile {
   updatedAt?: string;
 }
 
+export interface CustomerAddress {
+  street: string;
+  number: string;
+  complement?: string;
+  neighborhood: string;
+  city: string;
+  state: string;
+  zipcode: string;
+}
+
+export interface CustomerProfile {
+  id: string;
+  email: string;
+  name: string;
+  phone: string;
+  whatsapp: string;
+  address: CustomerAddress;
+  avatarUrl?: string;
+  isVip?: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+

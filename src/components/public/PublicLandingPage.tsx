@@ -18,9 +18,10 @@ import {
   Zap,
   MessageSquare,
   Send,
-  Headset
+  Headset,
+  User
 } from 'lucide-react';
-import { Showcase, Product, Banner, ChatbotProfile } from '../../types';
+import { Showcase, Product, Banner, ChatbotProfile, CustomerProfile } from '../../types';
 import { chatbotProfileService } from '../../services/chatbotProfileService';
 
 interface PublicLandingPageProps {
@@ -34,6 +35,9 @@ interface PublicLandingPageProps {
   isAdminSession: boolean;
   onLogout?: () => void;
   showcasePosition?: 'above_banner' | 'below_banner';
+  currentCustomer?: CustomerProfile | null;
+  onOpenCustomerAuthModal?: () => void;
+  onGoToCustomerAccount?: () => void;
 }
 
 export const PublicLandingPage: React.FC<PublicLandingPageProps> = ({
@@ -46,7 +50,10 @@ export const PublicLandingPage: React.FC<PublicLandingPageProps> = ({
   onOpenAuthModal,
   isAdminSession,
   onLogout,
-  showcasePosition = 'below_banner'
+  showcasePosition = 'below_banner',
+  currentCustomer,
+  onOpenCustomerAuthModal,
+  onGoToCustomerAccount
 }) => {
   const [isExternalDrawerOpen, setIsExternalDrawerOpen] = useState(false);
   const [isChatOpen, setIsChatOpen] = useState(false);
@@ -528,6 +535,47 @@ export const PublicLandingPage: React.FC<PublicLandingPageProps> = ({
                 Chat de Atendimento
               </button>
             </nav>
+          </div>
+
+          {/* Área do Cliente */}
+          <div className="pt-4 border-t border-slate-800/80">
+            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3 px-2">
+              Área do Cliente
+            </p>
+            <div className="space-y-2">
+              {currentCustomer ? (
+                <button
+                  onClick={() => {
+                    setIsExternalDrawerOpen(false);
+                    if (onGoToCustomerAccount) onGoToCustomerAccount();
+                  }}
+                  className="w-full text-left px-3.5 py-3 rounded-xl font-semibold text-emerald-400 hover:text-emerald-300 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 transition-all flex items-center justify-between cursor-pointer"
+                >
+                  <div className="flex items-center gap-3">
+                    <User className="w-4 h-4 text-emerald-400" />
+                    <div>
+                      <span className="block text-xs font-bold">{currentCustomer.name}</span>
+                      <span className="text-[10px] text-slate-400">Minha Conta</span>
+                    </div>
+                  </div>
+                  <ChevronRight className="w-4 h-4 text-emerald-400" />
+                </button>
+              ) : (
+                <button
+                  onClick={() => {
+                    setIsExternalDrawerOpen(false);
+                    if (onOpenCustomerAuthModal) onOpenCustomerAuthModal();
+                  }}
+                  className="w-full text-left px-3.5 py-3 rounded-xl font-semibold text-orange-400 hover:text-orange-300 bg-orange-500/10 hover:bg-orange-500/20 border border-orange-500/20 transition-all flex items-center justify-between cursor-pointer"
+                >
+                  <div className="flex items-center gap-3">
+                    <User className="w-4 h-4 text-orange-400" />
+                    <span>Entrar / Cadastrar-se</span>
+                  </div>
+                  <ChevronRight className="w-4 h-4 text-orange-400" />
+                </button>
+              )}
+            </div>
           </div>
 
           <div className="pt-4 border-t border-slate-800/80">

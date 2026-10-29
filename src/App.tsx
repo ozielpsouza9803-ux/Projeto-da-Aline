@@ -43,19 +43,26 @@ import { SettingsView } from './components/admin/SettingsView';
 import { StockManagementView } from './components/admin/StockManagementView';
 import { AdminAssistantView } from './components/admin/AdminAssistantView';
 import { ChatbotProfilesView } from './components/admin/ChatbotProfilesView';
+import { CustomersManagementView } from './components/admin/CustomersManagementView';
 import { PublicStorefront } from './components/public/PublicStorefront';
 import { PublicLandingPage } from './components/public/PublicLandingPage';
+import { CustomerAuthModal } from './components/customer/CustomerAuthModal';
+import { CustomerAccountView } from './components/customer/CustomerAccountView';
+import { customerService } from './services/customerService';
+import { CustomerProfile } from './types';
 
 export default function App() {
   // Initial viewMode: ALWAYS 'landing' (public initial view) when opening app
-  const [viewMode, setViewMode] = useState<'landing' | 'public' | 'admin'>('landing');
+  const [viewMode, setViewMode] = useState<'landing' | 'public' | 'admin' | 'customer_account'>('landing');
   const [currentTab, setCurrentTab] = useState<string>('overview');
   const [isMobileOpen, setIsMobileOpen] = useState<boolean>(false);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [selectedPreviewShowcaseId, setSelectedPreviewShowcaseId] = useState<string | undefined>(undefined);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState<boolean>(false);
+  const [isCustomerAuthModalOpen, setIsCustomerAuthModalOpen] = useState<boolean>(false);
   const [currentUser, setCurrentUser] = useState<SupabaseUser | null>(null);
   const [isAdminRole, setIsAdminRole] = useState<boolean>(false);
+  const [currentCustomer, setCurrentCustomer] = useState<CustomerProfile | null>(null);
 
   // Data state
   const [showcases, setShowcases] = useState<Showcase[]>(storageService.getShowcases());
@@ -76,6 +83,10 @@ export default function App() {
       } else {
         setIsAdminRole(false);
       }
+    });
+
+    customerService.getCurrentCustomer().then(cust => {
+      if (cust) setCurrentCustomer(cust);
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
@@ -270,6 +281,7 @@ export default function App() {
     overview: 'Visão Geral',
     assistant: 'Assistente de Gerência',
     chatbots: 'Perfis dos Chatbots',
+    customers: 'Gestão de Clientes VIP',
     showcases: 'Vitrines Multimarcas',
     products: 'Produtos & Catálogo',
     stock: 'Estoque e Produtos',
@@ -284,7 +296,18 @@ export default function App() {
 
   return (
     <>
-      {viewMode === 'landing' ? (
+      {viewMode === 'customer_account' && currentCustomer ? (
+        <CustomerAccountView
+          customer={currentCustomer}
+          onBack={() => setViewMode('landing')}
+          onUpdateCustomer={(updated) => setCurrentCustomer(updated)}
+          onLogout={() => {
+            setCurrentCustomer(null);
+            setViewMode('landing');
+          }}
+          buttonColor={settings.primaryButtonColor || '#f97316'}
+        />
+      ) : viewMode === 'landing' ? (
         <PublicLandingPage
           showcases={showcases}
           products={products}
@@ -305,6 +328,9 @@ export default function App() {
           onOpenAuthModal={() => setIsAuthModalOpen(true)}
           isAdminSession={isAdminSession}
           onLogout={handleLogout}
+          currentCustomer={currentCustomer}
+          onOpenCustomerAuthModal={() => setIsCustomerAuthModalOpen(true)}
+          onGoToCustomerAccount={() => setViewMode('customer_account')}
         />
       ) : viewMode === 'public' ? (
         <PublicStorefront
@@ -380,6 +406,10 @@ export default function App() {
 
               {currentTab === 'chatbots' && (
                 <ChatbotProfilesView />
+              )}
+
+              {currentTab === 'customers' && (
+                <CustomersManagementView isAdmin={isAdminRole} />
               )}
 
               {currentTab === 'showcases' && (
@@ -485,6 +515,16 @@ export default function App() {
           if (isAdmin && isExplicitLogin) {
             setViewMode('admin');
           }
+        }}
+      />
+
+      {/* Customer Auth Modal */}
+      <CustomerAuthModal
+        isOpen={isCustomerAuthModalOpen}
+        onClose={() => setIsCustomerAuthModalOpen(false)}
+        onAuthSuccess={(cust) => {
+          setCurrentCustomer(cust);
+          setViewMode('customer_account');
         }}
       />
     </>

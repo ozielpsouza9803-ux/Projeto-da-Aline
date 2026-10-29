@@ -15,7 +15,8 @@ import {
   Sparkles,
   Lock,
   LogOut,
-  Bot
+  Bot,
+  Crown
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -41,6 +42,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     { id: 'overview', label: 'Visão Geral', icon: LayoutDashboard },
     { id: 'assistant', label: 'Assistente de Gerência', icon: Sparkles },
     { id: 'chatbots', label: 'Perfis dos Chatbots', icon: Bot },
+    { id: 'customers', label: 'Clientes VIP', icon: Crown },
     { id: 'showcases', label: 'Vitrines', icon: Store },
     { id: 'products', label: 'Produtos', icon: Package },
     { id: 'stock', label: 'Estoque e Produtos', icon: Boxes },
