@@ -49,6 +49,14 @@ export const signOutAdmin = async () => {
   if (error) throw error;
 };
 
+export const resetAdminPassword = async (email: string) => {
+  const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: window.location.origin
+  });
+  if (error) throw error;
+  return data;
+};
+
 export const getCurrentUser = async (): Promise<User | null> => {
   const { data: { user } } = await supabase.auth.getUser();
   return user;

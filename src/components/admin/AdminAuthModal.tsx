@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { ShieldCheck, Lock, Mail, User, LogOut, Check, AlertCircle, X, Info } from 'lucide-react';
+import { ShieldCheck, Lock, Mail, User, LogOut, Check, AlertCircle, X, Info, KeyRound, ArrowLeft } from 'lucide-react';
 import { User as SupabaseUser } from '@supabase/supabase-js';
-import { signInAdmin, signUpAdmin, signOutAdmin, getCurrentUser, checkIsAdminRole, supabase } from '../../services/supabaseClient';
+import { signInAdmin, signUpAdmin, signOutAdmin, resetAdminPassword, getCurrentUser, checkIsAdminRole, supabase } from '../../services/supabaseClient';
 
 interface AdminAuthModalProps {
   isOpen: boolean;
@@ -12,7 +12,7 @@ interface AdminAuthModalProps {
 export const AdminAuthModal: React.FC<AdminAuthModalProps> = ({ isOpen, onClose, onAuthChange }) => {
   const [currentUser, setCurrentUser] = useState<SupabaseUser | null>(null);
   const [isAdminRole, setIsAdminRole] = useState(false);
-  const [isSignUp, setIsSignUp] = useState(false);
+  const [authMode, setAuthMode] = useState<'signin' | 'signup' | 'forgot'>('signin');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -59,7 +59,13 @@ export const AdminAuthModal: React.FC<AdminAuthModalProps> = ({ isOpen, onClose,
     setMessage(null);
 
     try {
-      if (isSignUp) {
+      if (authMode === 'forgot') {
+        await resetAdminPassword(email);
+        setMessage({
+          type: 'success',
+          text: 'E-mail de redefinição de senha enviado com sucesso! Verifique sua caixa de entrada ou spam.'
+        });
+      } else if (authMode === 'signup') {
         const res = await signUpAdmin(email, password);
         
         if (res.user && !res.session) {
@@ -93,7 +99,7 @@ export const AdminAuthModal: React.FC<AdminAuthModalProps> = ({ isOpen, onClose,
       if (errMsg.includes('over_email_send_rate_limit') || errMsg.includes('rate limit') || err?.status === 429) {
         setMessage({
           type: 'error',
-          text: 'Limite temporário de envio de e-mails atingido no Supabase Auth. Aguarde alguns minutos antes de tentar cadastrar novamente ou tente o login direto se a conta já existir.'
+          text: 'Limite temporário de envio de e-mails atingido no Supabase Auth. Aguarde alguns minutos antes de tentar enviar novamente.'
         });
       } else if (errMsg.includes('Email not confirmed')) {
         setMessage({
@@ -191,7 +197,9 @@ export const AdminAuthModal: React.FC<AdminAuthModalProps> = ({ isOpen, onClose,
             <form onSubmit={handleAuth} className="space-y-4">
               <div className="text-center pb-2">
                 <p className="text-xs text-slate-600">
-                  {isSignUp 
+                  {authMode === 'forgot'
+                    ? 'Informe seu e-mail para receber o link de redefinição de senha.'
+                    : authMode === 'signup'
                     ? 'Cadastre uma nova conta no Supabase Auth.' 
                     : 'Entre com sua conta para autenticar as requisições administrativas no Supabase.'}
                 </p>
@@ -205,7 +213,7 @@ export const AdminAuthModal: React.FC<AdminAuthModalProps> = ({ isOpen, onClose,
               )}
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">E-mail do Administrador</label>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">E-mail</label>
                 <div className="relative">
                   <Mail className="absolute left-3 top-2.5 w-4 h-4 text-slate-400" />
                   <input
@@ -213,48 +221,86 @@ export const AdminAuthModal: React.FC<AdminAuthModalProps> = ({ isOpen, onClose,
                     required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="admin@omnibrand.com.br"
+                    placeholder="ozielpsouza9803@gmail.com"
                     className="w-full pl-9 pr-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-orange-500/20"
                   />
                 </div>
               </div>
 
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">Senha</label>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-2.5 w-4 h-4 text-slate-400" />
-                  <input
-                    type="password"
-                    required
-                    minLength={6}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="••••••••"
-                    className="w-full pl-9 pr-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-orange-500/20"
-                  />
+              {authMode !== 'forgot' && (
+                <div>
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="block text-xs font-semibold text-slate-700">Senha</label>
+                    {authMode === 'signin' && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setAuthMode('forgot');
+                          setMessage(null);
+                        }}
+                        className="text-[11px] font-semibold text-orange-600 hover:text-orange-700"
+                      >
+                        Esqueceu a senha?
+                      </button>
+                    )}
+                  </div>
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-2.5 w-4 h-4 text-slate-400" />
+                    <input
+                      type="password"
+                      required
+                      minLength={6}
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder="••••••••"
+                      className="w-full pl-9 pr-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-orange-500/20"
+                    />
+                  </div>
                 </div>
-              </div>
+              )}
 
               <button
                 type="submit"
                 disabled={loading}
                 className="w-full py-3 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs transition-colors shadow-md flex items-center justify-center gap-2"
               >
-                <ShieldCheck className="w-4 h-4" />
-                <span>{loading ? 'Aguarde...' : isSignUp ? 'Criar Conta' : 'Entrar no Painel'}</span>
+                {authMode === 'forgot' ? (
+                  <>
+                    <KeyRound className="w-4 h-4" />
+                    <span>{loading ? 'Enviando...' : 'Enviar E-mail de Redefinição'}</span>
+                  </>
+                ) : (
+                  <>
+                    <ShieldCheck className="w-4 h-4" />
+                    <span>{loading ? 'Aguarde...' : authMode === 'signup' ? 'Criar Conta' : 'Entrar no Painel'}</span>
+                  </>
+                )}
               </button>
 
-              <div className="pt-2 text-center">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIsSignUp(!isSignUp);
-                    setMessage(null);
-                  }}
-                  className="text-xs font-semibold text-indigo-600 hover:text-indigo-800 transition-colors"
-                >
-                  {isSignUp ? 'Já tem conta? Entrar' : 'Não tem conta? Cadastrar'}
-                </button>
+              <div className="pt-2 text-center flex items-center justify-center gap-3">
+                {authMode === 'forgot' ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setAuthMode('signin');
+                      setMessage(null);
+                    }}
+                    className="text-xs font-semibold text-slate-600 hover:text-slate-800 transition-colors flex items-center gap-1"
+                  >
+                    <ArrowLeft className="w-3.5 h-3.5" /> Voltar ao Login
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setAuthMode(authMode === 'signup' ? 'signin' : 'signup');
+                      setMessage(null);
+                    }}
+                    className="text-xs font-semibold text-indigo-600 hover:text-indigo-800 transition-colors"
+                  >
+                    {authMode === 'signup' ? 'Já tem conta? Entrar' : 'Não tem conta? Cadastrar'}
+                  </button>
+                )}
               </div>
             </form>
           )}
@@ -263,3 +309,4 @@ export const AdminAuthModal: React.FC<AdminAuthModalProps> = ({ isOpen, onClose,
     </div>
   );
 };
+
