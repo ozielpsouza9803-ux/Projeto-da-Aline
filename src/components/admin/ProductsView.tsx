@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { Product, Showcase } from '../../types';
 import { uploadMediaToSupabase } from '../../services/supabaseClient';
+import { generateUUID } from '../../utils/uuid';
 
 interface ProductsViewProps {
   products: Product[];
@@ -124,7 +125,7 @@ export const ProductsView: React.FC<ProductsViewProps> = ({
 
     try {
       const productObj: Product = {
-        id: editingProduct ? editingProduct.id : `prod-${Date.now()}`,
+        id: editingProduct ? editingProduct.id : generateUUID(),
         showcaseId,
         name,
         sku,

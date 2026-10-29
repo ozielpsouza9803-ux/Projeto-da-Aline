@@ -1,9 +1,12 @@
 import { Showcase, Product, Banner, ClickRecord, CommissionRecord, AdminSettings } from '../types';
-import { getSupabaseClient } from './supabaseClient';
+
+export const SEED_NATURA_ID = '11111111-1111-4111-a111-111111111111';
+export const SEED_BOTICARIO_ID = '22222222-2222-4222-a222-222222222222';
+export const SEED_EUDORA_ID = '33333333-3333-4333-a333-333333333333';
 
 const INITIAL_SHOWCASES: Showcase[] = [
   {
-    id: 'natura-1',
+    id: SEED_NATURA_ID,
     name: 'Natura',
     slug: 'natura',
     description: 'Consultoria oficial Natura. Perfumaria exclusiva, Chronos, Ekos e cuidados diários.',
@@ -17,7 +20,7 @@ const INITIAL_SHOWCASES: Showcase[] = [
     createdAt: '2026-01-15'
   },
   {
-    id: 'boticario-2',
+    id: SEED_BOTICARIO_ID,
     name: 'O Boticário',
     slug: 'boticario',
     description: 'Revenda autorizada O Boticário. Malbec, Lily, Cuide-se Bem e make B.',
@@ -31,7 +34,7 @@ const INITIAL_SHOWCASES: Showcase[] = [
     createdAt: '2026-01-20'
   },
   {
-    id: 'eudora-3',
+    id: SEED_EUDORA_ID,
     name: 'Eudora',
     slug: 'eudora',
     description: 'Eudora Chega Lá. Maquiagens de alta performance, Deo Colônias e sofisticação.',
@@ -48,8 +51,8 @@ const INITIAL_SHOWCASES: Showcase[] = [
 
 const INITIAL_PRODUCTS: Product[] = [
   {
-    id: 'prod-1',
-    showcaseId: 'natura-1',
+    id: 'a0000000-0000-4000-a000-000000000001',
+    showcaseId: SEED_NATURA_ID,
     name: 'Ekos Castanha Polpa Hidratante Corporal 400ml',
     sku: 'NAT-EKOS-01',
     description: 'Hidratação nutritiva para o corpo com óleo de castanha. Restaura a barreira da pele.',
@@ -67,8 +70,8 @@ const INITIAL_PRODUCTS: Product[] = [
     createdAt: '2026-01-16'
   },
   {
-    id: 'prod-2',
-    showcaseId: 'natura-1',
+    id: 'a0000000-0000-4000-a000-000000000002',
+    showcaseId: SEED_NATURA_ID,
     name: 'Kaiak Masculino Desodorante Colônia 100ml',
     sku: 'NAT-KAI-02',
     description: 'O clássico da perfumaria brasileira. Notas aquosas, bergamota e especiarias.',
@@ -85,8 +88,8 @@ const INITIAL_PRODUCTS: Product[] = [
     createdAt: '2026-01-18'
   },
   {
-    id: 'prod-3',
-    showcaseId: 'boticario-2',
+    id: 'a0000000-0000-4000-a000-000000000003',
+    showcaseId: SEED_BOTICARIO_ID,
     name: 'Malbec Desodorante Colônia 100ml',
     sku: 'BOT-MAL-01',
     description: 'O primeiro deo colônia do mundo feito com álcool vínico macerado em barris de carvalho.',
@@ -103,8 +106,8 @@ const INITIAL_PRODUCTS: Product[] = [
     createdAt: '2026-01-21'
   },
   {
-    id: 'prod-4',
-    showcaseId: 'boticario-2',
+    id: 'a0000000-0000-4000-a000-000000000004',
+    showcaseId: SEED_BOTICARIO_ID,
     name: 'Creme Hidratante Desodorante Corporal Lily 250g',
     sku: 'BOT-LIL-02',
     description: 'Fragrância marcante e única com óleo essencial de flores de lírio obtido por enfleurage.',
@@ -121,8 +124,8 @@ const INITIAL_PRODUCTS: Product[] = [
     createdAt: '2026-01-22'
   },
   {
-    id: 'prod-5',
-    showcaseId: 'eudora-3',
+    id: 'a0000000-0000-4000-a000-000000000005',
+    showcaseId: SEED_EUDORA_ID,
     name: 'Soul Kiss Me Batom Líquido Matte',
     sku: 'EUD-BAT-01',
     description: 'Efeito super matte que não resseca os lábios. Alta fixação por até 12 horas.',
@@ -142,8 +145,8 @@ const INITIAL_PRODUCTS: Product[] = [
 
 const INITIAL_BANNERS: Banner[] = [
   {
-    id: 'ban-1',
-    showcaseId: 'natura-1',
+    id: 'b0000000-0000-4000-a000-000000000001',
+    showcaseId: SEED_NATURA_ID,
     title: 'Ciclo de Inverno Natura',
     subtitle: 'Até 40% OFF em Perfumaria e Cuidados Diários',
     imageUrl: 'https://images.unsplash.com/photo-1616683693504-3ea7e9ad6fec?w=1200&auto=format&fit=crop&q=80',
@@ -153,8 +156,8 @@ const INITIAL_BANNERS: Banner[] = [
     isActive: true
   },
   {
-    id: 'ban-2',
-    showcaseId: 'boticario-2',
+    id: 'b0000000-0000-4000-a000-000000000002',
+    showcaseId: SEED_BOTICARIO_ID,
     title: 'Lançamentos Malbec & Lily',
     subtitle: 'O presente perfeito para quem você ama com frete grátis',
     imageUrl: 'https://images.unsplash.com/photo-1598440947619-2c35fc9aa908?w=1200&auto=format&fit=crop&q=80',
@@ -164,8 +167,8 @@ const INITIAL_BANNERS: Banner[] = [
     isActive: true
   },
   {
-    id: 'ban-3',
-    showcaseId: 'eudora-3',
+    id: 'b0000000-0000-4000-a000-000000000003',
+    showcaseId: SEED_EUDORA_ID,
     title: 'Eudora Glow & Make',
     subtitle: 'Realce sua beleza com a linha profissional',
     imageUrl: 'https://images.unsplash.com/photo-1526947425960-945c6e72858f?w=1200&auto=format&fit=crop&q=80',
@@ -178,10 +181,10 @@ const INITIAL_BANNERS: Banner[] = [
 
 const INITIAL_CLICKS: ClickRecord[] = [
   {
-    id: 'clk-1',
+    id: 'c0000000-0000-4000-a000-000000000001',
     timestamp: '2026-10-28 14:32',
-    showcaseId: 'boticario-2',
-    productId: 'prod-3',
+    showcaseId: SEED_BOTICARIO_ID,
+    productId: 'a0000000-0000-4000-a000-000000000003',
     productName: 'Malbec Desodorante Colônia 100ml',
     device: 'Mobile',
     source: 'Instagram Stories',
@@ -189,25 +192,15 @@ const INITIAL_CLICKS: ClickRecord[] = [
     commissionEarned: 15.19
   },
   {
-    id: 'clk-2',
+    id: 'c0000000-0000-4000-a000-000000000002',
     timestamp: '2026-10-28 14:15',
-    showcaseId: 'natura-1',
-    productId: 'prod-2',
+    showcaseId: SEED_NATURA_ID,
+    productId: 'a0000000-0000-4000-a000-000000000002',
     productName: 'Kaiak Masculino Desodorante Colônia',
     device: 'Desktop',
     source: 'WhatsApp Group',
     converted: true,
     commissionEarned: 11.39
-  },
-  {
-    id: 'clk-3',
-    timestamp: '2026-10-28 13:50',
-    showcaseId: 'natura-1',
-    productId: 'prod-1',
-    productName: 'Ekos Castanha Polpa Hidratante',
-    device: 'Mobile',
-    source: 'Direct Link',
-    converted: false
   }
 ];
 
@@ -215,7 +208,7 @@ const INITIAL_COMMISSIONS: CommissionRecord[] = [
   {
     id: 'com-1',
     date: '2026-10-28',
-    showcaseId: 'boticario-2',
+    showcaseId: SEED_BOTICARIO_ID,
     orderId: 'BOT-883920',
     productName: 'Malbec Desodorante Colônia 100ml',
     saleAmount: 189.90,
@@ -226,7 +219,7 @@ const INITIAL_COMMISSIONS: CommissionRecord[] = [
   {
     id: 'com-2',
     date: '2026-10-28',
-    showcaseId: 'natura-1',
+    showcaseId: SEED_NATURA_ID,
     orderId: 'NAT-442190',
     productName: 'Kaiak Masculino Desodorante Colônia',
     saleAmount: 119.90,
@@ -240,104 +233,57 @@ const INITIAL_SETTINGS: AdminSettings = {
   siteName: 'OmniBrand Afiliados',
   adminEmail: 'admin@omnibrand.com.br',
   currency: 'BRL',
-  supabaseUrl: '',
-  supabaseAnonKey: '',
-  storageProvider: 'local',
+  supabaseUrl: 'https://spqwrnywdlkrfrslfmwl.supabase.co',
+  supabaseAnonKey: 'sb_publishable_JGX27g41zq4QHaW6i5rYVw_KNMOHgq0',
+  storageProvider: 'supabase',
   autoApproveCommissions: true
 };
 
 export const storageService = {
   getShowcases: (): Showcase[] => {
     const data = localStorage.getItem('omnibrand_showcases');
-    return data ? JSON.parse(data) : INITIAL_SHOWCASES;
-  },
-  saveShowcases: async (items: Showcase[]) => {
-    localStorage.setItem('omnibrand_showcases', JSON.stringify(items));
-    // Optional Supabase sync if connected
-    const client = getSupabaseClient();
-    if (client) {
-      try {
-        for (const item of items) {
-          await client.from('showcases').upsert({
-            id: item.id,
-            name: item.name,
-            slug: item.slug,
-            description: item.description,
-            logo_url: item.logoUrl,
-            banner_url: item.bannerUrl,
-            category: item.category,
-            affiliate_base_url: item.affiliateBaseUrl,
-            commission_rate: item.commissionRate,
-            is_active: item.isActive,
-            theme_color: item.themeColor,
-            created_at: item.createdAt
-          });
-        }
-      } catch (err) {
-        console.warn('Supabase showcases sync note:', err);
-      }
+    if (!data) return INITIAL_SHOWCASES;
+    try {
+      const parsed = JSON.parse(data);
+      // Ensure IDs are valid UUID format
+      if (parsed.length > 0 && !parsed[0].id.includes('-')) return INITIAL_SHOWCASES;
+      return parsed;
+    } catch {
+      return INITIAL_SHOWCASES;
     }
+  },
+  saveShowcases: (items: Showcase[]) => {
+    localStorage.setItem('omnibrand_showcases', JSON.stringify(items));
   },
 
   getProducts: (): Product[] => {
     const data = localStorage.getItem('omnibrand_products');
-    return data ? JSON.parse(data) : INITIAL_PRODUCTS;
-  },
-  saveProducts: async (items: Product[]) => {
-    localStorage.setItem('omnibrand_products', JSON.stringify(items));
-    const client = getSupabaseClient();
-    if (client) {
-      try {
-        for (const item of items) {
-          await client.from('products').upsert({
-            id: item.id,
-            showcase_id: item.showcaseId,
-            name: item.name,
-            sku: item.sku,
-            description: item.description,
-            price: item.price,
-            promotional_price: item.promotionalPrice,
-            category: item.category,
-            photos: item.photos,
-            affiliate_url: item.affiliateUrl,
-            is_active: item.isActive,
-            clicks_count: item.clicksCount,
-            conversions_count: item.conversionsCount,
-            created_at: item.createdAt
-          });
-        }
-      } catch (err) {
-        console.warn('Supabase products sync note:', err);
-      }
+    if (!data) return INITIAL_PRODUCTS;
+    try {
+      const parsed = JSON.parse(data);
+      if (parsed.length > 0 && !parsed[0].id.includes('-')) return INITIAL_PRODUCTS;
+      return parsed;
+    } catch {
+      return INITIAL_PRODUCTS;
     }
+  },
+  saveProducts: (items: Product[]) => {
+    localStorage.setItem('omnibrand_products', JSON.stringify(items));
   },
 
   getBanners: (): Banner[] => {
     const data = localStorage.getItem('omnibrand_banners');
-    return data ? JSON.parse(data) : INITIAL_BANNERS;
-  },
-  saveBanners: async (items: Banner[]) => {
-    localStorage.setItem('omnibrand_banners', JSON.stringify(items));
-    const client = getSupabaseClient();
-    if (client) {
-      try {
-        for (const item of items) {
-          await client.from('banners').upsert({
-            id: item.id,
-            showcase_id: item.showcaseId,
-            title: item.title,
-            subtitle: item.subtitle,
-            image_url: item.imageUrl,
-            cta_text: item.ctaText,
-            cta_url: item.ctaUrl,
-            order: item.order,
-            is_active: item.isActive
-          });
-        }
-      } catch (err) {
-        console.warn('Supabase banners sync note:', err);
-      }
+    if (!data) return INITIAL_BANNERS;
+    try {
+      const parsed = JSON.parse(data);
+      if (parsed.length > 0 && !parsed[0].id.includes('-')) return INITIAL_BANNERS;
+      return parsed;
+    } catch {
+      return INITIAL_BANNERS;
     }
+  },
+  saveBanners: (items: Banner[]) => {
+    localStorage.setItem('omnibrand_banners', JSON.stringify(items));
   },
 
   getClicks: (): ClickRecord[] => {

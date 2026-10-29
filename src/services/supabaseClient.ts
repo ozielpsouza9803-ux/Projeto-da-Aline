@@ -1,5 +1,6 @@
 import { createClient, SupabaseClient, User } from '@supabase/supabase-js';
 import { Showcase, Product, Banner, ClickRecord, CommissionRecord } from '../types';
+import { generateUUID } from '../utils/uuid';
 
 export const SUPABASE_URL = 'https://spqwrnywdlkrfrslfmwl.supabase.co';
 export const SUPABASE_ANON_KEY = 'sb_publishable_JGX27g41zq4QHaW6i5rYVw_KNMOHgq0';
@@ -83,7 +84,7 @@ export const uploadMediaToSupabase = async (file: File): Promise<string> => {
       });
 
     if (uploadError) {
-      console.error('Supabase Storage Upload Error:', uploadError);
+      console.warn('Supabase Storage Upload note:', uploadError.message);
       throw uploadError;
     }
 
@@ -93,7 +94,7 @@ export const uploadMediaToSupabase = async (file: File): Promise<string> => {
 
     return data.publicUrl;
   } catch (err: any) {
-    console.error('Failed to upload file to Supabase Storage:', err);
+    console.warn('Note: File upload to Supabase Storage requires authenticated admin or fallback:', err);
     throw new Error(err.message || 'Erro ao fazer upload da imagem.');
   }
 };
@@ -132,7 +133,7 @@ export const fetchShowcasesFromSupabase = async (): Promise<Showcase[] | null> =
   }
 };
 
-export const upsertShowcaseToSupabase = async (showcase: Showcase): Promise<void> => {
+export const upsertShowcaseToSupabase = async (showcase: Showcase): Promise<{ success: boolean; rls?: boolean }> => {
   const payload = {
     id: showcase.id,
     name: showcase.name,
@@ -144,17 +145,27 @@ export const upsertShowcaseToSupabase = async (showcase: Showcase): Promise<void
 
   const { error } = await supabase.from('brands').upsert(payload);
   if (error) {
-    console.error('Error upserting brand to Supabase:', error);
-    throw error;
+    if (error.code === '42501') {
+      console.warn('Note: Modificação na tabela brands requer sessão de admin no Supabase (RLS 42501). Salvamento efetuado no ambiente local.');
+      return { success: false, rls: true };
+    }
+    console.warn('Note: Upsert brand error:', error.message);
+    return { success: false };
   }
+  return { success: true };
 };
 
-export const deleteShowcaseFromSupabase = async (id: string): Promise<void> => {
+export const deleteShowcaseFromSupabase = async (id: string): Promise<{ success: boolean; rls?: boolean }> => {
   const { error } = await supabase.from('brands').delete().eq('id', id);
   if (error) {
-    console.error('Error deleting brand from Supabase:', error);
-    throw error;
+    if (error.code === '42501') {
+      console.warn('Note: Exclusão na tabela brands requer sessão de admin (RLS 42501).');
+      return { success: false, rls: true };
+    }
+    console.warn('Note: Delete brand error:', error.message);
+    return { success: false };
   }
+  return { success: true };
 };
 
 // 2. PRODUCTS & PRODUCT_IMAGES
@@ -186,7 +197,7 @@ export const fetchProductsFromSupabase = async (): Promise<Product[] | null> => 
       const galleryPhotos = imagesByProductId[pId] || [];
       return {
         id: pId,
-        showcaseId: String(item.brand_id || 'natura-1'),
+        showcaseId: String(item.brand_id || '11111111-1111-4111-a111-111111111111'),
         name: item.name || '',
         sku: `SKU-${pId.substring(0, 8)}`,
         description: item.description || '',
@@ -207,7 +218,7 @@ export const fetchProductsFromSupabase = async (): Promise<Product[] | null> => 
   }
 };
 
-export const upsertProductToSupabase = async (product: Product): Promise<void> => {
+export const upsertProductToSupabase = async (product: Product): Promise<{ success: boolean; rls?: boolean }> => {
   const payload = {
     id: product.id,
     brand_id: product.showcaseId,
@@ -221,8 +232,12 @@ export const upsertProductToSupabase = async (product: Product): Promise<void> =
 
   const { error } = await supabase.from('products').upsert(payload);
   if (error) {
-    console.error('Error upserting product to Supabase:', error);
-    throw error;
+    if (error.code === '42501') {
+      console.warn('Note: Salvamento de produto no Supabase requer sessão de admin (RLS 42501). Salvamento mantido localmente.');
+      return { success: false, rls: true };
+    }
+    console.warn('Note: Upsert product error:', error.message);
+    return { success: false };
   }
 
   // Insert photos into product_images
@@ -236,21 +251,28 @@ export const upsertProductToSupabase = async (product: Product): Promise<void> =
           image_url: imgUrl
         });
       } catch (err) {
-        // ignore note
+        // ignore image note
       }
     }
   }
+
+  return { success: true };
 };
 
-export const deleteProductFromSupabase = async (id: string): Promise<void> => {
+export const deleteProductFromSupabase = async (id: string): Promise<{ success: boolean; rls?: boolean }> => {
   try {
     await supabase.from('product_images').delete().eq('product_id', id);
   } catch {}
   const { error } = await supabase.from('products').delete().eq('id', id);
   if (error) {
-    console.error('Error deleting product from Supabase:', error);
-    throw error;
+    if (error.code === '42501') {
+      console.warn('Note: Exclusão de produto no Supabase requer sessão de admin (RLS 42501).');
+      return { success: false, rls: true };
+    }
+    console.warn('Note: Delete product error:', error.message);
+    return { success: false };
   }
+  return { success: true };
 };
 
 // 3. BANNERS (table: banners | cols: id, brand_id, title, subtitle, image_url, is_active, created_at)
@@ -265,7 +287,7 @@ export const fetchBannersFromSupabase = async (): Promise<Banner[] | null> => {
 
     return data.map((item: any, index: number) => ({
       id: String(item.id),
-      showcaseId: String(item.brand_id || 'natura-1'),
+      showcaseId: String(item.brand_id || '11111111-1111-4111-a111-111111111111'),
       title: item.title || 'Banner Promocional',
       subtitle: item.subtitle || 'Confira as melhores ofertas',
       imageUrl: item.image_url || 'https://images.unsplash.com/photo-1616683693504-3ea7e9ad6fec?w=1200&auto=format&fit=crop&q=80',
@@ -280,7 +302,7 @@ export const fetchBannersFromSupabase = async (): Promise<Banner[] | null> => {
   }
 };
 
-export const upsertBannerToSupabase = async (banner: Banner): Promise<void> => {
+export const upsertBannerToSupabase = async (banner: Banner): Promise<{ success: boolean; rls?: boolean }> => {
   const payload = {
     id: banner.id,
     brand_id: banner.showcaseId,
@@ -292,26 +314,37 @@ export const upsertBannerToSupabase = async (banner: Banner): Promise<void> => {
 
   const { error } = await supabase.from('banners').upsert(payload);
   if (error) {
-    console.error('Error upserting banner to Supabase:', error);
-    throw error;
+    if (error.code === '42501') {
+      console.warn('Note: Salvamento de banner no Supabase requer sessão de admin (RLS 42501). Salvamento mantido localmente.');
+      return { success: false, rls: true };
+    }
+    console.warn('Note: Upsert banner error:', error.message);
+    return { success: false };
   }
+  return { success: true };
 };
 
-export const deleteBannerFromSupabase = async (id: string): Promise<void> => {
+export const deleteBannerFromSupabase = async (id: string): Promise<{ success: boolean; rls?: boolean }> => {
   const { error } = await supabase.from('banners').delete().eq('id', id);
   if (error) {
-    console.error('Error deleting banner from Supabase:', error);
-    throw error;
+    if (error.code === '42501') {
+      console.warn('Note: Exclusão de banner no Supabase requer sessão de admin (RLS 42501).');
+      return { success: false, rls: true };
+    }
+    console.warn('Note: Delete banner error:', error.message);
+    return { success: false };
   }
+  return { success: true };
 };
 
 // 4. AFFILIATE_CLICKS (table: affiliate_clicks | cols: id, brand_id, product_id, source)
 export const recordClickInSupabase = async (brandId: string, productId?: string, source: string = 'Direto'): Promise<void> => {
   try {
+    const validProductId = productId && productId.includes('-') ? productId : null;
     await supabase.from('affiliate_clicks').insert({
-      id: `clk-${Date.now()}`,
+      id: generateUUID(),
       brand_id: brandId,
-      product_id: productId || null,
+      product_id: validProductId,
       source: source
     });
   } catch (err) {

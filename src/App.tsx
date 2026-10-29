@@ -71,6 +71,17 @@ export default function App() {
           fetchBannersFromSupabase()
         ]);
 
+        if (sbShowcases && sbShowcases.length > 0) {
+          setShowcases(sbShowcases);
+          storageService.saveShowcases(sbShowcases);
+        } else {
+          // Seed showcases (brands) first to satisfy FK constraints
+          const localShowcases = storageService.getShowcases();
+          for (const s of localShowcases) {
+            await upsertShowcaseToSupabase(s).catch(() => {});
+          }
+        }
+
         if (sbProducts && sbProducts.length > 0) {
           setProducts(sbProducts);
           storageService.saveProducts(sbProducts);
@@ -90,17 +101,6 @@ export default function App() {
           const localBanners = storageService.getBanners();
           for (const b of localBanners) {
             await upsertBannerToSupabase(b).catch(() => {});
-          }
-        }
-
-        if (sbShowcases && sbShowcases.length > 0) {
-          setShowcases(sbShowcases);
-          storageService.saveShowcases(sbShowcases);
-        } else {
-          // Seed showcases if empty
-          const localShowcases = storageService.getShowcases();
-          for (const s of localShowcases) {
-            await upsertShowcaseToSupabase(s).catch(() => {});
           }
         }
       } catch (err) {
@@ -123,30 +123,29 @@ export default function App() {
       : [showcase, ...showcases];
 
     setShowcases(updated);
-    await storageService.saveShowcases(updated);
-    await upsertShowcaseToSupabase(showcase).catch(err => {
-      console.warn('Note: Showcase saved locally, Supabase RLS message:', err.message);
-    });
+    storageService.saveShowcases(updated);
+    const res = await upsertShowcaseToSupabase(showcase);
+    if (res && res.rls && !currentUser) {
+      alert('Vitrine salva com sucesso localmente! Para sincronizar no Supabase, faça login como Administrador clicando em "Login Admin" na barra superior.');
+    }
   };
 
   const handleDeleteShowcase = async (id: string) => {
     if (confirm('Deseja realmente excluir esta vitrine? Os produtos associados também serão afetados.')) {
       const updated = showcases.filter(s => s.id !== id);
       setShowcases(updated);
-      await storageService.saveShowcases(updated);
-      await deleteShowcaseFromSupabase(id).catch(err => {
-        console.warn('Note: Showcase deleted locally, Supabase RLS message:', err.message);
-      });
+      storageService.saveShowcases(updated);
+      await deleteShowcaseFromSupabase(id);
     }
   };
 
   const handleToggleShowcaseActive = async (id: string) => {
     const updated = showcases.map(s => s.id === id ? { ...s, isActive: !s.isActive } : s);
     setShowcases(updated);
-    await storageService.saveShowcases(updated);
+    storageService.saveShowcases(updated);
     const target = updated.find(s => s.id === id);
     if (target) {
-      await upsertShowcaseToSupabase(target).catch(() => {});
+      await upsertShowcaseToSupabase(target);
     }
   };
 
@@ -158,15 +157,18 @@ export default function App() {
       : [product, ...products];
 
     setProducts(updated);
-    await storageService.saveProducts(updated);
-    await upsertProductToSupabase(product);
+    storageService.saveProducts(updated);
+    const res = await upsertProductToSupabase(product);
+    if (res && res.rls && !currentUser) {
+      alert('Produto salvo com sucesso localmente! Para sincronizar no Supabase, faça login como Administrador clicando em "Login Admin" na barra superior.');
+    }
   };
 
   const handleDeleteProduct = async (id: string) => {
     if (confirm('Deseja excluir este produto?')) {
       const updated = products.filter(p => p.id !== id);
       setProducts(updated);
-      await storageService.saveProducts(updated);
+      storageService.saveProducts(updated);
       await deleteProductFromSupabase(id);
     }
   };
@@ -179,8 +181,11 @@ export default function App() {
       : [banner, ...banners];
 
     setBanners(updated);
-    await storageService.saveBanners(updated);
-    await upsertBannerToSupabase(banner);
+    storageService.saveBanners(updated);
+    const res = await upsertBannerToSupabase(banner);
+    if (res && res.rls && !currentUser) {
+      alert('Banner salvo com sucesso localmente! Para sincronizar no Supabase, faça login como Administrador clicando em "Login Admin" na barra superior.');
+    }
   };
 
   const handleDeleteBanner = async (id: string) => {

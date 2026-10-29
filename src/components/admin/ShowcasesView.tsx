@@ -12,6 +12,7 @@ import {
   Link as LinkIcon
 } from 'lucide-react';
 import { Showcase } from '../../types';
+import { generateUUID } from '../../utils/uuid';
 
 interface ShowcasesViewProps {
   showcases: Showcase[];
@@ -73,7 +74,7 @@ export const ShowcasesView: React.FC<ShowcasesViewProps> = ({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const newShowcase: Showcase = {
-      id: editingShowcase ? editingShowcase.id : `showcase-${Date.now()}`,
+      id: editingShowcase ? editingShowcase.id : generateUUID(),
       name,
       slug: slug || name.toLowerCase().replace(/\s+/g, '-'),
       description,

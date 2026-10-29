@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { Banner, Showcase } from '../../types';
 import { uploadMediaToSupabase } from '../../services/supabaseClient';
+import { generateUUID } from '../../utils/uuid';
 
 interface BannersViewProps {
   banners: Banner[];
@@ -105,7 +106,7 @@ export const BannersView: React.FC<BannersViewProps> = ({
 
     try {
       const bannerObj: Banner = {
-        id: editingBanner ? editingBanner.id : `banner-${Date.now()}`,
+        id: editingBanner ? editingBanner.id : generateUUID(),
         showcaseId,
         title,
         subtitle,
