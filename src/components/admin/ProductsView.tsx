@@ -10,15 +10,17 @@ import {
   ExternalLink, 
   Image as ImageIcon,
   Upload,
-  DollarSign
+  Loader2,
+  AlertCircle
 } from 'lucide-react';
 import { Product, Showcase } from '../../types';
+import { uploadMediaToSupabase } from '../../services/supabaseClient';
 
 interface ProductsViewProps {
   products: Product[];
   showcases: Showcase[];
-  onSaveProduct: (product: Product) => void;
-  onDeleteProduct: (id: string) => void;
+  onSaveProduct: (product: Product) => Promise<void> | void;
+  onDeleteProduct: (id: string) => Promise<void> | void;
   searchQuery: string;
 }
 
@@ -34,7 +36,7 @@ export const ProductsView: React.FC<ProductsViewProps> = ({
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
 
   // Form state
-  const [showcaseId, setShowcaseId] = useState(showcases[0]?.id || '');
+  const [showcaseId, setShowcaseId] = useState(showcases[0]?.id || 'natura-1');
   const [name, setName] = useState('');
   const [sku, setSku] = useState('');
   const [description, setDescription] = useState('');
@@ -43,6 +45,11 @@ export const ProductsView: React.FC<ProductsViewProps> = ({
   const [category, setCategory] = useState('');
   const [photos, setPhotos] = useState<string[]>([]);
   const [affiliateUrl, setAffiliateUrl] = useState('');
+
+  // Status state
+  const [isUploading, setIsUploading] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const filteredProducts = products.filter(p => {
     const matchesSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
@@ -53,7 +60,7 @@ export const ProductsView: React.FC<ProductsViewProps> = ({
 
   const handleOpenCreate = () => {
     setEditingProduct(null);
-    setShowcaseId(showcases[0]?.id || '');
+    setShowcaseId(showcases[0]?.id || 'natura-1');
     setName('');
     setSku(`SKU-${Math.floor(1000 + Math.random() * 9000)}`);
     setDescription('');
@@ -61,10 +68,10 @@ export const ProductsView: React.FC<ProductsViewProps> = ({
     setPromotionalPrice(undefined);
     setCategory('Perfumaria');
     setPhotos([
-      'https://images.unsplash.com/photo-1523293182086-7651a899d37f?w=600&auto=format&fit=crop&q=80',
-      'https://images.unsplash.com/photo-1594035910387-fea47794261f?w=600&auto=format&fit=crop&q=80'
+      'https://images.unsplash.com/photo-1523293182086-7651a899d37f?w=600&auto=format&fit=crop&q=80'
     ]);
-    setAffiliateUrl('https://www.marca.com.br/produto?consultoria=omnibrand');
+    setAffiliateUrl('https://www.natura.com.br');
+    setErrorMessage(null);
     setIsModalOpen(true);
   };
 
@@ -79,50 +86,68 @@ export const ProductsView: React.FC<ProductsViewProps> = ({
     setCategory(prod.category);
     setPhotos(prod.photos || []);
     setAffiliateUrl(prod.affiliateUrl);
+    setErrorMessage(null);
     setIsModalOpen(true);
   };
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
-    if (!files) return;
+    if (!files || files.length === 0) return;
 
-    Array.from(files).forEach((file: File) => {
-      const reader = new FileReader();
-      reader.onload = (uploadEvent) => {
-        const result = uploadEvent.target?.result as string;
-        if (result) {
-          setPhotos(prev => [...prev, result]);
+    setIsUploading(true);
+    setErrorMessage(null);
+
+    try {
+      for (const file of Array.from(files)) {
+        // Upload to Supabase Storage bucket "storefront-media"
+        const publicUrl = await uploadMediaToSupabase(file);
+        if (publicUrl) {
+          setPhotos(prev => [...prev, publicUrl]);
         }
-      };
-      reader.readAsDataURL(file);
-    });
+      }
+    } catch (err: any) {
+      console.error('File upload error:', err);
+      setErrorMessage(`Falha no upload para o Supabase Storage: ${err.message}`);
+    } finally {
+      setIsUploading(false);
+    }
   };
 
   const handleRemovePhoto = (index: number) => {
     setPhotos(photos.filter((_, i) => i !== index));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const productObj: Product = {
-      id: editingProduct ? editingProduct.id : `prod-${Date.now()}`,
-      showcaseId,
-      name,
-      sku,
-      description,
-      price: Number(price),
-      promotionalPrice: promotionalPrice ? Number(promotionalPrice) : undefined,
-      category,
-      photos: photos.length > 0 ? photos : ['https://images.unsplash.com/photo-1523293182086-7651a899d37f?w=600&auto=format&fit=crop&q=80'],
-      affiliateUrl,
-      isActive: editingProduct ? editingProduct.isActive : true,
-      clicksCount: editingProduct ? editingProduct.clicksCount : 0,
-      conversionsCount: editingProduct ? editingProduct.conversionsCount : 0,
-      createdAt: editingProduct ? editingProduct.createdAt : new Date().toISOString().split('T')[0]
-    };
+    setIsSaving(true);
+    setErrorMessage(null);
 
-    onSaveProduct(productObj);
-    setIsModalOpen(false);
+    try {
+      const productObj: Product = {
+        id: editingProduct ? editingProduct.id : `prod-${Date.now()}`,
+        showcaseId,
+        name,
+        sku,
+        description,
+        price: Number(price),
+        promotionalPrice: promotionalPrice ? Number(promotionalPrice) : undefined,
+        category,
+        photos: photos.length > 0 ? photos : ['https://images.unsplash.com/photo-1523293182086-7651a899d37f?w=600&auto=format&fit=crop&q=80'],
+        affiliateUrl,
+        isActive: editingProduct ? editingProduct.isActive : true,
+        clicksCount: editingProduct ? editingProduct.clicksCount : 0,
+        conversionsCount: editingProduct ? editingProduct.conversionsCount : 0,
+        createdAt: editingProduct ? editingProduct.createdAt : new Date().toISOString().split('T')[0]
+      };
+
+      await onSaveProduct(productObj);
+      setIsModalOpen(false);
+    } catch (err: any) {
+      console.error('Error saving product:', err);
+      setErrorMessage(`Erro ao salvar no Supabase: ${err.message || 'Verifique as permissões do usuário.'}`);
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
@@ -131,7 +156,7 @@ export const ProductsView: React.FC<ProductsViewProps> = ({
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-white p-6 rounded-2xl border border-slate-200 shadow-xs">
         <div>
           <h3 className="text-lg font-bold text-slate-900">Gerenciamento de Produtos e Vitrines</h3>
-          <p className="text-xs text-slate-500">Cadastre produtos com upload da galeria do celular, fotos múltiplas e links de afiliado exclusivos.</p>
+          <p className="text-xs text-slate-500">Cadastre produtos no Supabase com upload de mídia para o bucket storefront-media.</p>
         </div>
 
         <div className="flex items-center gap-3">
@@ -254,6 +279,13 @@ export const ProductsView: React.FC<ProductsViewProps> = ({
             </div>
 
             <form onSubmit={handleSubmit} className="p-6 space-y-4">
+              {errorMessage && (
+                <div className="p-3.5 bg-rose-50 border border-rose-200 text-rose-900 rounded-xl text-xs flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4 shrink-0 text-rose-600" />
+                  <span>{errorMessage}</span>
+                </div>
+              )}
+
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-semibold text-slate-700 mb-1">Vitrine Destino</label>
@@ -336,17 +368,18 @@ export const ProductsView: React.FC<ProductsViewProps> = ({
                 />
               </div>
 
-              {/* Multiple Photos Upload from Gallery / Device */}
+              {/* Upload Multiple Photos to Supabase Storage */}
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <label className="block text-xs font-semibold text-slate-700">Fotos do Produto (Galeria do Aparelho / URLs)</label>
+                  <label className="block text-xs font-semibold text-slate-700">Fotos do Produto (Supabase Storage: storefront-media)</label>
                   <label className="cursor-pointer px-3 py-1.5 bg-orange-50 hover:bg-orange-100 text-orange-700 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1.5">
-                    <Upload className="w-3.5 h-3.5" />
-                    <span>Enviar da Galeria</span>
+                    {isUploading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Upload className="w-3.5 h-3.5" />}
+                    <span>{isUploading ? 'Enviando...' : 'Enviar para Supabase'}</span>
                     <input 
                       type="file" 
                       accept="image/*" 
                       multiple 
+                      disabled={isUploading}
                       onChange={handleFileUpload} 
                       className="hidden" 
                     />
@@ -369,14 +402,14 @@ export const ProductsView: React.FC<ProductsViewProps> = ({
                   ))}
                   {photos.length === 0 && (
                     <div className="col-span-4 p-4 rounded-xl border border-dashed border-slate-300 text-center text-xs text-slate-400">
-                      Nenhuma foto adicionada. Clique em "Enviar da Galeria" acima.
+                      Nenhuma foto adicionada. Clique em "Enviar para Supabase" acima.
                     </div>
                   )}
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">Link de Afiliado Direto (Compra)</label>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">Link de Afiliado Direto</label>
                 <input
                   type="url"
                   required
@@ -397,10 +430,11 @@ export const ProductsView: React.FC<ProductsViewProps> = ({
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2.5 rounded-xl bg-orange-500 hover:bg-orange-600 text-white text-xs font-semibold transition-colors shadow-md flex items-center gap-1.5"
+                  disabled={isSaving || isUploading}
+                  className="px-5 py-2.5 rounded-xl bg-orange-500 hover:bg-orange-600 text-white text-xs font-semibold transition-colors shadow-md flex items-center gap-1.5 disabled:opacity-50"
                 >
-                  <Check className="w-4 h-4" />
-                  Salvar Produto
+                  {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
+                  <span>{isSaving ? 'Salvando...' : 'Salvar no Supabase'}</span>
                 </button>
               </div>
             </form>

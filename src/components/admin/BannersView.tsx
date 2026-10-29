@@ -6,18 +6,20 @@ import {
   Trash2, 
   X, 
   Check, 
-  ExternalLink,
   Power,
-  Upload
+  Upload,
+  Loader2,
+  AlertCircle
 } from 'lucide-react';
 import { Banner, Showcase } from '../../types';
+import { uploadMediaToSupabase } from '../../services/supabaseClient';
 
 interface BannersViewProps {
   banners: Banner[];
   showcases: Showcase[];
-  onSaveBanner: (banner: Banner) => void;
-  onDeleteBanner: (id: string) => void;
-  onToggleBannerActive: (id: string) => void;
+  onSaveBanner: (banner: Banner) => Promise<void> | void;
+  onDeleteBanner: (id: string) => Promise<void> | void;
+  onToggleBannerActive: (id: string) => Promise<void> | void;
 }
 
 export const BannersView: React.FC<BannersViewProps> = ({
@@ -32,7 +34,7 @@ export const BannersView: React.FC<BannersViewProps> = ({
   const [editingBanner, setEditingBanner] = useState<Banner | null>(null);
 
   // Form state
-  const [showcaseId, setShowcaseId] = useState(showcases[0]?.id || '');
+  const [showcaseId, setShowcaseId] = useState(showcases[0]?.id || 'natura-1');
   const [title, setTitle] = useState('');
   const [subtitle, setSubtitle] = useState('');
   const [imageUrl, setImageUrl] = useState('');
@@ -40,19 +42,25 @@ export const BannersView: React.FC<BannersViewProps> = ({
   const [ctaUrl, setCtaUrl] = useState('');
   const [order, setOrder] = useState(1);
 
+  // Status state
+  const [isUploading, setIsUploading] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
   const filteredBanners = banners.filter(b => {
     return selectedShowcaseFilter === 'all' || b.showcaseId === selectedShowcaseFilter;
   });
 
   const handleOpenCreate = () => {
     setEditingBanner(null);
-    setShowcaseId(showcases[0]?.id || '');
+    setShowcaseId(showcases[0]?.id || 'natura-1');
     setTitle('');
     setSubtitle('');
     setImageUrl('https://images.unsplash.com/photo-1616683693504-3ea7e9ad6fec?w=1200&auto=format&fit=crop&q=80');
     setCtaText('Explorar Ofertas');
     setCtaUrl('https://www.natura.com.br');
     setOrder(1);
+    setErrorMessage(null);
     setIsModalOpen(true);
   };
 
@@ -65,39 +73,57 @@ export const BannersView: React.FC<BannersViewProps> = ({
     setCtaText(banner.ctaText);
     setCtaUrl(banner.ctaUrl);
     setOrder(banner.order);
+    setErrorMessage(null);
     setIsModalOpen(true);
   };
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    const reader = new FileReader();
-    reader.onload = (uploadEvent) => {
-      const result = uploadEvent.target?.result as string;
-      if (result) {
-        setImageUrl(result);
+    setIsUploading(true);
+    setErrorMessage(null);
+
+    try {
+      // Upload to Supabase Storage bucket "storefront-media"
+      const publicUrl = await uploadMediaToSupabase(file);
+      if (publicUrl) {
+        setImageUrl(publicUrl);
       }
-    };
-    reader.readAsDataURL(file);
+    } catch (err: any) {
+      console.error('Banner upload error:', err);
+      setErrorMessage(`Erro ao enviar para o Supabase Storage: ${err.message}`);
+    } finally {
+      setIsUploading(false);
+    }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const bannerObj: Banner = {
-      id: editingBanner ? editingBanner.id : `banner-${Date.now()}`,
-      showcaseId,
-      title,
-      subtitle,
-      imageUrl,
-      ctaText,
-      ctaUrl,
-      order: Number(order),
-      isActive: editingBanner ? editingBanner.isActive : true
-    };
+    setIsSaving(true);
+    setErrorMessage(null);
 
-    onSaveBanner(bannerObj);
-    setIsModalOpen(false);
+    try {
+      const bannerObj: Banner = {
+        id: editingBanner ? editingBanner.id : `banner-${Date.now()}`,
+        showcaseId,
+        title,
+        subtitle,
+        imageUrl,
+        ctaText,
+        ctaUrl,
+        order: Number(order),
+        isActive: editingBanner ? editingBanner.isActive : true
+      };
+
+      await onSaveBanner(bannerObj);
+      setIsModalOpen(false);
+    } catch (err: any) {
+      console.error('Error saving banner:', err);
+      setErrorMessage(`Erro ao salvar no Supabase: ${err.message || 'Verifique as permissões.'}`);
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
@@ -106,7 +132,7 @@ export const BannersView: React.FC<BannersViewProps> = ({
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-white p-6 rounded-2xl border border-slate-200 shadow-xs">
         <div>
           <h3 className="text-lg font-bold text-slate-900">Banners e Carrosséis Independentes</h3>
-          <p className="text-xs text-slate-500">Configure carrosséis de banners customizados com upload da galeria para cada vitrine.</p>
+          <p className="text-xs text-slate-500">Banners conectados ao Supabase com upload direto para o bucket storefront-media.</p>
         </div>
 
         <div className="flex items-center gap-3">
@@ -213,6 +239,13 @@ export const BannersView: React.FC<BannersViewProps> = ({
             </div>
 
             <form onSubmit={handleSubmit} className="p-6 space-y-4">
+              {errorMessage && (
+                <div className="p-3.5 bg-rose-50 border border-rose-200 text-rose-900 rounded-xl text-xs flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4 shrink-0 text-rose-600" />
+                  <span>{errorMessage}</span>
+                </div>
+              )}
+
               <div>
                 <label className="block text-xs font-semibold text-slate-700 mb-1">Vitrine Associada</label>
                 <select
@@ -252,13 +285,14 @@ export const BannersView: React.FC<BannersViewProps> = ({
 
               <div>
                 <div className="flex items-center justify-between mb-1">
-                  <label className="block text-xs font-semibold text-slate-700">Imagem do Banner</label>
+                  <label className="block text-xs font-semibold text-slate-700">Imagem do Banner (Bucket: storefront-media)</label>
                   <label className="cursor-pointer px-3 py-1 bg-orange-50 hover:bg-orange-100 text-orange-700 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1.5">
-                    <Upload className="w-3.5 h-3.5" />
-                    <span>Enviar da Galeria</span>
+                    {isUploading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Upload className="w-3.5 h-3.5" />}
+                    <span>{isUploading ? 'Enviando...' : 'Enviar para Supabase'}</span>
                     <input 
                       type="file" 
                       accept="image/*" 
+                      disabled={isUploading}
                       onChange={handleFileUpload} 
                       className="hidden" 
                     />
@@ -318,10 +352,11 @@ export const BannersView: React.FC<BannersViewProps> = ({
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2.5 rounded-xl bg-orange-500 hover:bg-orange-600 text-white text-xs font-semibold transition-colors shadow-md flex items-center gap-1.5"
+                  disabled={isSaving || isUploading}
+                  className="px-5 py-2.5 rounded-xl bg-orange-500 hover:bg-orange-600 text-white text-xs font-semibold transition-colors shadow-md flex items-center gap-1.5 disabled:opacity-50"
                 >
-                  <Check className="w-4 h-4" />
-                  Salvar Banner
+                  {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
+                  <span>{isSaving ? 'Salvando...' : 'Salvar no Supabase'}</span>
                 </button>
               </div>
             </form>

@@ -54,7 +54,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ settings, onSaveSett
   const handleTestConnection = async () => {
     setIsTesting(true);
     setTestResult(null);
-    const res = await testSupabaseConnection(supabaseUrl, supabaseAnonKey);
+    const res = await testSupabaseConnection();
     setTestResult(res);
     setIsTesting(false);
   };

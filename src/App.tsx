@@ -1,8 +1,32 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { User as SupabaseUser } from '@supabase/supabase-js';
 import { storageService } from './services/storage';
-import { Showcase, Product, Banner, ClickRecord, CommissionRecord, AdminSettings } from './types';
+import { 
+  Showcase, 
+  Product, 
+  Banner, 
+  ClickRecord, 
+  CommissionRecord, 
+  AdminSettings 
+} from './types';
+import { 
+  fetchProductsFromSupabase, 
+  upsertProductToSupabase, 
+  deleteProductFromSupabase,
+  fetchBannersFromSupabase,
+  upsertBannerToSupabase,
+  deleteBannerFromSupabase,
+  fetchShowcasesFromSupabase,
+  upsertShowcaseToSupabase,
+  deleteShowcaseFromSupabase,
+  getCurrentUser,
+  supabase
+} from './services/supabaseClient';
+
 import { Sidebar } from './components/admin/Sidebar';
 import { Header } from './components/admin/Header';
+import { AdminAuthModal } from './components/admin/AdminAuthModal';
+
 import { OverviewView } from './components/admin/OverviewView';
 import { ShowcasesView } from './components/admin/ShowcasesView';
 import { ProductsView } from './components/admin/ProductsView';
@@ -20,6 +44,8 @@ export default function App() {
   const [isMobileOpen, setIsMobileOpen] = useState<boolean>(false);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [selectedPreviewShowcaseId, setSelectedPreviewShowcaseId] = useState<string | undefined>(undefined);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState<boolean>(false);
+  const [currentUser, setCurrentUser] = useState<SupabaseUser | null>(null);
 
   // Data state
   const [showcases, setShowcases] = useState<Showcase[]>(storageService.getShowcases());
@@ -29,70 +55,151 @@ export default function App() {
   const [commissions, setCommissions] = useState<CommissionRecord[]>(storageService.getCommissions());
   const [settings, setSettings] = useState<AdminSettings>(storageService.getSettings());
 
+  // Check Supabase Auth User & Load Supabase Data on Mount
+  useEffect(() => {
+    getCurrentUser().then(user => setCurrentUser(user));
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setCurrentUser(session?.user || null);
+    });
+
+    const loadSupabaseData = async () => {
+      try {
+        const [sbShowcases, sbProducts, sbBanners] = await Promise.all([
+          fetchShowcasesFromSupabase(),
+          fetchProductsFromSupabase(),
+          fetchBannersFromSupabase()
+        ]);
+
+        if (sbProducts && sbProducts.length > 0) {
+          setProducts(sbProducts);
+          storageService.saveProducts(sbProducts);
+        } else {
+          // Seed products to Supabase if empty
+          const localProds = storageService.getProducts();
+          for (const p of localProds) {
+            await upsertProductToSupabase(p).catch(() => {});
+          }
+        }
+
+        if (sbBanners && sbBanners.length > 0) {
+          setBanners(sbBanners);
+          storageService.saveBanners(sbBanners);
+        } else {
+          // Seed banners to Supabase if empty
+          const localBanners = storageService.getBanners();
+          for (const b of localBanners) {
+            await upsertBannerToSupabase(b).catch(() => {});
+          }
+        }
+
+        if (sbShowcases && sbShowcases.length > 0) {
+          setShowcases(sbShowcases);
+          storageService.saveShowcases(sbShowcases);
+        } else {
+          // Seed showcases if empty
+          const localShowcases = storageService.getShowcases();
+          for (const s of localShowcases) {
+            await upsertShowcaseToSupabase(s).catch(() => {});
+          }
+        }
+      } catch (err) {
+        console.warn('Initial Supabase sync note:', err);
+      }
+    };
+
+    loadSupabaseData();
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
+
   // Showcase Handlers
-  const handleSaveShowcase = (showcase: Showcase) => {
+  const handleSaveShowcase = async (showcase: Showcase) => {
     const exists = showcases.some(s => s.id === showcase.id);
     const updated = exists 
       ? showcases.map(s => s.id === showcase.id ? showcase : s)
       : [showcase, ...showcases];
+
     setShowcases(updated);
-    storageService.saveShowcases(updated);
+    await storageService.saveShowcases(updated);
+    await upsertShowcaseToSupabase(showcase).catch(err => {
+      console.warn('Note: Showcase saved locally, Supabase RLS message:', err.message);
+    });
   };
 
-  const handleDeleteShowcase = (id: string) => {
+  const handleDeleteShowcase = async (id: string) => {
     if (confirm('Deseja realmente excluir esta vitrine? Os produtos associados também serão afetados.')) {
       const updated = showcases.filter(s => s.id !== id);
       setShowcases(updated);
-      storageService.saveShowcases(updated);
+      await storageService.saveShowcases(updated);
+      await deleteShowcaseFromSupabase(id).catch(err => {
+        console.warn('Note: Showcase deleted locally, Supabase RLS message:', err.message);
+      });
     }
   };
 
-  const handleToggleShowcaseActive = (id: string) => {
+  const handleToggleShowcaseActive = async (id: string) => {
     const updated = showcases.map(s => s.id === id ? { ...s, isActive: !s.isActive } : s);
     setShowcases(updated);
-    storageService.saveShowcases(updated);
+    await storageService.saveShowcases(updated);
+    const target = updated.find(s => s.id === id);
+    if (target) {
+      await upsertShowcaseToSupabase(target).catch(() => {});
+    }
   };
 
   // Product Handlers
-  const handleSaveProduct = (product: Product) => {
+  const handleSaveProduct = async (product: Product) => {
     const exists = products.some(p => p.id === product.id);
     const updated = exists 
       ? products.map(p => p.id === product.id ? product : p)
       : [product, ...products];
+
     setProducts(updated);
-    storageService.saveProducts(updated);
+    await storageService.saveProducts(updated);
+    await upsertProductToSupabase(product);
   };
 
-  const handleDeleteProduct = (id: string) => {
+  const handleDeleteProduct = async (id: string) => {
     if (confirm('Deseja excluir este produto?')) {
       const updated = products.filter(p => p.id !== id);
       setProducts(updated);
-      storageService.saveProducts(updated);
+      await storageService.saveProducts(updated);
+      await deleteProductFromSupabase(id);
     }
   };
 
   // Banner Handlers
-  const handleSaveBanner = (banner: Banner) => {
+  const handleSaveBanner = async (banner: Banner) => {
     const exists = banners.some(b => b.id === banner.id);
     const updated = exists 
       ? banners.map(b => b.id === banner.id ? banner : b)
       : [banner, ...banners];
+
     setBanners(updated);
-    storageService.saveBanners(updated);
+    await storageService.saveBanners(updated);
+    await upsertBannerToSupabase(banner);
   };
 
-  const handleDeleteBanner = (id: string) => {
+  const handleDeleteBanner = async (id: string) => {
     if (confirm('Deseja excluir este banner?')) {
       const updated = banners.filter(b => b.id !== id);
       setBanners(updated);
-      storageService.saveBanners(updated);
+      await storageService.saveBanners(updated);
+      await deleteBannerFromSupabase(id);
     }
   };
 
-  const handleToggleBannerActive = (id: string) => {
+  const handleToggleBannerActive = async (id: string) => {
     const updated = banners.map(b => b.id === id ? { ...b, isActive: !b.isActive } : b);
     setBanners(updated);
-    storageService.saveBanners(updated);
+    await storageService.saveBanners(updated);
+    const target = updated.find(b => b.id === id);
+    if (target) {
+      await upsertBannerToSupabase(target);
+    }
   };
 
   // Settings Handlers
@@ -160,8 +267,10 @@ export default function App() {
             setSelectedPreviewShowcaseId(undefined);
             setViewMode('public');
           }}
+          onOpenAuthModal={() => setIsAuthModalOpen(true)}
           searchQuery={searchQuery}
           setSearchQuery={setSearchQuery}
+          currentUser={currentUser}
         />
 
         <main className="flex-1 p-4 lg:p-8 max-w-7xl w-full mx-auto">
@@ -246,6 +355,13 @@ export default function App() {
           )}
         </main>
       </div>
+
+      {/* Admin Auth Modal */}
+      <AdminAuthModal
+        isOpen={isAuthModalOpen}
+        onClose={() => setIsAuthModalOpen(false)}
+        onAuthChange={(user) => setCurrentUser(user)}
+      />
     </div>
   );
 }
