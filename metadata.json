@@ -1,0 +1,6 @@
+{
+  "name": "OmniBrand Affiliate Admin",
+  "description": "Painel Administrativo Completo para Gestão de Vitrines, Produtos, Banners e Relatórios de Afiliados Multimarcas",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
