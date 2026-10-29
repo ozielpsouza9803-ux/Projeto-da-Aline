@@ -11,7 +11,8 @@ import {
   Settings,
   ExternalLink,
   ShieldCheck,
-  Sparkles
+  Sparkles,
+  Lock
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -38,6 +39,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     { id: 'commissions', label: 'Comissões', icon: DollarSign },
     { id: 'reports', label: 'Relatórios', icon: FileText },
     { id: 'charts', label: 'Gráficos', icon: BarChart3 },
+    { id: 'security', label: 'Segurança e Acesso', icon: Lock },
     { id: 'settings', label: 'Configurações', icon: Settings },
   ];
 

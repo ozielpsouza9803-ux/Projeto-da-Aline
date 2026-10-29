@@ -20,6 +20,7 @@ import {
   upsertShowcaseToSupabase,
   deleteShowcaseFromSupabase,
   getCurrentUser,
+  checkIsAdminRole,
   supabase
 } from './services/supabaseClient';
 
@@ -35,6 +36,7 @@ import { ClicksView } from './components/admin/ClicksView';
 import { CommissionsView } from './components/admin/CommissionsView';
 import { ReportsView } from './components/admin/ReportsView';
 import { ChartsView } from './components/admin/ChartsView';
+import { SecurityView } from './components/admin/SecurityView';
 import { SettingsView } from './components/admin/SettingsView';
 import { PublicStorefront } from './components/public/PublicStorefront';
 
@@ -46,6 +48,7 @@ export default function App() {
   const [selectedPreviewShowcaseId, setSelectedPreviewShowcaseId] = useState<string | undefined>(undefined);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState<boolean>(false);
   const [currentUser, setCurrentUser] = useState<SupabaseUser | null>(null);
+  const [isAdminRole, setIsAdminRole] = useState<boolean>(false);
 
   // Data state
   const [showcases, setShowcases] = useState<Showcase[]>(storageService.getShowcases());
@@ -57,10 +60,25 @@ export default function App() {
 
   // Check Supabase Auth User & Load Supabase Data on Mount
   useEffect(() => {
-    getCurrentUser().then(user => setCurrentUser(user));
+    getCurrentUser().then(async user => {
+      setCurrentUser(user);
+      if (user) {
+        const adminCheck = await checkIsAdminRole(user.id);
+        setIsAdminRole(adminCheck);
+      } else {
+        setIsAdminRole(false);
+      }
+    });
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setCurrentUser(session?.user || null);
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      const user = session?.user || null;
+      setCurrentUser(user);
+      if (user) {
+        const adminCheck = await checkIsAdminRole(user.id);
+        setIsAdminRole(adminCheck);
+      } else {
+        setIsAdminRole(false);
+      }
     });
 
     const loadSupabaseData = async () => {
@@ -192,7 +210,7 @@ export default function App() {
     if (confirm('Deseja excluir este banner?')) {
       const updated = banners.filter(b => b.id !== id);
       setBanners(updated);
-      await storageService.saveBanners(updated);
+      storageService.saveBanners(updated);
       await deleteBannerFromSupabase(id);
     }
   };
@@ -200,7 +218,7 @@ export default function App() {
   const handleToggleBannerActive = async (id: string) => {
     const updated = banners.map(b => b.id === id ? { ...b, isActive: !b.isActive } : b);
     setBanners(updated);
-    await storageService.saveBanners(updated);
+    storageService.saveBanners(updated);
     const target = updated.find(b => b.id === id);
     if (target) {
       await upsertBannerToSupabase(target);
@@ -234,6 +252,7 @@ export default function App() {
     commissions: 'Comissões & Extrato',
     reports: 'Relatórios',
     charts: 'Gráficos',
+    security: 'Segurança e Acesso',
     settings: 'Configurações'
   };
 
@@ -351,6 +370,14 @@ export default function App() {
             />
           )}
 
+          {currentTab === 'security' && (
+            <SecurityView
+              currentUser={currentUser}
+              isAdminRole={isAdminRole}
+              onOpenAuthModal={() => setIsAuthModalOpen(true)}
+            />
+          )}
+
           {currentTab === 'settings' && (
             <SettingsView
               settings={settings}
@@ -365,7 +392,10 @@ export default function App() {
       <AdminAuthModal
         isOpen={isAuthModalOpen}
         onClose={() => setIsAuthModalOpen(false)}
-        onAuthChange={(user) => setCurrentUser(user)}
+        onAuthChange={(user, isAdmin) => {
+          setCurrentUser(user);
+          setIsAdminRole(isAdmin);
+        }}
       />
     </div>
   );

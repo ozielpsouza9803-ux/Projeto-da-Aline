@@ -61,10 +61,18 @@ export const AdminAuthModal: React.FC<AdminAuthModalProps> = ({ isOpen, onClose,
     try {
       if (isSignUp) {
         const res = await signUpAdmin(email, password);
-        setMessage({ 
-          type: 'info', 
-          text: 'Conta registrada no Supabase Auth! Para segurança, contas públicas não ganham privilégios de administrador automaticamente. Para ativar como Admin, defina role = "admin" na tabela "profiles" no painel do Supabase.' 
-        });
+        
+        if (res.user && !res.session) {
+          setMessage({
+            type: 'info',
+            text: 'Conta cadastrada no Supabase Auth! Um e-mail de confirmação foi enviado. Por favor, verifique sua caixa de entrada antes de fazer login.'
+          });
+        } else {
+          setMessage({ 
+            type: 'info', 
+            text: 'Conta registrada no Supabase Auth com perfil padrão (client). Para segurança, contas públicas não ganham privilégios de administrador automaticamente. Para ativar como Admin, defina role = "admin" na tabela "profiles" no painel do Supabase.' 
+          });
+        }
       } else {
         const res = await signInAdmin(email, password);
         const adminCheck = res.user ? await checkIsAdminRole(res.user.id) : false;
@@ -74,13 +82,32 @@ export const AdminAuthModal: React.FC<AdminAuthModalProps> = ({ isOpen, onClose,
           type: 'success', 
           text: adminCheck 
             ? 'Sessão administrativa autenticada com sucesso! Função "admin" confirmada.' 
-            : 'Sessão autenticada! Nota: Função "admin" pendente na tabela "profiles".' 
+            : 'Sessão autenticada! Função "client" ativa. Nota: Função "admin" pendente na tabela "profiles".' 
         });
         setTimeout(() => onClose(), 1500);
       }
     } catch (err: any) {
       console.error('Auth error:', err);
-      setMessage({ type: 'error', text: err.message || 'Erro ao autenticar. Verifique e-mail e senha.' });
+      const errMsg = String(err?.message || err || '');
+      
+      if (errMsg.includes('over_email_send_rate_limit') || errMsg.includes('rate limit') || err?.status === 429) {
+        setMessage({
+          type: 'error',
+          text: 'Limite temporário de envio de e-mails atingido no Supabase Auth. Aguarde alguns minutos antes de tentar cadastrar novamente ou tente o login direto se a conta já existir.'
+        });
+      } else if (errMsg.includes('Email not confirmed')) {
+        setMessage({
+          type: 'error',
+          text: 'E-mail ainda não confirmado. Por favor, acesse o link de confirmação enviado para seu e-mail.'
+        });
+      } else if (errMsg.includes('Invalid login credentials')) {
+        setMessage({
+          type: 'error',
+          text: 'E-mail ou senha incorretos. Verifique suas credenciais e tente novamente.'
+        });
+      } else {
+        setMessage({ type: 'error', text: errMsg || 'Erro ao autenticar. Verifique e-mail e senha.' });
+      }
     } finally {
       setLoading(false);
     }
@@ -134,14 +161,14 @@ export const AdminAuthModal: React.FC<AdminAuthModalProps> = ({ isOpen, onClose,
                 <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider block">Usuário Autenticado</span>
                 <span className="text-sm font-bold text-slate-900 block mt-0.5">{currentUser.email}</span>
                 <span className={`text-[11px] font-semibold block mt-1 ${isAdminRole ? 'text-emerald-600' : 'text-amber-600'}`}>
-                  {isAdminRole ? '✓ Perfil Administrador Confirmado (profiles.role = "admin")' : '⚠ Perfil Padrão (profiles.role !== "admin")'}
+                  {isAdminRole ? '✓ Perfil Administrador Confirmado (profiles.role = "admin")' : '⚠ Perfil Padrão Client (profiles.role !== "admin")'}
                 </span>
               </div>
 
               {!isAdminRole && (
                 <div className="p-3 bg-amber-50 border border-amber-200 text-amber-900 rounded-xl text-xs text-left leading-relaxed">
-                  <strong className="block mb-1">Como ativar o 1º Administrador:</strong>
-                  No painel do Supabase &gt; Tabela <code>profiles</code>, localize o registro deste usuário (ID: <code>{currentUser.id.substring(0, 8)}...</code>) e defina a coluna <code>role</code> para <code>'admin'</code>.
+                  <strong className="block mb-1">Como autorizar o 1º Administrador:</strong>
+                  No painel do Supabase &gt; Tabela <code>profiles</code>, localize a linha deste usuário (ID: <code>{currentUser.id.substring(0, 8)}...</code>) e defina a coluna <code>role</code> para <code>'admin'</code>.
                 </div>
               )}
 
