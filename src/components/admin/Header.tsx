@@ -1,16 +1,17 @@
-import React, { useState, useEffect } from 'react';
-import { Menu, Search, ExternalLink, Sparkles, User, ShieldCheck, Lock } from 'lucide-react';
+import React from 'react';
+import { Menu, Search, ExternalLink, Sparkles, ShieldCheck, Lock, LogOut } from 'lucide-react';
 import { User as SupabaseUser } from '@supabase/supabase-js';
-import { getCurrentUser, supabase } from '../../services/supabaseClient';
 
 interface HeaderProps {
   currentTabTitle: string;
   onOpenMobileSidebar: () => void;
   onOpenStorefront: () => void;
   onOpenAuthModal: () => void;
+  onLogout: () => void;
   searchQuery: string;
   setSearchQuery: (query: string) => void;
   currentUser: SupabaseUser | null;
+  isAdminSession: boolean;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -18,9 +19,11 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenMobileSidebar,
   onOpenStorefront,
   onOpenAuthModal,
+  onLogout,
   searchQuery,
   setSearchQuery,
-  currentUser
+  currentUser,
+  isAdminSession
 }) => {
   return (
     <header className="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b border-slate-200 px-4 lg:px-8 py-3.5 flex items-center justify-between gap-4 shadow-xs">
@@ -35,7 +38,7 @@ export const Header: React.FC<HeaderProps> = ({
         </button>
         <div>
           <div className="flex items-center gap-1.5 text-xs text-slate-400 font-medium">
-            <span>Painel Administrativo</span>
+            <span>OmniBrand Admin</span>
             <span>/</span>
             <span className="text-slate-600 font-semibold">{currentTabTitle}</span>
           </div>
@@ -57,38 +60,58 @@ export const Header: React.FC<HeaderProps> = ({
         />
       </div>
 
-      {/* Right: Storefront preview button & Admin profile / Login button */}
-      <div className="flex items-center gap-3">
+      {/* Right: Storefront preview button & Admin profile / Logout button */}
+      <div className="flex items-center gap-2 sm:gap-3">
         <button
+          type="button"
           onClick={onOpenStorefront}
-          className="hidden sm:flex items-center gap-2 px-3.5 py-2 rounded-xl bg-orange-50 hover:bg-orange-100 text-orange-700 text-xs font-semibold transition-colors border border-orange-200"
+          className="flex items-center gap-1.5 sm:gap-2 px-3 py-2 rounded-xl bg-orange-50 hover:bg-orange-100 text-orange-700 text-xs font-semibold transition-colors border border-orange-200 cursor-pointer"
         >
-          <Sparkles className="w-3.5 h-3.5 text-orange-600" />
-          <span>Ver Vitrine Pública</span>
-          <ExternalLink className="w-3.5 h-3.5 text-orange-500" />
+          <Sparkles className="w-3.5 h-3.5 text-orange-600 shrink-0" />
+          <span className="hidden sm:inline">Ver Vitrine Pública</span>
+          <span className="sm:hidden text-[11px]">Vitrine</span>
+          <ExternalLink className="w-3.5 h-3.5 text-orange-500 shrink-0" />
         </button>
 
         <div className="flex items-center gap-2 pl-2 border-l border-slate-200">
-          <button
-            onClick={onOpenAuthModal}
-            className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all border ${currentUser ? 'bg-emerald-50 text-emerald-800 border-emerald-200' : 'bg-slate-100 hover:bg-slate-200 text-slate-700 border-slate-200'}`}
-            title="Autenticação Supabase Admin"
-          >
-            {currentUser ? (
-              <>
-                <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-                <span className="hidden md:inline truncate max-w-[120px]">{currentUser.email}</span>
-                <span className="md:hidden">Admin</span>
-              </>
-            ) : (
-              <>
-                <Lock className="w-3.5 h-3.5 text-slate-500" />
-                <span>Login Admin</span>
-              </>
-            )}
-          </button>
+          {isAdminSession ? (
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={onOpenAuthModal}
+                className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 text-xs font-semibold transition-all cursor-pointer"
+                title="Gerenciar Sessão / Segurança"
+              >
+                <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                <span className="hidden md:inline truncate max-w-[130px]">
+                  {currentUser?.email || 'admin@omnibrand.com.br'}
+                </span>
+                <span className="md:hidden text-[11px]">Admin</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={onLogout}
+                className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold transition-all shadow-xs cursor-pointer active:scale-95"
+                title="Sair do Painel Admin"
+              >
+                <LogOut className="w-3.5 h-3.5 shrink-0" />
+                <span>Sair</span>
+              </button>
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={onOpenAuthModal}
+              className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold transition-all shadow-xs cursor-pointer active:scale-95"
+            >
+              <Lock className="w-3.5 h-3.5 text-orange-400 shrink-0" />
+              <span>Login Admin</span>
+            </button>
+          )}
         </div>
       </div>
     </header>
   );
 };
+

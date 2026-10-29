@@ -12,7 +12,8 @@ import {
   ExternalLink,
   ShieldCheck,
   Sparkles,
-  Lock
+  Lock,
+  LogOut
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -21,6 +22,8 @@ interface SidebarProps {
   onOpenStorefront: () => void;
   isMobileOpen: boolean;
   setIsMobileOpen: (open: boolean) => void;
+  onLogout?: () => void;
+  isAdminSession?: boolean;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({ 
@@ -28,7 +31,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
   setCurrentTab, 
   onOpenStorefront,
   isMobileOpen,
-  setIsMobileOpen
+  setIsMobileOpen,
+  onLogout,
+  isAdminSession
 }) => {
   const menuItems = [
     { id: 'overview', label: 'Visão Geral', icon: LayoutDashboard },
@@ -104,16 +109,27 @@ export const Sidebar: React.FC<SidebarProps> = ({
           })}
         </nav>
 
-        {/* Public Storefront Preview Action */}
-        <div className="p-4 border-t border-slate-800 bg-slate-950/40">
+        {/* Footer Actions */}
+        <div className="p-4 border-t border-slate-800 bg-slate-950/40 space-y-2">
           <button
             onClick={onOpenStorefront}
-            className="w-full flex items-center justify-center gap-2.5 px-4 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white text-xs font-semibold transition-all border border-slate-700 shadow-xs group"
+            className="w-full flex items-center justify-center gap-2.5 px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white text-xs font-semibold transition-all border border-slate-700 shadow-xs group"
           >
             <span>Ver Vitrine Pública</span>
             <ExternalLink className="w-4 h-4 text-slate-400 group-hover:text-white transition-colors" />
           </button>
-          <div className="mt-3 text-center text-[11px] text-slate-400">
+
+          {isAdminSession && onLogout && (
+            <button
+              onClick={onLogout}
+              className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 hover:text-rose-300 text-xs font-semibold transition-all border border-rose-500/30 cursor-pointer"
+            >
+              <LogOut className="w-4 h-4 text-rose-400" />
+              <span>Sair do Painel</span>
+            </button>
+          )}
+
+          <div className="pt-1 text-center text-[11px] text-slate-400">
             PWA Afiliados Multimarcas v1.0
           </div>
         </div>
@@ -121,3 +137,4 @@ export const Sidebar: React.FC<SidebarProps> = ({
     </>
   );
 };
+

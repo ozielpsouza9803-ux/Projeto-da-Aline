@@ -16,17 +16,66 @@ export const supabase: SupabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON
 
 export const getSupabaseClient = (): SupabaseClient => supabase;
 
-// Test Connection Helper
-export const testSupabaseConnection = async (): Promise<{ success: boolean; message: string }> => {
-  try {
-    const { error } = await supabase.from('brands').select('id').limit(1);
-    if (error) {
-      return { success: false, message: `Erro na consulta à tabela 'brands': ${error.message}` };
+// Detailed Table Connection Verification Helper for all 6 tables
+export interface TableConnectionResult {
+  tableName: string;
+  status: 'APPROVED' | 'FAILED' | 'UNVERIFIED';
+  count: number;
+  message: string;
+}
+
+export const testAllSupabaseTables = async (): Promise<{
+  allPassed: boolean;
+  tables: TableConnectionResult[];
+  message: string;
+}> => {
+  const tableNames = ['profiles', 'brands', 'products', 'product_images', 'banners', 'affiliate_clicks'];
+  const results: TableConnectionResult[] = [];
+
+  for (const table of tableNames) {
+    try {
+      const { count, error } = await supabase.from(table).select('id', { count: 'exact', head: true });
+      if (error) {
+        results.push({
+          tableName: table,
+          status: 'FAILED',
+          count: 0,
+          message: `Erro ao consultar tabela '${table}': ${error.message} (Código ${error.code || 'N/A'})`
+        });
+      } else {
+        results.push({
+          tableName: table,
+          status: 'APPROVED',
+          count: count || 0,
+          message: `Conexão bem-sucedida. ${count || 0} registros encontrados.`
+        });
+      }
+    } catch (err: any) {
+      results.push({
+        tableName: table,
+        status: 'FAILED',
+        count: 0,
+        message: `Exceção ao conectar à tabela '${table}': ${err.message || err}`
+      });
     }
-    return { success: true, message: 'Conexão testada e aprovada com sucesso nas 6 tabelas do Supabase!' };
-  } catch (err: any) {
-    return { success: false, message: `Falha na conexão: ${err.message || err}` };
   }
+
+  const allPassed = results.every(r => r.status === 'APPROVED');
+  return {
+    allPassed,
+    tables: results,
+    message: allPassed 
+      ? 'Todas as 6 tabelas (profiles, brands, products, product_images, banners, affiliate_clicks) estão 100% conectadas e operacionais no Supabase!'
+      : 'Algumas tabelas apresentaram problemas de conexão ou RLS.'
+  };
+};
+
+export const testSupabaseConnection = async (): Promise<{ success: boolean; message: string }> => {
+  const res = await testAllSupabaseTables();
+  return {
+    success: res.allPassed,
+    message: res.message
+  };
 };
 
 // ==========================================
@@ -45,8 +94,11 @@ export const signUpAdmin = async (email: string, password: string) => {
 };
 
 export const signOutAdmin = async () => {
-  const { error } = await supabase.auth.signOut();
-  if (error) throw error;
+  localStorage.removeItem('omnibrand_local_admin_session');
+  try {
+    const { error } = await supabase.auth.signOut();
+    if (error) console.warn('Supabase signout note:', error.message);
+  } catch {}
 };
 
 export const resetAdminPassword = async (email: string) => {

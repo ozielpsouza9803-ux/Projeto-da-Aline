@@ -8,7 +8,8 @@ import {
   Search, 
   ChevronRight,
   ChevronLeft,
-  X
+  X,
+  Lock
 } from 'lucide-react';
 import { Showcase, Product, Banner } from '../../types';
 
@@ -16,16 +17,28 @@ interface PublicStorefrontProps {
   showcases: Showcase[];
   products: Product[];
   banners: Banner[];
+  buttonColor?: string;
   onBackToAdmin: () => void;
+  onGoToLanding?: () => void;
   initialShowcaseId?: string;
+  isAdminSession?: boolean;
+  onLogout?: () => void;
+  onOpenAuthModal?: () => void;
+  showcasePosition?: 'above_banner' | 'below_banner';
 }
 
 export const PublicStorefront: React.FC<PublicStorefrontProps> = ({
   showcases,
   products,
   banners,
+  buttonColor = '#f97316',
   onBackToAdmin,
-  initialShowcaseId
+  onGoToLanding,
+  initialShowcaseId,
+  isAdminSession,
+  onLogout,
+  onOpenAuthModal,
+  showcasePosition = 'below_banner'
 }) => {
   const activeShowcases = showcases.filter(s => s.isActive);
   const [activeShowcaseId, setActiveShowcaseId] = useState<string>(
@@ -68,11 +81,102 @@ export const PublicStorefront: React.FC<PublicStorefrontProps> = ({
 
   const currentBanner = showcaseBanners[currentBannerIndex] || showcaseBanners[0];
 
+  // Brand Switcher Bar component for reusability depending on showcasePosition
+  const renderBrandSwitcherBar = () => (
+    <div className="bg-white border-b border-slate-200 px-4 lg:px-12 py-3 overflow-x-auto flex items-center gap-3">
+      <span className="text-xs font-bold text-slate-400 uppercase tracking-wider shrink-0">Vitrines Disponíveis:</span>
+      <div className="flex items-center gap-2">
+        {activeShowcases.map(s => (
+          <button
+            key={s.id}
+            onClick={() => {
+              setActiveShowcaseId(s.id);
+              setSelectedCategory('all');
+              setCurrentBannerIndex(0);
+            }}
+            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all shrink-0 flex items-center gap-2 cursor-pointer ${activeShowcaseId === s.id ? 'bg-orange-500 text-white shadow-md' : 'bg-slate-100 hover:bg-slate-200 text-slate-700'}`}
+          >
+            <img src={s.logoUrl} alt={s.name} className="w-5 h-5 rounded-full object-cover bg-white" referrerPolicy="no-referrer" />
+            <span>{s.name}</span>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+
+  // Hero Banner Carousel component
+  const renderHeroBannerCarousel = () => {
+    if (showcaseBanners.length === 0) return null;
+    return (
+      <div className="relative rounded-3xl overflow-hidden shadow-xl bg-slate-900 h-72 sm:h-96 flex items-center">
+        <img 
+          src={currentBanner?.imageUrl} 
+          alt={currentBanner?.title}
+          className="absolute inset-0 w-full h-full object-cover opacity-75 transition-opacity duration-500"
+          referrerPolicy="no-referrer"
+        />
+        <div className="absolute inset-0 bg-gradient-to-r from-slate-950/90 via-slate-950/40 to-transparent" />
+        <div className="relative z-10 p-6 sm:p-12 max-w-xl text-white space-y-3">
+          <span className="px-3 py-1 rounded-full bg-orange-500 text-white text-[10px] font-bold uppercase tracking-wider">
+            {currentShowcase?.category}
+          </span>
+          <h2 className="text-2xl sm:text-4xl font-extrabold tracking-tight">
+            {currentBanner?.title}
+          </h2>
+          <p className="text-sm sm:text-base text-slate-200 leading-relaxed">
+            {currentBanner?.subtitle}
+          </p>
+          <div className="pt-2">
+            <button
+              onClick={() => handleAffiliateClick(currentBanner?.ctaUrl || currentShowcase?.affiliateBaseUrl)}
+              className="px-6 py-3 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs transition-colors shadow-lg flex items-center gap-2 cursor-pointer"
+            >
+              <span>{currentBanner?.ctaText || 'Comprar na Loja Oficial'}</span>
+              <ExternalLink className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+
+        {/* Carousel Navigation Arrows */}
+        {showcaseBanners.length > 1 && (
+          <>
+            <button 
+              onClick={prevBanner}
+              className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/50 text-white flex items-center justify-center hover:bg-black/80 transition-colors cursor-pointer z-20"
+              aria-label="Banner Anterior"
+            >
+              <ChevronLeft className="w-6 h-6" />
+            </button>
+            <button 
+              onClick={nextBanner}
+              className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/50 text-white flex items-center justify-center hover:bg-black/80 transition-colors cursor-pointer z-20"
+              aria-label="Próximo Banner"
+            >
+              <ChevronRight className="w-6 h-6" />
+            </button>
+          </>
+        )}
+      </div>
+    );
+  };
+
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col font-sans selection:bg-orange-500 selection:text-white">
-      {/* Top Navigation Bar separating Public view from Admin */}
+      {/* Top Navigation Bar: Clean public header with return to landing page */}
       <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200 px-4 lg:px-12 py-3.5 flex items-center justify-between shadow-xs">
         <div className="flex items-center gap-3">
+          {onGoToLanding && (
+            <button
+              type="button"
+              onClick={onGoToLanding}
+              className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors flex items-center justify-center cursor-pointer shadow-xs"
+              title="Voltar para a Tela Inicial"
+              aria-label="Voltar para a Tela Inicial"
+            >
+              <ArrowLeft className="w-5 h-5 text-slate-700" />
+            </button>
+          )}
+
           <img 
             src={currentShowcase?.logoUrl} 
             alt={currentShowcase?.name} 
@@ -88,91 +192,31 @@ export const PublicStorefront: React.FC<PublicStorefrontProps> = ({
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
-          <button
-            onClick={onBackToAdmin}
-            className="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold transition-colors flex items-center gap-2 shadow-sm"
-          >
-            <ArrowLeft className="w-4 h-4" /> Voltar ao Painel Admin
-          </button>
+        <div className="flex items-center gap-2">
+          {onGoToLanding && (
+            <button
+              type="button"
+              onClick={onGoToLanding}
+              className="px-3.5 py-2 rounded-xl text-white text-xs font-bold transition-all flex items-center gap-2 cursor-pointer shadow-sm active:scale-95"
+              style={{ backgroundColor: buttonColor }}
+            >
+              <ArrowLeft className="w-4 h-4 shrink-0" />
+              <span>Voltar ao Início</span>
+            </button>
+          )}
         </div>
       </header>
 
-      {/* Brand Switcher Bar */}
-      <div className="bg-white border-b border-slate-200 px-4 lg:px-12 py-3 overflow-x-auto flex items-center gap-3">
-        <span className="text-xs font-bold text-slate-400 uppercase tracking-wider shrink-0">Vitrines Disponíveis:</span>
-        <div className="flex items-center gap-2">
-          {activeShowcases.map(s => (
-            <button
-              key={s.id}
-              onClick={() => {
-                setActiveShowcaseId(s.id);
-                setSelectedCategory('all');
-                setCurrentBannerIndex(0);
-              }}
-              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all shrink-0 flex items-center gap-2 ${activeShowcaseId === s.id ? 'bg-orange-500 text-white shadow-md' : 'bg-slate-100 hover:bg-slate-200 text-slate-700'}`}
-            >
-              <img src={s.logoUrl} alt={s.name} className="w-5 h-5 rounded-full object-cover bg-white" referrerPolicy="no-referrer" />
-              <span>{s.name}</span>
-            </button>
-          ))}
-        </div>
-      </div>
+      {/* Render Brand Switcher Bar ABOVE Banner if configured */}
+      {showcasePosition === 'above_banner' && renderBrandSwitcherBar()}
 
       {/* Main Content */}
       <main className="flex-1 max-w-7xl w-full mx-auto p-4 lg:p-8 space-y-8">
-        {/* Independent Showcase Hero Banner Carousel */}
-        {showcaseBanners.length > 0 && (
-          <div className="relative rounded-3xl overflow-hidden shadow-xl bg-slate-900 h-72 sm:h-96 flex items-center">
-            <img 
-              src={currentBanner?.imageUrl} 
-              alt={currentBanner?.title}
-              className="absolute inset-0 w-full h-full object-cover opacity-75 transition-opacity duration-500"
-              referrerPolicy="no-referrer"
-            />
-            <div className="absolute inset-0 bg-gradient-to-r from-slate-950/90 via-slate-950/40 to-transparent" />
-            <div className="relative z-10 p-6 sm:p-12 max-w-xl text-white space-y-3">
-              <span className="px-3 py-1 rounded-full bg-orange-500 text-white text-[10px] font-bold uppercase tracking-wider">
-                {currentShowcase?.category}
-              </span>
-              <h2 className="text-2xl sm:text-4xl font-extrabold tracking-tight">
-                {currentBanner?.title}
-              </h2>
-              <p className="text-sm sm:text-base text-slate-200 leading-relaxed">
-                {currentBanner?.subtitle}
-              </p>
-              <div className="pt-2">
-                <button
-                  onClick={() => handleAffiliateClick(currentBanner?.ctaUrl || currentShowcase?.affiliateBaseUrl)}
-                  className="px-6 py-3 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs transition-colors shadow-lg flex items-center gap-2"
-                >
-                  <span>{currentBanner?.ctaText || 'Comprar na Loja Oficial'}</span>
-                  <ExternalLink className="w-4 h-4" />
-                </button>
-              </div>
-            </div>
+        {/* Render Banner Carousel */}
+        {renderHeroBannerCarousel()}
 
-            {/* Carousel Navigation Arrows */}
-            {showcaseBanners.length > 1 && (
-              <>
-                <button 
-                  onClick={prevBanner}
-                  className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/50 text-white flex items-center justify-center hover:bg-black/80 transition-colors"
-                  aria-label="Banner Anterior"
-                >
-                  <ChevronLeft className="w-6 h-6" />
-                </button>
-                <button 
-                  onClick={nextBanner}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/50 text-white flex items-center justify-center hover:bg-black/80 transition-colors"
-                  aria-label="Próximo Banner"
-                >
-                  <ChevronRight className="w-6 h-6" />
-                </button>
-              </>
-            )}
-          </div>
-        )}
+        {/* Render Brand Switcher Bar BELOW Banner if configured (default) */}
+        {showcasePosition === 'below_banner' && renderBrandSwitcherBar()}
 
         {/* Catalog Section */}
         <div className="space-y-6">

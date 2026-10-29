@@ -21,6 +21,7 @@ import {
   deleteShowcaseFromSupabase,
   getCurrentUser,
   checkIsAdminRole,
+  signOutAdmin,
   supabase
 } from './services/supabaseClient';
 
@@ -39,9 +40,11 @@ import { ChartsView } from './components/admin/ChartsView';
 import { SecurityView } from './components/admin/SecurityView';
 import { SettingsView } from './components/admin/SettingsView';
 import { PublicStorefront } from './components/public/PublicStorefront';
+import { PublicLandingPage } from './components/public/PublicLandingPage';
 
 export default function App() {
-  const [viewMode, setViewMode] = useState<'admin' | 'public'>('admin');
+  // Initial viewMode: ALWAYS 'landing' (public initial view) when opening app
+  const [viewMode, setViewMode] = useState<'landing' | 'public' | 'admin'>('landing');
   const [currentTab, setCurrentTab] = useState<string>('overview');
   const [isMobileOpen, setIsMobileOpen] = useState<boolean>(false);
   const [searchQuery, setSearchQuery] = useState<string>('');
@@ -242,6 +245,21 @@ export default function App() {
     alert('Padrões restaurados com sucesso!');
   };
 
+  // Auth Session State
+  const isAdminSession = !!currentUser || localStorage.getItem('omnibrand_local_admin_session') === 'true';
+
+  const handleLogout = async () => {
+    localStorage.removeItem('omnibrand_local_admin_session');
+    try {
+      await signOutAdmin();
+    } catch (err) {
+      console.warn('Signout note:', err);
+    }
+    setCurrentUser(null);
+    setIsAdminRole(false);
+    setViewMode('landing');
+  };
+
   // Tab titles mapping
   const tabTitles: Record<string, string> = {
     overview: 'Visão Geral',
@@ -256,147 +274,188 @@ export default function App() {
     settings: 'Configurações'
   };
 
-  if (viewMode === 'public') {
-    return (
-      <PublicStorefront
-        showcases={showcases}
-        products={products}
-        banners={banners}
-        initialShowcaseId={selectedPreviewShowcaseId}
-        onBackToAdmin={() => setViewMode('admin')}
-      />
-    );
-  }
-
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 flex font-sans selection:bg-orange-500 selection:text-white">
-      {/* Sidebar */}
-      <Sidebar
-        currentTab={currentTab}
-        setCurrentTab={setCurrentTab}
-        onOpenStorefront={() => {
-          setSelectedPreviewShowcaseId(undefined);
-          setViewMode('public');
-        }}
-        isMobileOpen={isMobileOpen}
-        setIsMobileOpen={setIsMobileOpen}
-      />
-
-      {/* Main Content Area */}
-      <div className="flex-1 lg:pl-72 flex flex-col min-h-screen">
-        <Header
-          currentTabTitle={tabTitles[currentTab] || 'Painel'}
-          onOpenMobileSidebar={() => setIsMobileOpen(true)}
-          onOpenStorefront={() => {
-            setSelectedPreviewShowcaseId(undefined);
+    <>
+      {viewMode === 'landing' ? (
+        <PublicLandingPage
+          showcases={showcases}
+          products={products}
+          banners={banners}
+          buttonColor={settings.primaryButtonColor || '#f97316'}
+          showcasePosition={settings.showcasePosition || 'below_banner'}
+          onGoToStorefront={(showcaseId) => {
+            setSelectedPreviewShowcaseId(showcaseId);
             setViewMode('public');
           }}
+          onGoToAdmin={() => {
+            if (!isAdminSession) {
+              setIsAuthModalOpen(true);
+            } else {
+              setViewMode('admin');
+            }
+          }}
           onOpenAuthModal={() => setIsAuthModalOpen(true)}
-          searchQuery={searchQuery}
-          setSearchQuery={setSearchQuery}
-          currentUser={currentUser}
+          isAdminSession={isAdminSession}
+          onLogout={handleLogout}
         />
+      ) : viewMode === 'public' ? (
+        <PublicStorefront
+          showcases={showcases}
+          products={products}
+          banners={banners}
+          buttonColor={settings.primaryButtonColor || '#f97316'}
+          showcasePosition={settings.showcasePosition || 'below_banner'}
+          initialShowcaseId={selectedPreviewShowcaseId}
+          onGoToLanding={() => setViewMode('landing')}
+          onBackToAdmin={() => {
+            if (!isAdminSession) {
+              setIsAuthModalOpen(true);
+            } else {
+              setViewMode('admin');
+            }
+          }}
+          isAdminSession={isAdminSession}
+          onLogout={handleLogout}
+          onOpenAuthModal={() => setIsAuthModalOpen(true)}
+        />
+      ) : (
+        <div className="min-h-screen bg-slate-50 text-slate-900 flex font-sans selection:bg-orange-500 selection:text-white">
+          {/* Sidebar */}
+          <Sidebar
+            currentTab={currentTab}
+            setCurrentTab={setCurrentTab}
+            onOpenStorefront={() => {
+              setSelectedPreviewShowcaseId(undefined);
+              setViewMode('public');
+            }}
+            isMobileOpen={isMobileOpen}
+            setIsMobileOpen={setIsMobileOpen}
+            onLogout={handleLogout}
+            isAdminSession={isAdminSession}
+          />
 
-        <main className="flex-1 p-4 lg:p-8 max-w-7xl w-full mx-auto">
-          {currentTab === 'overview' && (
-            <OverviewView
-              showcases={showcases}
-              products={products}
-              clicks={clicks}
-              commissions={commissions}
-              onNavigate={setCurrentTab}
-            />
-          )}
-
-          {currentTab === 'showcases' && (
-            <ShowcasesView
-              showcases={showcases}
-              onSaveShowcase={handleSaveShowcase}
-              onDeleteShowcase={handleDeleteShowcase}
-              onToggleActive={handleToggleShowcaseActive}
-              onSelectShowcasePreview={(showcaseId) => {
-                setSelectedPreviewShowcaseId(showcaseId);
+          {/* Main Content Area */}
+          <div className="flex-1 lg:pl-72 flex flex-col min-h-screen">
+            <Header
+              currentTabTitle={tabTitles[currentTab] || 'Painel'}
+              onOpenMobileSidebar={() => setIsMobileOpen(true)}
+              onOpenStorefront={() => {
+                setSelectedPreviewShowcaseId(undefined);
                 setViewMode('public');
               }}
-            />
-          )}
-
-          {currentTab === 'products' && (
-            <ProductsView
-              products={products}
-              showcases={showcases}
-              onSaveProduct={handleSaveProduct}
-              onDeleteProduct={handleDeleteProduct}
-              searchQuery={searchQuery}
-            />
-          )}
-
-          {currentTab === 'banners' && (
-            <BannersView
-              banners={banners}
-              showcases={showcases}
-              onSaveBanner={handleSaveBanner}
-              onDeleteBanner={handleDeleteBanner}
-              onToggleBannerActive={handleToggleBannerActive}
-            />
-          )}
-
-          {currentTab === 'clicks' && (
-            <ClicksView
-              clicks={clicks}
-              showcases={showcases}
-            />
-          )}
-
-          {currentTab === 'commissions' && (
-            <CommissionsView
-              commissions={commissions}
-              showcases={showcases}
-            />
-          )}
-
-          {currentTab === 'reports' && (
-            <ReportsView
-              showcases={showcases}
-              products={products}
-              commissions={commissions}
-            />
-          )}
-
-          {currentTab === 'charts' && (
-            <ChartsView
-              showcases={showcases}
-              products={products}
-            />
-          )}
-
-          {currentTab === 'security' && (
-            <SecurityView
-              currentUser={currentUser}
-              isAdminRole={isAdminRole}
               onOpenAuthModal={() => setIsAuthModalOpen(true)}
+              onLogout={handleLogout}
+              searchQuery={searchQuery}
+              setSearchQuery={setSearchQuery}
+              currentUser={currentUser}
+              isAdminSession={isAdminSession}
             />
-          )}
 
-          {currentTab === 'settings' && (
-            <SettingsView
-              settings={settings}
-              onSaveSettings={handleSaveSettings}
-              onResetDefaults={handleResetDefaults}
-            />
-          )}
-        </main>
-      </div>
+            <main className="flex-1 p-4 lg:p-8 max-w-7xl w-full mx-auto">
+              {currentTab === 'overview' && (
+                <OverviewView
+                  showcases={showcases}
+                  products={products}
+                  clicks={clicks}
+                  commissions={commissions}
+                  onNavigate={setCurrentTab}
+                />
+              )}
 
-      {/* Admin Auth Modal */}
+              {currentTab === 'showcases' && (
+                <ShowcasesView
+                  showcases={showcases}
+                  onSaveShowcase={handleSaveShowcase}
+                  onDeleteShowcase={handleDeleteShowcase}
+                  onToggleActive={handleToggleShowcaseActive}
+                  onSelectShowcasePreview={(showcaseId) => {
+                    setSelectedPreviewShowcaseId(showcaseId);
+                    setViewMode('public');
+                  }}
+                />
+              )}
+
+              {currentTab === 'products' && (
+                <ProductsView
+                  products={products}
+                  showcases={showcases}
+                  onSaveProduct={handleSaveProduct}
+                  onDeleteProduct={handleDeleteProduct}
+                  searchQuery={searchQuery}
+                />
+              )}
+
+              {currentTab === 'banners' && (
+                <BannersView
+                  banners={banners}
+                  showcases={showcases}
+                  onSaveBanner={handleSaveBanner}
+                  onDeleteBanner={handleDeleteBanner}
+                  onToggleBannerActive={handleToggleBannerActive}
+                />
+              )}
+
+              {currentTab === 'clicks' && (
+                <ClicksView
+                  clicks={clicks}
+                  showcases={showcases}
+                />
+              )}
+
+              {currentTab === 'commissions' && (
+                <CommissionsView
+                  commissions={commissions}
+                  showcases={showcases}
+                />
+              )}
+
+              {currentTab === 'reports' && (
+                <ReportsView
+                  showcases={showcases}
+                  products={products}
+                  commissions={commissions}
+                />
+              )}
+
+              {currentTab === 'charts' && (
+                <ChartsView
+                  showcases={showcases}
+                  products={products}
+                />
+              )}
+
+              {currentTab === 'security' && (
+                <SecurityView
+                  currentUser={currentUser}
+                  isAdminRole={isAdminRole}
+                  onOpenAuthModal={() => setIsAuthModalOpen(true)}
+                />
+              )}
+
+              {currentTab === 'settings' && (
+                <SettingsView
+                  settings={settings}
+                  onSaveSettings={handleSaveSettings}
+                  onResetDefaults={handleResetDefaults}
+                />
+              )}
+            </main>
+          </div>
+        </div>
+      )}
+
+      {/* Admin Auth Modal (rendered in both public and admin views) */}
       <AdminAuthModal
         isOpen={isAuthModalOpen}
         onClose={() => setIsAuthModalOpen(false)}
-        onAuthChange={(user, isAdmin) => {
+        onAuthChange={(user, isAdmin, isExplicitLogin) => {
           setCurrentUser(user);
           setIsAdminRole(isAdmin);
+          if (isAdmin && isExplicitLogin) {
+            setViewMode('admin');
+          }
         }}
       />
-    </div>
+    </>
   );
 }

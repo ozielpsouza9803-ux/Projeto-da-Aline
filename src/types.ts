@@ -74,4 +74,7 @@ export interface AdminSettings {
   supabaseAnonKey: string;
   storageProvider: 'local' | 'supabase';
   autoApproveCommissions: boolean;
+  primaryButtonColor?: string;
+  showcasePosition?: 'above_banner' | 'below_banner';
 }
+

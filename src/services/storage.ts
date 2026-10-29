@@ -236,7 +236,9 @@ const INITIAL_SETTINGS: AdminSettings = {
   supabaseUrl: 'https://spqwrnywdlkrfrslfmwl.supabase.co',
   supabaseAnonKey: 'sb_publishable_JGX27g41zq4QHaW6i5rYVw_KNMOHgq0',
   storageProvider: 'supabase',
-  autoApproveCommissions: true
+  autoApproveCommissions: true,
+  primaryButtonColor: '#f97316',
+  showcasePosition: 'below_banner'
 };
 
 export const storageService = {
@@ -310,6 +312,17 @@ export const storageService = {
     localStorage.setItem('omnibrand_settings', JSON.stringify(settings));
   },
 
+  getAdminCredentials: () => {
+    const data = localStorage.getItem('omnibrand_admin_creds');
+    return data ? JSON.parse(data) : { email: 'admin@omnibrand.com.br', username: 'admin', password: 'admin' };
+  },
+  saveAdminCredentials: (creds: { email?: string; username?: string; password?: string }) => {
+    const current = storageService.getAdminCredentials();
+    const updated = { ...current, ...creds };
+    localStorage.setItem('omnibrand_admin_creds', JSON.stringify(updated));
+    return updated;
+  },
+
   resetDefaults: () => {
     localStorage.setItem('omnibrand_showcases', JSON.stringify(INITIAL_SHOWCASES));
     localStorage.setItem('omnibrand_products', JSON.stringify(INITIAL_PRODUCTS));
@@ -317,5 +330,6 @@ export const storageService = {
     localStorage.setItem('omnibrand_clicks', JSON.stringify(INITIAL_CLICKS));
     localStorage.setItem('omnibrand_commissions', JSON.stringify(INITIAL_COMMISSIONS));
     localStorage.setItem('omnibrand_settings', JSON.stringify(INITIAL_SETTINGS));
+    localStorage.setItem('omnibrand_admin_creds', JSON.stringify({ email: 'admin@omnibrand.com.br', username: 'admin', password: 'admin' }));
   }
 };
