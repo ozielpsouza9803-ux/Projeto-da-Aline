@@ -248,11 +248,11 @@ const INITIAL_SETTINGS: AdminSettings = {
 
 export const storageService = {
   getShowcases: (): Showcase[] => {
+    if (typeof window === 'undefined' || typeof localStorage === 'undefined') return INITIAL_SHOWCASES;
     const data = localStorage.getItem('omnibrand_showcases');
     if (!data) return INITIAL_SHOWCASES;
     try {
       const parsed = JSON.parse(data);
-      // Ensure IDs are valid UUID format
       if (parsed.length > 0 && !parsed[0].id.includes('-')) return INITIAL_SHOWCASES;
       return parsed;
     } catch {
@@ -260,10 +260,13 @@ export const storageService = {
     }
   },
   saveShowcases: (items: Showcase[]) => {
-    localStorage.setItem('omnibrand_showcases', JSON.stringify(items));
+    if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
+      localStorage.setItem('omnibrand_showcases', JSON.stringify(items));
+    }
   },
 
   getProducts: (): Product[] => {
+    if (typeof window === 'undefined' || typeof localStorage === 'undefined') return INITIAL_PRODUCTS;
     const data = localStorage.getItem('omnibrand_products');
     if (!data) return INITIAL_PRODUCTS;
     try {
@@ -275,10 +278,13 @@ export const storageService = {
     }
   },
   saveProducts: (items: Product[]) => {
-    localStorage.setItem('omnibrand_products', JSON.stringify(items));
+    if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
+      localStorage.setItem('omnibrand_products', JSON.stringify(items));
+    }
   },
 
   getBanners: (): Banner[] => {
+    if (typeof window === 'undefined' || typeof localStorage === 'undefined') return INITIAL_BANNERS;
     const data = localStorage.getItem('omnibrand_banners');
     if (!data) return INITIAL_BANNERS;
     try {
@@ -290,51 +296,69 @@ export const storageService = {
     }
   },
   saveBanners: (items: Banner[]) => {
-    localStorage.setItem('omnibrand_banners', JSON.stringify(items));
+    if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
+      localStorage.setItem('omnibrand_banners', JSON.stringify(items));
+    }
   },
 
   getClicks: (): ClickRecord[] => {
+    if (typeof window === 'undefined' || typeof localStorage === 'undefined') return INITIAL_CLICKS;
     const data = localStorage.getItem('omnibrand_clicks');
     return data ? JSON.parse(data) : INITIAL_CLICKS;
   },
   saveClicks: (items: ClickRecord[]) => {
-    localStorage.setItem('omnibrand_clicks', JSON.stringify(items));
+    if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
+      localStorage.setItem('omnibrand_clicks', JSON.stringify(items));
+    }
   },
 
   getCommissions: (): CommissionRecord[] => {
+    if (typeof window === 'undefined' || typeof localStorage === 'undefined') return INITIAL_COMMISSIONS;
     const data = localStorage.getItem('omnibrand_commissions');
     return data ? JSON.parse(data) : INITIAL_COMMISSIONS;
   },
   saveCommissions: (items: CommissionRecord[]) => {
-    localStorage.setItem('omnibrand_commissions', JSON.stringify(items));
+    if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
+      localStorage.setItem('omnibrand_commissions', JSON.stringify(items));
+    }
   },
 
   getSettings: (): AdminSettings => {
+    if (typeof window === 'undefined' || typeof localStorage === 'undefined') return INITIAL_SETTINGS;
     const data = localStorage.getItem('omnibrand_settings');
     return data ? JSON.parse(data) : INITIAL_SETTINGS;
   },
   saveSettings: (settings: AdminSettings) => {
-    localStorage.setItem('omnibrand_settings', JSON.stringify(settings));
+    if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
+      localStorage.setItem('omnibrand_settings', JSON.stringify(settings));
+    }
   },
 
   getAdminCredentials: () => {
+    if (typeof window === 'undefined' || typeof localStorage === 'undefined') {
+      return { email: 'admin@omnibrand.com.br', username: 'admin', password: 'admin' };
+    }
     const data = localStorage.getItem('omnibrand_admin_creds');
     return data ? JSON.parse(data) : { email: 'admin@omnibrand.com.br', username: 'admin', password: 'admin' };
   },
   saveAdminCredentials: (creds: { email?: string; username?: string; password?: string }) => {
     const current = storageService.getAdminCredentials();
     const updated = { ...current, ...creds };
-    localStorage.setItem('omnibrand_admin_creds', JSON.stringify(updated));
+    if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
+      localStorage.setItem('omnibrand_admin_creds', JSON.stringify(updated));
+    }
     return updated;
   },
 
   resetDefaults: () => {
-    localStorage.setItem('omnibrand_showcases', JSON.stringify(INITIAL_SHOWCASES));
-    localStorage.setItem('omnibrand_products', JSON.stringify(INITIAL_PRODUCTS));
-    localStorage.setItem('omnibrand_banners', JSON.stringify(INITIAL_BANNERS));
-    localStorage.setItem('omnibrand_clicks', JSON.stringify(INITIAL_CLICKS));
-    localStorage.setItem('omnibrand_commissions', JSON.stringify(INITIAL_COMMISSIONS));
-    localStorage.setItem('omnibrand_settings', JSON.stringify(INITIAL_SETTINGS));
-    localStorage.setItem('omnibrand_admin_creds', JSON.stringify({ email: 'admin@omnibrand.com.br', username: 'admin', password: 'admin' }));
+    if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
+      localStorage.setItem('omnibrand_showcases', JSON.stringify(INITIAL_SHOWCASES));
+      localStorage.setItem('omnibrand_products', JSON.stringify(INITIAL_PRODUCTS));
+      localStorage.setItem('omnibrand_banners', JSON.stringify(INITIAL_BANNERS));
+      localStorage.setItem('omnibrand_clicks', JSON.stringify(INITIAL_CLICKS));
+      localStorage.setItem('omnibrand_commissions', JSON.stringify(INITIAL_COMMISSIONS));
+      localStorage.setItem('omnibrand_settings', JSON.stringify(INITIAL_SETTINGS));
+      localStorage.setItem('omnibrand_admin_creds', JSON.stringify({ email: 'admin@omnibrand.com.br', username: 'admin', password: 'admin' }));
+    }
   }
 };

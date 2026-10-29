@@ -60,12 +60,11 @@ export const PublicLandingPage: React.FC<PublicLandingPageProps> = ({
   const [chatMessages, setChatMessages] = useState<Array<{ sender: 'bot' | 'user'; text: string; time: string }>>([
     {
       sender: 'bot',
-      text: 'Olá! Bem-vindo ao Atendimento OmniBrand Afiliados. Como posso te ajudar hoje?',
+      text: 'Olá! Sou o Assistente Virtual da OmniBrand Afiliados.\n\nComo posso te ajudar hoje? Você pode me perguntar sobre marcas, produtos, preços, disponibilidade de estoque ou comparar opções!',
       time: 'Agora'
     }
   ]);
   const [inputMessage, setInputMessage] = useState('');
-
   const activeShowcases = showcases.filter(s => s.isActive);
   const activeProducts = products.filter(p => p.isActive);
   const activeBanners = banners.filter(b => b.isActive);
@@ -140,36 +139,81 @@ export const PublicLandingPage: React.FC<PublicLandingPageProps> = ({
     setTouchEndX(null);
   };
 
-  // Chat send message
-  const handleSendMessage = (e?: React.FormEvent) => {
-    if (e) e.preventDefault();
-    if (!inputMessage.trim()) return;
+  const [isTyping, setIsTyping] = useState(false);
 
-    const userMsg = inputMessage;
+  // Chat send message with backend Gemini AI integration & fallback
+  const handleSendMessage = async (e?: React.FormEvent, customQuery?: string) => {
+    if (e) e.preventDefault();
+    const queryToSend = customQuery || inputMessage;
+    if (!queryToSend.trim() || isTyping) return;
+
+    const userMsg = queryToSend.trim();
     const timeNow = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
-    setChatMessages(prev => [
-      ...prev, 
-      { sender: 'user', text: userMsg, time: timeNow }
-    ]);
-    setInputMessage('');
+    // Append user message immediately
+    const updatedMessages = [
+      ...chatMessages,
+      { sender: 'user' as const, text: userMsg, time: timeNow }
+    ];
 
-    setTimeout(() => {
-      let botResponse = 'Obrigado pelo seu contato! Nossos atendentes estão disponíveis para responder dúvidas sobre vitrines, links e parcerias.';
-      const lower = userMsg.toLowerCase();
-      if (lower.includes('cupom') || lower.includes('desconto')) {
-        botResponse = 'Para conferir os cupons e descontos ativos, selecione uma das nossas marcas no carrossel ou clique em "Explorar Vitrine".';
-      } else if (lower.includes('natura') || lower.includes('boticario') || lower.includes('eudora')) {
-        botResponse = 'Temos uma vitrine dedicada para essa marca! Você pode clicar no cartão da marca para ver todos os produtos disponíveis.';
-      } else if (lower.includes('admin') || lower.includes('login') || lower.includes('painel')) {
-        botResponse = 'Para acessar o Painel Administrativo, abra o Menu e clique em "Login de Administrador".';
+    setChatMessages(updatedMessages);
+    if (!customQuery) setInputMessage('');
+    setIsTyping(true);
+
+    try {
+      // Build conversation history for API (excluding system welcome message if desired)
+      const apiMessages = updatedMessages.map(m => ({
+        role: m.sender === 'user' ? ('user' as const) : ('assistant' as const),
+        content: m.text
+      }));
+
+      const res = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messages: apiMessages })
+      });
+
+      if (!res.ok) {
+        throw new Error(`HTTP error ${res.status}`);
       }
+
+      const data = await res.json();
+      const botResponse = data.reply || 'Como posso te ajudar com nossos produtos em estoque?';
 
       setChatMessages(prev => [
         ...prev,
-        { sender: 'bot', text: botResponse, time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }
+        {
+          sender: 'bot',
+          text: botResponse,
+          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        }
       ]);
-    }, 800);
+    } catch (err) {
+      console.warn('Erro ao conectar à API do Chatbot, utilizando fallback local:', err);
+      try {
+        const { chatbotQueryService } = await import('../../services/chatbotQueryService');
+        const fallback = await chatbotQueryService.generateFallbackResponse(userMsg);
+        setChatMessages(prev => [
+          ...prev,
+          {
+            sender: 'bot',
+            text: fallback,
+            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+          }
+        ]);
+      } catch {
+        setChatMessages(prev => [
+          ...prev,
+          {
+            sender: 'bot',
+            text: 'Estou enfrentando uma breve oscilação de rede, mas você pode navegar normalmente pelas nossas vitrines de produtos!',
+            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+          }
+        ]);
+      }
+    } finally {
+      setIsTyping(false);
+    }
   };
 
   // Preview products for search bar
@@ -556,15 +600,15 @@ export const PublicLandingPage: React.FC<PublicLandingPageProps> = ({
               {chatMessages.map((msg, idx) => (
                 <div
                   key={idx}
-                  className={`flex flex-col max-w-[85%] ${
+                  className={`flex flex-col max-w-[88%] ${
                     msg.sender === 'user' ? 'ml-auto items-end' : 'mr-auto items-start'
                   }`}
                 >
                   <div
-                    className={`p-3.5 rounded-2xl text-xs leading-relaxed ${
+                    className={`p-3.5 rounded-2xl text-xs leading-relaxed whitespace-pre-line ${
                       msg.sender === 'user'
                         ? 'text-white rounded-br-xs'
-                        : 'bg-slate-800 text-slate-200 border border-slate-700/80 rounded-bl-xs'
+                        : 'bg-slate-800 text-slate-100 border border-slate-700/80 rounded-bl-xs shadow-xs'
                     }`}
                     style={msg.sender === 'user' ? { backgroundColor: buttonColor } : undefined}
                   >
@@ -573,21 +617,49 @@ export const PublicLandingPage: React.FC<PublicLandingPageProps> = ({
                   <span className="text-[10px] text-slate-500 mt-1 px-1">{msg.time}</span>
                 </div>
               ))}
+
+              {/* Typing Indicator */}
+              {isTyping && (
+                <div className="flex flex-col max-w-[85%] mr-auto items-start">
+                  <div className="p-3.5 rounded-2xl bg-slate-800 text-slate-300 border border-slate-700/80 rounded-bl-xs flex items-center gap-1.5">
+                    <span className="text-xs text-slate-400 font-medium">Consultando catálogo</span>
+                    <span className="w-1.5 h-1.5 rounded-full bg-orange-400 animate-bounce" style={{ animationDelay: '0ms' }} />
+                    <span className="w-1.5 h-1.5 rounded-full bg-orange-400 animate-bounce" style={{ animationDelay: '150ms' }} />
+                    <span className="w-1.5 h-1.5 rounded-full bg-orange-400 animate-bounce" style={{ animationDelay: '300ms' }} />
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Quick Action Pills in Chat */}
             <div className="px-4 py-2 bg-slate-900 border-t border-slate-800/80 flex items-center gap-2 overflow-x-auto scrollbar-none">
               <button
-                onClick={() => setInputMessage('Como funciona o cupom de desconto?')}
-                className="px-2.5 py-1 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-300 text-[11px] shrink-0 border border-slate-700 transition-colors"
+                type="button"
+                onClick={() => handleSendMessage(undefined, 'Quais as melhores ofertas e cupons ativas?')}
+                className="px-2.5 py-1.5 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-300 text-[11px] shrink-0 border border-slate-700 transition-colors cursor-pointer"
               >
-                💡 Cupons de Desconto
+                💡 Cupons & Promoções
               </button>
               <button
-                onClick={() => setInputMessage('Quais marcas estão disponíveis?')}
-                className="px-2.5 py-1 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-300 text-[11px] shrink-0 border border-slate-700 transition-colors"
+                type="button"
+                onClick={() => handleSendMessage(undefined, 'Quais marcas estão disponíveis no catálogo?')}
+                className="px-2.5 py-1.5 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-300 text-[11px] shrink-0 border border-slate-700 transition-colors cursor-pointer"
               >
                 🏷️ Marcas Parceiras
+              </button>
+              <button
+                type="button"
+                onClick={() => handleSendMessage(undefined, 'Quais produtos estão em estoque?')}
+                className="px-2.5 py-1.5 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-300 text-[11px] shrink-0 border border-slate-700 transition-colors cursor-pointer"
+              >
+                📦 Consultar Estoque
+              </button>
+              <button
+                type="button"
+                onClick={() => handleSendMessage(undefined, 'Compare os preços dos perfumes disponíveis')}
+                className="px-2.5 py-1.5 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-300 text-[11px] shrink-0 border border-slate-700 transition-colors cursor-pointer"
+              >
+                ⚖️ Comparar Perfumes
               </button>
             </div>
 
@@ -595,14 +667,16 @@ export const PublicLandingPage: React.FC<PublicLandingPageProps> = ({
             <form onSubmit={handleSendMessage} className="p-3 bg-slate-900 border-t border-slate-800 flex items-center gap-2">
               <input
                 type="text"
-                placeholder="Escreva sua dúvida..."
+                placeholder="Escreva sua dúvida (ex: batom, perfume, Natura)..."
                 value={inputMessage}
                 onChange={(e) => setInputMessage(e.target.value)}
-                className="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                disabled={isTyping}
+                className="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-orange-500 disabled:opacity-50"
               />
               <button
                 type="submit"
-                className="p-2.5 rounded-xl text-white transition-opacity cursor-pointer active:scale-95 shadow-md"
+                disabled={isTyping || !inputMessage.trim()}
+                className="p-2.5 rounded-xl text-white transition-opacity cursor-pointer active:scale-95 shadow-md disabled:opacity-50"
                 style={{ backgroundColor: buttonColor }}
                 title="Enviar mensagem"
               >
