@@ -10,7 +10,8 @@ import {
   Globe, 
   CheckCircle2,
   Clock,
-  Sparkles
+  Sparkles,
+  ShieldCheck
 } from 'lucide-react';
 import { Showcase, Product, ClickRecord, CommissionRecord } from '../../types';
 
@@ -61,6 +62,12 @@ export const OverviewView: React.FC<OverviewViewProps> = ({
               className="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-semibold text-xs transition-colors border border-slate-700 flex items-center gap-2"
             >
               <Package className="w-4 h-4" /> Cadastrar Produtos
+            </button>
+            <button
+              onClick={() => onNavigate('security')}
+              className="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs transition-colors shadow-md flex items-center gap-2"
+            >
+              <ShieldCheck className="w-4 h-4" /> Segurança e Acesso
             </button>
           </div>
         </div>
