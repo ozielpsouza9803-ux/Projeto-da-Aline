@@ -51,6 +51,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
   const [supabaseAnonKey, setSupabaseAnonKey] = useState(settings.supabaseAnonKey);
   const [storageProvider, setStorageProvider] = useState(settings.storageProvider);
   const [autoApproveCommissions, setAutoApproveCommissions] = useState(settings.autoApproveCommissions);
+  const [deliveryFee, setDeliveryFee] = useState(settings.deliveryFee || 15.00);
   
   const [savedSuccess, setSavedSuccess] = useState(false);
   const [testResult, setTestResult] = useState<{ success: boolean; message: string } | null>(null);
@@ -108,7 +109,8 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
       storageProvider,
       autoApproveCommissions,
       primaryButtonColor,
-      showcasePosition
+      showcasePosition,
+      deliveryFee
     };
     localStorage.setItem('omnibrand_supabase_url', supabaseUrl);
     localStorage.setItem('omnibrand_supabase_key', supabaseAnonKey);
@@ -517,6 +519,18 @@ CREATE POLICY "Auth Upload Storage" ON storage.objects FOR INSERT WITH CHECK (bu
                 required
                 value={adminEmail}
                 onChange={(e) => setAdminEmail(e.target.value)}
+                className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-orange-500/20"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 mb-1">Taxa de Entrega Padrão (R$)</label>
+              <input
+                type="number"
+                step="0.01"
+                min="0"
+                required
+                value={deliveryFee}
+                onChange={(e) => setDeliveryFee(parseFloat(e.target.value))}
                 className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-orange-500/20"
               />
             </div>

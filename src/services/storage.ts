@@ -243,7 +243,8 @@ const INITIAL_SETTINGS: AdminSettings = {
   storageProvider: 'supabase',
   autoApproveCommissions: true,
   primaryButtonColor: '#f97316',
-  showcasePosition: 'below_banner'
+  showcasePosition: 'below_banner',
+  deliveryFee: 15.00
 };
 
 export const storageService = {

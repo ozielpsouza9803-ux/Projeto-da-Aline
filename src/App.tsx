@@ -49,13 +49,14 @@ import { PublicStorefront } from './components/public/PublicStorefront';
 import { PublicLandingPage } from './components/public/PublicLandingPage';
 import { CustomerAuthModal } from './components/customer/CustomerAuthModal';
 import { CustomerAccountView } from './components/customer/CustomerAccountView';
+import { CheckoutView } from './components/customer/CheckoutView';
 import { customerService } from './services/customerService';
 import { bagService } from './services/bagService';
 import { CustomerProfile } from './types';
 
 export default function App() {
   // Initial viewMode: ALWAYS 'landing' (public initial view) when opening app
-  const [viewMode, setViewMode] = useState<'landing' | 'public' | 'admin' | 'customer_account'>('landing');
+  const [viewMode, setViewMode] = useState<'landing' | 'public' | 'admin' | 'customer_account' | 'checkout'>('landing');
   const [currentTab, setCurrentTab] = useState<string>('overview');
   const [isMobileOpen, setIsMobileOpen] = useState<boolean>(false);
   const [searchQuery, setSearchQuery] = useState<string>('');
@@ -344,7 +345,23 @@ export default function App() {
 
   return (
     <>
-      {viewMode === 'customer_account' && currentCustomer ? (
+      {viewMode === 'checkout' && currentCustomer ? (
+        <CheckoutView
+          bag={bag}
+          customer={currentCustomer}
+          deliveryFee={settings.deliveryFee || 15.00}
+          onBack={() => setViewMode('landing')}
+          onConfirm={(orderData) => {
+            console.log('Order confirmed:', orderData);
+            alert('Pedido confirmado! Em breve você poderá acompanhar os detalhes em sua conta. (Esta etapa encerra a simulação de checkout)');
+            setViewMode('landing');
+            if (currentCustomer) {
+              bagService.clearBag(currentCustomer.email);
+              setBag({ items: [], total: 0 });
+            }
+          }}
+        />
+      ) : viewMode === 'customer_account' && currentCustomer ? (
         <CustomerAccountView
           customer={currentCustomer}
           onBack={() => setViewMode('landing')}
@@ -383,6 +400,7 @@ export default function App() {
           onUpdateQuantity={handleUpdateQuantity}
           onRemoveItem={handleRemoveFromBag}
           onAddToBag={handleAddToBag}
+          onGoToCheckout={() => setViewMode('checkout')}
         />
       ) : viewMode === 'public' ? (
         <PublicStorefront
@@ -407,6 +425,7 @@ export default function App() {
           bag={bag}
           onUpdateQuantity={handleUpdateQuantity}
           onRemoveItem={handleRemoveFromBag}
+          onGoToCheckout={() => setViewMode('checkout')}
         />
       ) : (
         <div 

@@ -36,6 +36,7 @@ interface PublicStorefrontProps {
   bag: ShoppingBag;
   onUpdateQuantity: (productId: string, quantity: number) => void;
   onRemoveItem: (productId: string) => void;
+  onGoToCheckout?: () => void;
 }
 
 export const PublicStorefront: React.FC<PublicStorefrontProps> = ({
@@ -55,7 +56,8 @@ export const PublicStorefront: React.FC<PublicStorefrontProps> = ({
   onAddToBag,
   bag,
   onUpdateQuantity,
-  onRemoveItem
+  onRemoveItem,
+  onGoToCheckout
 }) => {
   const activeShowcases = showcases.filter(s => s.isActive);
   const [activeShowcaseId, setActiveShowcaseId] = useState<string>(
@@ -587,6 +589,7 @@ export const PublicStorefront: React.FC<PublicStorefrontProps> = ({
           onClose={() => setIsBagOpen(false)} 
           onUpdateQuantity={(pid, q) => onUpdateQuantity(pid, q)} 
           onRemoveItem={(pid) => onRemoveItem(pid)}
+          onContinueToCheckout={onGoToCheckout}
         />
       )}
 

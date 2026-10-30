@@ -78,6 +78,7 @@ export interface AdminSettings {
   autoApproveCommissions: boolean;
   primaryButtonColor?: string;
   showcasePosition?: 'above_banner' | 'below_banner';
+  deliveryFee: number;
 }
 
 // ==========================================

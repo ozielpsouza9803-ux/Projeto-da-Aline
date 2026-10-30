@@ -44,6 +44,7 @@ interface PublicLandingPageProps {
   onUpdateQuantity: (productId: string, quantity: number) => void;
   onRemoveItem: (productId: string) => void;
   onAddToBag: (product: Product, showcase: Showcase) => void;
+  onGoToCheckout?: () => void;
 }
 
 export const PublicLandingPage: React.FC<PublicLandingPageProps> = ({
@@ -63,7 +64,8 @@ export const PublicLandingPage: React.FC<PublicLandingPageProps> = ({
   bag,
   onUpdateQuantity,
   onRemoveItem,
-  onAddToBag
+  onAddToBag,
+  onGoToCheckout
 }) => {
   const [isExternalDrawerOpen, setIsExternalDrawerOpen] = useState(false);
   const [isBagOpen, setIsBagOpen] = useState(false);
@@ -1080,6 +1082,7 @@ export const PublicLandingPage: React.FC<PublicLandingPageProps> = ({
           onClose={() => setIsBagOpen(false)} 
           onUpdateQuantity={onUpdateQuantity} 
           onRemoveItem={onRemoveItem}
+          onContinueToCheckout={onGoToCheckout}
         />
       )}
 
