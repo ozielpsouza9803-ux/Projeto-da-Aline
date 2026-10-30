@@ -22,7 +22,8 @@ import {
   Headset,
   User
 } from 'lucide-react';
-import { Showcase, Product, Banner, ChatbotProfile, CustomerProfile } from '../../types';
+import { Showcase, Product, Banner, ChatbotProfile, CustomerProfile, ShoppingBag as ShoppingBagType } from '../../types';
+import { ShoppingBagView } from '../customer/ShoppingBagView';
 import { chatbotProfileService } from '../../services/chatbotProfileService';
 
 interface PublicLandingPageProps {
@@ -39,6 +40,10 @@ interface PublicLandingPageProps {
   currentCustomer?: CustomerProfile | null;
   onOpenCustomerAuthModal?: () => void;
   onGoToCustomerAccount?: () => void;
+  bag: ShoppingBagType;
+  onUpdateQuantity: (productId: string, quantity: number) => void;
+  onRemoveItem: (productId: string) => void;
+  onAddToBag: (product: Product, showcase: Showcase) => void;
 }
 
 export const PublicLandingPage: React.FC<PublicLandingPageProps> = ({
@@ -54,9 +59,14 @@ export const PublicLandingPage: React.FC<PublicLandingPageProps> = ({
   showcasePosition = 'below_banner',
   currentCustomer,
   onOpenCustomerAuthModal,
-  onGoToCustomerAccount
+  onGoToCustomerAccount,
+  bag,
+  onUpdateQuantity,
+  onRemoveItem,
+  onAddToBag
 }) => {
   const [isExternalDrawerOpen, setIsExternalDrawerOpen] = useState(false);
+  const [isBagOpen, setIsBagOpen] = useState(false);
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   
@@ -624,77 +634,49 @@ export const PublicLandingPage: React.FC<PublicLandingPageProps> = ({
       {isChatOpen && (
         <div 
           className="fixed inset-0 sm:inset-auto sm:bottom-6 sm:right-6 sm:w-[400px] sm:h-[600px] z-50 sm:rounded-3xl shadow-2xl flex flex-col overflow-hidden border border-slate-800 bg-slate-900"
-          onClick={() => {}}
+          onClick={(e) => e.stopPropagation()}
         >
-            {/* Chat Header */}
-            <div className="p-4 border-b border-slate-800 bg-slate-900/90 flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="relative">
-                  <img 
-                    src={botProfile.avatarUrl} 
-                    alt={botProfile.name}
-                    className="w-10 h-10 rounded-2xl object-cover border border-slate-700 shadow-md"
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).src = botProfile.defaultAvatarUrl;
-                    }}
-                  />
-                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 absolute -bottom-0.5 -right-0.5 border-2 border-slate-900 animate-pulse" />
-                </div>
-                <div>
-                  <h3 className="font-bold text-sm text-white flex items-center gap-2">
-                    <span>{botProfile.name}</span>
-                  </h3>
-                  <p className="text-[11px] text-slate-400">{botProfile.role || 'Suporte rápido ao visitante'}</p>
-                </div>
+          {/* Chat Header */}
+          <div className="p-4 border-b border-slate-800 bg-slate-900/90 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="relative">
+                <img 
+                  src={botProfile.avatarUrl} 
+                  alt={botProfile.name}
+                  className="w-10 h-10 rounded-2xl object-cover border border-slate-700 shadow-md"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = botProfile.defaultAvatarUrl;
+                  }}
+                />
+                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 absolute -bottom-0.5 -right-0.5 border-2 border-slate-900 animate-pulse" />
               </div>
-
-              <button
-                onClick={() => setIsChatOpen(false)}
-                className="p-1.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors cursor-pointer"
-                title="Fechar chat"
-              >
-                <X className="w-5 h-5" />
-              </button>
+              <div>
+                <h3 className="font-bold text-sm text-white flex items-center gap-2">
+                  <span>{botProfile.name}</span>
+                </h3>
+                <p className="text-[11px] text-slate-400">{botProfile.role || 'Suporte rápido ao visitante'}</p>
+              </div>
             </div>
 
-            {/* Chat Message List */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-3.5 bg-slate-950/40">
-              {chatMessages.map((msg, idx) => (
-                <div
-                  key={idx}
-                  className={`flex items-start gap-2.5 max-w-[90%] ${
-                    msg.sender === 'user' ? 'ml-auto flex-row-reverse' : 'mr-auto flex-row'
-                  }`}
-                >
-                  {msg.sender === 'bot' && (
-                    <img 
-                      src={botProfile.avatarUrl} 
-                      alt={botProfile.name}
-                      className="w-7 h-7 rounded-xl object-cover border border-slate-700 shrink-0 mt-0.5"
-                      onError={(e) => {
-                        (e.target as HTMLImageElement).src = botProfile.defaultAvatarUrl;
-                      }}
-                    />
-                  )}
-                  <div className={`flex flex-col ${msg.sender === 'user' ? 'items-end' : 'items-start'}`}>
-                    <div
-                      className={`p-3.5 rounded-2xl text-xs leading-relaxed whitespace-pre-line ${
-                        msg.sender === 'user'
-                          ? 'text-white rounded-br-xs'
-                          : 'bg-slate-800 text-slate-100 border border-slate-700/80 rounded-tl-xs shadow-xs'
-                      }`}
-                      style={msg.sender === 'user' ? { backgroundColor: buttonColor } : undefined}
-                    >
-                      {msg.text}
-                    </div>
-                    <span className="text-[10px] text-slate-500 mt-1 px-1">{msg.time}</span>
-                  </div>
-                </div>
-              ))}
+            <button
+              onClick={() => setIsChatOpen(false)}
+              className="p-1.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors cursor-pointer"
+              title="Fechar chat"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
 
-              {/* Typing Indicator */}
-              {isTyping && (
-                <div className="flex items-start gap-2.5 max-w-[85%] mr-auto">
+          {/* Chat Message List */}
+          <div className="flex-1 overflow-y-auto p-4 space-y-3.5 bg-slate-950/40">
+            {chatMessages.map((msg, idx) => (
+              <div
+                key={idx}
+                className={`flex items-start gap-2.5 max-w-[90%] ${
+                  msg.sender === 'user' ? 'ml-auto flex-row-reverse' : 'mr-auto flex-row'
+                }`}
+              >
+                {msg.sender === 'bot' && (
                   <img 
                     src={botProfile.avatarUrl} 
                     alt={botProfile.name}
@@ -703,69 +685,56 @@ export const PublicLandingPage: React.FC<PublicLandingPageProps> = ({
                       (e.target as HTMLImageElement).src = botProfile.defaultAvatarUrl;
                     }}
                   />
-                  <div className="p-3.5 rounded-2xl bg-slate-800 text-slate-300 border border-slate-700/80 rounded-tl-xs flex items-center gap-1.5">
-                    <span className="text-xs text-slate-400 font-medium">Consultando catálogo</span>
-                    <span className="w-1.5 h-1.5 rounded-full bg-orange-400 animate-bounce" style={{ animationDelay: '0ms' }} />
-                    <span className="w-1.5 h-1.5 rounded-full bg-orange-400 animate-bounce" style={{ animationDelay: '150ms' }} />
-                    <span className="w-1.5 h-1.5 rounded-full bg-orange-400 animate-bounce" style={{ animationDelay: '300ms' }} />
+                )}
+                <div className={`flex flex-col ${msg.sender === 'user' ? 'items-end' : 'items-start'}`}>
+                  <div
+                    className={`p-3.5 rounded-2xl text-xs leading-relaxed whitespace-pre-line ${
+                      msg.sender === 'user'
+                        ? 'text-white rounded-br-xs'
+                        : 'bg-slate-800 text-slate-100 border border-slate-700/80 rounded-tl-xs shadow-xs'
+                    }`}
+                    style={msg.sender === 'user' ? { backgroundColor: buttonColor } : undefined}
+                  >
+                    {msg.text}
                   </div>
+                  <span className="text-[10px] text-slate-500 mt-1 px-1">{msg.time}</span>
                 </div>
-              )}
-            </div>
+              </div>
+            ))}
 
-            {/* Quick Action Pills in Chat */}
-            <div className="px-4 py-2 bg-slate-900 border-t border-slate-800/80 flex items-center gap-2 overflow-x-auto scrollbar-none">
-              <button
-                type="button"
-                onClick={() => handleSendMessage(undefined, 'Quais as melhores ofertas e cupons ativas?')}
-                className="px-2.5 py-1.5 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-300 text-[11px] shrink-0 border border-slate-700 transition-colors cursor-pointer"
-              >
-                💡 Cupons & Promoções
-              </button>
-              <button
-                type="button"
-                onClick={() => handleSendMessage(undefined, 'Quais marcas estão disponíveis no catálogo?')}
-                className="px-2.5 py-1.5 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-300 text-[11px] shrink-0 border border-slate-700 transition-colors cursor-pointer"
-              >
-                🏷️ Marcas Parceiras
-              </button>
-              <button
-                type="button"
-                onClick={() => handleSendMessage(undefined, 'Quais produtos estão em estoque?')}
-                className="px-2.5 py-1.5 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-300 text-[11px] shrink-0 border border-slate-700 transition-colors cursor-pointer"
-              >
-                📦 Consultar Estoque
-              </button>
-              <button
-                type="button"
-                onClick={() => handleSendMessage(undefined, 'Compare os preços dos perfumes disponíveis')}
-                className="px-2.5 py-1.5 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-300 text-[11px] shrink-0 border border-slate-700 transition-colors cursor-pointer"
-              >
-                ⚖️ Comparar Perfumes
-              </button>
-            </div>
-
-            {/* Chat Input Form */}
-            <form onSubmit={handleSendMessage} className="p-3 bg-slate-900 border-t border-slate-800 flex items-center gap-2">
-              <input
-                type="text"
-                placeholder="Escreva sua dúvida (ex: batom, perfume, Natura)..."
-                value={inputMessage}
-                onChange={(e) => setInputMessage(e.target.value)}
-                disabled={isTyping}
-                className="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-orange-500 disabled:opacity-50"
-              />
-              <button
-                type="submit"
-                disabled={isTyping || !inputMessage.trim()}
-                className="p-2.5 rounded-xl text-white transition-opacity cursor-pointer active:scale-95 shadow-md disabled:opacity-50"
-                style={{ backgroundColor: buttonColor }}
-                title="Enviar mensagem"
-              >
-                <Send className="w-4 h-4" />
-              </button>
-            </form>
+            {isTyping && (
+              <div className="flex items-start gap-2.5 max-w-[85%] mr-auto">
+                <img 
+                  src={botProfile.avatarUrl} 
+                  alt={botProfile.name}
+                  className="w-7 h-7 rounded-xl object-cover border border-slate-700 shrink-0 mt-0.5"
+                />
+                <div className="p-3.5 rounded-2xl bg-slate-800 text-slate-300 border border-slate-700/80 rounded-tl-xs flex items-center gap-1.5">
+                  <span className="text-xs text-slate-400 font-medium">Consultando catálogo</span>
+                </div>
+              </div>
+            )}
           </div>
+
+          {/* Chat Input Form */}
+          <form onSubmit={handleSendMessage} className="p-3 bg-slate-900 border-t border-slate-800 flex items-center gap-2">
+            <input
+              type="text"
+              placeholder="Escreva sua dúvida..."
+              value={inputMessage}
+              onChange={(e) => setInputMessage(e.target.value)}
+              disabled={isTyping}
+              className="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-orange-500"
+            />
+            <button
+              type="submit"
+              disabled={isTyping || !inputMessage.trim()}
+              className="p-2.5 rounded-xl text-white transition-opacity cursor-pointer shadow-md"
+              style={{ backgroundColor: buttonColor }}
+            >
+              <Send className="w-4 h-4" />
+            </button>
+          </form>
         </div>
       )}
 
@@ -825,6 +794,21 @@ export const PublicLandingPage: React.FC<PublicLandingPageProps> = ({
 
           {/* Action Buttons & External Drawer Toggle */}
           <div className="flex items-center gap-3">
+            {currentCustomer && (
+              <button
+                onClick={() => setIsBagOpen(true)}
+                className="relative p-2.5 rounded-xl bg-slate-900 border border-slate-800 text-slate-200 hover:text-white hover:border-slate-700 transition-all cursor-pointer"
+                aria-label="Ver Sacola"
+              >
+                <ShoppingBag className="w-5 h-5 text-orange-400" />
+                {bag.items.length > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-orange-500 text-slate-950 text-[10px] font-black w-4.5 h-4.5 flex items-center justify-center rounded-full border-2 border-slate-950">
+                    {bag.items.length}
+                  </span>
+                )}
+              </button>
+            )}
+
             <button
               onClick={() => onGoToStorefront()}
               className="hidden sm:inline-flex items-center gap-2 px-4 py-2.5 rounded-xl font-semibold text-sm text-slate-950 transition-all active:scale-[0.98] shadow-md cursor-pointer"
@@ -949,13 +933,22 @@ export const PublicLandingPage: React.FC<PublicLandingPageProps> = ({
                     </div>
                   </div>
 
-                  <div className="p-5 pt-0">
+                  <div className="p-5 pt-0 space-y-2">
                     <button
                       onClick={() => onGoToStorefront(product.showcaseId)}
-                      className="w-full py-2.5 rounded-xl bg-orange-500/10 hover:bg-orange-500 border border-orange-500/30 text-orange-400 hover:text-slate-950 font-bold text-xs transition-all flex items-center justify-center gap-2 cursor-pointer"
+                      className="w-full py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-white font-bold text-xs transition-all flex items-center justify-center gap-2 cursor-pointer"
                     >
                       <ExternalLink className="w-3.5 h-3.5" />
                       <span>Ver na Vitrine</span>
+                    </button>
+                    <button
+                      onClick={() => {
+                        if (parentShowcase) onAddToBag(product, parentShowcase);
+                      }}
+                      className="w-full py-2.5 rounded-xl bg-orange-500 hover:bg-orange-600 text-slate-950 font-black text-xs transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md"
+                    >
+                      <ShoppingBag className="w-4 h-4 text-slate-950" />
+                      <span>Adicionar à Sacola</span>
                     </button>
                   </div>
                 </div>
@@ -1019,48 +1012,76 @@ export const PublicLandingPage: React.FC<PublicLandingPageProps> = ({
       </section>
 
       {/* 5. Fixed Bottom Navigation Bar for Mobile/Tablet/Desktop Visitors */}
-      <div className="fixed bottom-0 left-0 right-0 h-16 bg-slate-900/95 border-t border-slate-800/90 backdrop-blur-md z-40 flex items-center justify-around px-4">
+      <div className="fixed bottom-0 left-0 right-0 h-16 bg-slate-900/95 border-t border-slate-800/90 backdrop-blur-md z-40 flex items-center justify-around px-2">
         
         {/* Início Button */}
         <button
-          onClick={() => {
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-          }}
-          className="flex flex-col items-center justify-center gap-1 text-slate-300 hover:text-white transition-colors cursor-pointer"
+          onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+          className="flex flex-col items-center justify-center gap-1 text-slate-300 hover:text-white transition-colors cursor-pointer w-full"
         >
           <Compass className="w-5 h-5 text-orange-400" />
-          <span className="text-[11px] font-semibold">Início</span>
+          <span className="text-[10px] font-semibold">Início</span>
         </button>
 
-        {/* Chat de Atendimento Button */}
+        {/* Vitrine Button */}
+        <button
+          onClick={() => onGoToStorefront()}
+          className="flex flex-col items-center justify-center gap-1 text-slate-300 hover:text-white transition-colors cursor-pointer w-full"
+        >
+          <Store className="w-5 h-5 text-orange-400" />
+          <span className="text-[10px] font-semibold">Vitrine</span>
+        </button>
+
+        {/* Clientes Button */}
+        <button
+          onClick={() => {
+            if (currentCustomer) {
+              if (onGoToCustomerAccount) onGoToCustomerAccount();
+            } else {
+              if (onOpenCustomerAuthModal) onOpenCustomerAuthModal();
+            }
+          }}
+          className="flex flex-col items-center justify-center gap-1 text-slate-300 hover:text-white transition-colors cursor-pointer w-full"
+        >
+          <User className="w-5 h-5 text-orange-400" />
+          <span className="text-[10px] font-semibold">Clientes</span>
+        </button>
+
+        {/* Chat Button */}
         <button
           onClick={() => setIsChatOpen(true)}
-          className="flex flex-col items-center justify-center gap-1 text-slate-300 hover:text-white transition-colors cursor-pointer relative group"
+          className="flex flex-col items-center justify-center gap-1 text-slate-300 hover:text-white transition-colors cursor-pointer w-full relative"
         >
-          <div className="relative">
-            <img 
-              src={botProfile.avatarUrl} 
-              alt={botProfile.name}
-              className="w-5 h-5 rounded-full object-cover border border-orange-400/80 shadow-xs group-hover:scale-105 transition-transform"
-              onError={(e) => {
-                (e.target as HTMLImageElement).src = botProfile.defaultAvatarUrl;
-              }}
-            />
-            <span className="w-2 h-2 rounded-full bg-emerald-500 absolute -bottom-0.5 -right-0.5 border border-slate-900" />
-          </div>
-          <span className="text-[11px] font-semibold">{botProfile.name || 'Chat de Atendimento'}</span>
+          <MessageSquare className="w-5 h-5 text-orange-400" />
+          <span className="text-[10px] font-semibold">Chat</span>
         </button>
-
-        {/* Menu Button */}
-        <button
-          onClick={() => setIsExternalDrawerOpen(true)}
-          className="flex flex-col items-center justify-center gap-1 text-slate-300 hover:text-white transition-colors cursor-pointer"
-        >
-          <Menu className="w-5 h-5 text-orange-400" />
-          <span className="text-[11px] font-semibold">Menu</span>
-        </button>
-
       </div>
+
+      {/* Floating Bag Button */}
+      {currentCustomer && (
+        <button
+          onClick={() => setIsBagOpen(true)}
+          className="fixed bottom-24 right-6 z-40 w-14 h-14 bg-white rounded-full shadow-2xl flex items-center justify-center text-slate-900 transition-all hover:scale-110 cursor-pointer border border-slate-800"
+          title="Sacola de Compras"
+        >
+          <ShoppingBag className="w-6 h-6 text-orange-500" />
+          {bag.items.length > 0 && (
+            <span className="absolute -top-1 -right-1 bg-orange-500 text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full border border-slate-950">
+              {bag.items.length}
+            </span>
+          )}
+        </button>
+      )}
+
+      {/* Shopping Bag Modal */}
+      {isBagOpen && (
+        <ShoppingBagView 
+          bag={bag} 
+          onClose={() => setIsBagOpen(false)} 
+          onUpdateQuantity={onUpdateQuantity} 
+          onRemoveItem={onRemoveItem}
+        />
+      )}
 
     </div>
   );

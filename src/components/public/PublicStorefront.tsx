@@ -3,7 +3,7 @@ import {
   Store, 
   ArrowLeft, 
   ExternalLink, 
-  ShoppingBag, 
+  ShoppingBag as BagIcon, 
   Sparkles, 
   Search, 
   ChevronRight,
@@ -14,7 +14,8 @@ import {
   Zap,
   User
 } from 'lucide-react';
-import { Showcase, Product, Banner, CustomerProfile } from '../../types';
+import { Showcase, Product, Banner, CustomerProfile, ShoppingBag } from '../../types';
+import { ShoppingBagView } from '../customer/ShoppingBagView';
 import { customerService } from '../../services/customerService';
 
 interface PublicStorefrontProps {
@@ -31,6 +32,10 @@ interface PublicStorefrontProps {
   showcasePosition?: 'above_banner' | 'below_banner';
   currentCustomer?: CustomerProfile | null;
   onOpenCustomerAuthModal?: () => void;
+  onAddToBag: (product: Product, showcase: Showcase) => void;
+  bag: ShoppingBag;
+  onUpdateQuantity: (productId: string, quantity: number) => void;
+  onRemoveItem: (productId: string) => void;
 }
 
 export const PublicStorefront: React.FC<PublicStorefrontProps> = ({
@@ -46,7 +51,11 @@ export const PublicStorefront: React.FC<PublicStorefrontProps> = ({
   onOpenAuthModal,
   showcasePosition = 'below_banner',
   currentCustomer,
-  onOpenCustomerAuthModal
+  onOpenCustomerAuthModal,
+  onAddToBag,
+  bag,
+  onUpdateQuantity,
+  onRemoveItem
 }) => {
   const activeShowcases = showcases.filter(s => s.isActive);
   const [activeShowcaseId, setActiveShowcaseId] = useState<string>(
@@ -57,6 +66,7 @@ export const PublicStorefront: React.FC<PublicStorefrontProps> = ({
   const [activeProductModal, setActiveProductModal] = useState<Product | null>(null);
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
   const [currentBannerIndex, setCurrentBannerIndex] = useState(0);
+  const [isBagOpen, setIsBagOpen] = useState(false);
   const [pegarAgoraAlert, setPegarAgoraAlert] = useState<{
     isOpen: boolean;
     title: string;
@@ -260,6 +270,21 @@ export const PublicStorefront: React.FC<PublicStorefrontProps> = ({
             </button>
           )}
 
+          {currentCustomer && (
+            <button
+              onClick={() => setIsBagOpen(true)}
+              className="relative p-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 transition-all cursor-pointer"
+              aria-label="Ver Sacola"
+            >
+              <BagIcon className="w-5 h-5 text-orange-500" />
+              {bag.items.length > 0 && (
+                <span className="absolute -top-1 -right-1 bg-orange-500 text-white text-[10px] font-black w-4.5 h-4.5 flex items-center justify-center rounded-full border-2 border-white">
+                  {bag.items.length}
+                </span>
+              )}
+            </button>
+          )}
+
           {onGoToLanding && (
             <button
               type="button"
@@ -377,9 +402,16 @@ export const PublicStorefront: React.FC<PublicStorefrontProps> = ({
                     onClick={() => handleAffiliateClick(product.affiliateUrl)}
                     className="w-full py-2.5 rounded-xl bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-white font-bold text-xs transition-all shadow-md flex items-center justify-center gap-2"
                   >
-                    <ShoppingBag className="w-4 h-4" />
+                    <BagIcon className="w-4 h-4" />
                     <span>Comprar na {currentShowcase?.name}</span>
                     <ExternalLink className="w-3.5 h-3.5" />
+                  </button>
+                  <button
+                    onClick={() => onAddToBag(product, currentShowcase)}
+                    className="w-full py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs transition-all shadow-sm flex items-center justify-center gap-1.5 cursor-pointer"
+                  >
+                    <BagIcon className="w-4 h-4" />
+                    <span>Adicionar à Sacola</span>
                   </button>
                   <button
                     onClick={() => handlePegarAgora(product)}
@@ -453,7 +485,7 @@ export const PublicStorefront: React.FC<PublicStorefrontProps> = ({
                   onClick={() => handleAffiliateClick(activeProductModal.affiliateUrl)}
                   className="w-full py-3 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs transition-colors shadow-md flex items-center justify-center gap-2"
                 >
-                  <ShoppingBag className="w-4 h-4" />
+                  <BagIcon className="w-4 h-4" />
                   <span>Ir para Loja Oficial ({currentShowcase?.name})</span>
                   <ExternalLink className="w-4 h-4" />
                 </button>
@@ -532,6 +564,32 @@ export const PublicStorefront: React.FC<PublicStorefrontProps> = ({
           </div>
         </div>
       )}
+      {/* Floating Bag Button */}
+      {currentCustomer && (
+        <button
+          onClick={() => setIsBagOpen(true)}
+          className="fixed bottom-24 right-6 z-40 w-14 h-14 bg-white rounded-full shadow-2xl flex items-center justify-center text-slate-900 transition-all hover:scale-110 cursor-pointer border border-slate-200"
+          title="Sacola de Compras"
+        >
+          <BagIcon className="w-6 h-6" />
+          {bag.items.length > 0 && (
+            <span className="absolute -top-1 -right-1 bg-orange-500 text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full">
+              {bag.items.length}
+            </span>
+          )}
+        </button>
+      )}
+
+      {/* Shopping Bag Modal */}
+      {isBagOpen && (
+        <ShoppingBagView 
+          bag={bag} 
+          onClose={() => setIsBagOpen(false)} 
+          onUpdateQuantity={(pid, q) => onUpdateQuantity(pid, q)} 
+          onRemoveItem={(pid) => onRemoveItem(pid)}
+        />
+      )}
+
     </div>
   );
 };

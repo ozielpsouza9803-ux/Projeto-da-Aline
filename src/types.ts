@@ -212,3 +212,17 @@ export interface CustomerProfile {
 }
 
 
+export interface BagItem {
+  productId: string;
+  name: string;
+  showcaseId: string;
+  showcaseName: string;
+  price: number;
+  quantity: number;
+  photoUrl: string;
+}
+
+export interface ShoppingBag {
+  items: BagItem[];
+  total: number;
+}

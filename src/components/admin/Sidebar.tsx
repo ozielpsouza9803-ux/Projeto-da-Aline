@@ -1,5 +1,6 @@
 import React from 'react';
 import { 
+  Home,
   LayoutDashboard, 
   Store, 
   Package, 
@@ -39,6 +40,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   isAdminSession
 }) => {
   const menuItems = [
+    { id: 'home', label: 'Início da Loja Pública', icon: Home },
     { id: 'overview', label: 'Início do Painel', icon: LayoutDashboard },
     { id: 'assistant', label: 'Assistente de Gerência', icon: Sparkles },
     { id: 'chatbots', label: 'Perfis dos Chatbots', icon: Bot },

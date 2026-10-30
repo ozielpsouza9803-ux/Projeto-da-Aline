@@ -7,7 +7,8 @@ import {
   Banner, 
   ClickRecord, 
   CommissionRecord, 
-  AdminSettings 
+  AdminSettings,
+  ShoppingBag
 } from './types';
 import { 
   fetchProductsFromSupabase, 
@@ -49,6 +50,7 @@ import { PublicLandingPage } from './components/public/PublicLandingPage';
 import { CustomerAuthModal } from './components/customer/CustomerAuthModal';
 import { CustomerAccountView } from './components/customer/CustomerAccountView';
 import { customerService } from './services/customerService';
+import { bagService } from './services/bagService';
 import { CustomerProfile } from './types';
 
 export default function App() {
@@ -63,6 +65,14 @@ export default function App() {
   const [currentUser, setCurrentUser] = useState<SupabaseUser | null>(null);
   const [isAdminRole, setIsAdminRole] = useState<boolean>(false);
   const [currentCustomer, setCurrentCustomer] = useState<CustomerProfile | null>(null);
+  const [bag, setBag] = useState<ShoppingBag>({ items: [], total: 0 });
+
+  useEffect(() => {
+    if (currentCustomer) {
+      setBag(bagService.getBag(currentCustomer.email));
+    }
+  }, [currentCustomer]);
+
 
   // Data state
   const [showcases, setShowcases] = useState<Showcase[]>(storageService.getShowcases());
@@ -261,6 +271,44 @@ export default function App() {
     alert('Padrões restaurados com sucesso!');
   };
 
+  // Bag Handlers
+  const handleAddToBag = (product: Product, showcase: Showcase) => {
+    if (!currentCustomer) {
+      setIsCustomerAuthModalOpen(true);
+      return;
+    }
+    
+    // Ensure we use the latest stock info from the state
+    const latestProduct = products.find(p => p.id === product.id) || product;
+    
+    const res = bagService.addToBag(currentCustomer.email, latestProduct, showcase);
+    if (res.success) {
+      setBag(bagService.getBag(currentCustomer.email));
+      // Subtle feedback instead of alert if possible, but keep alert for now as requested
+      alert(res.message);
+    } else {
+      alert(res.message);
+    }
+  };
+
+  const handleRemoveFromBag = (productId: string) => {
+    if (!currentCustomer) return;
+    bagService.removeFromBag(currentCustomer.email, productId);
+    setBag(bagService.getBag(currentCustomer.email));
+  };
+
+  const handleUpdateQuantity = (productId: string, quantity: number) => {
+    if (!currentCustomer) return;
+    const product = products.find(p => p.id === productId);
+    const res = bagService.updateQuantity(currentCustomer.email, productId, quantity, product?.stockQuantity || 0);
+    if (res.success) {
+      setBag(bagService.getBag(currentCustomer.email));
+    } else {
+      alert(res.message);
+    }
+  };
+
+
   // Auth Session State
   const isAdminSession = !!currentUser || localStorage.getItem('omnibrand_local_admin_session') === 'true';
 
@@ -331,6 +379,10 @@ export default function App() {
           currentCustomer={currentCustomer}
           onOpenCustomerAuthModal={() => setIsCustomerAuthModalOpen(true)}
           onGoToCustomerAccount={() => setViewMode('customer_account')}
+          bag={bag}
+          onUpdateQuantity={handleUpdateQuantity}
+          onRemoveItem={handleRemoveFromBag}
+          onAddToBag={handleAddToBag}
         />
       ) : viewMode === 'public' ? (
         <PublicStorefront
@@ -351,6 +403,10 @@ export default function App() {
           isAdminSession={isAdminSession}
           onLogout={handleLogout}
           onOpenAuthModal={() => setIsAuthModalOpen(true)}
+          onAddToBag={handleAddToBag}
+          bag={bag}
+          onUpdateQuantity={handleUpdateQuantity}
+          onRemoveItem={handleRemoveFromBag}
         />
       ) : (
         <div 
@@ -361,7 +417,13 @@ export default function App() {
           {/* Sidebar */}
           <Sidebar
             currentTab={currentTab}
-            setCurrentTab={setCurrentTab}
+            setCurrentTab={(tab) => {
+              if (tab === 'home') {
+                setViewMode('landing');
+              } else {
+                setCurrentTab(tab);
+              }
+            }}
             onOpenStorefront={() => {
               setSelectedPreviewShowcaseId(undefined);
               setViewMode('public');

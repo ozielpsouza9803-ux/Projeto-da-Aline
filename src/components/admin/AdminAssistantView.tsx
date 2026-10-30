@@ -140,13 +140,13 @@ export const AdminAssistantView: React.FC = () => {
             setServerAuthStatus('unauthorized');
             setServerAuthMessage('Servidor rejeitou autenticação: usuário não possui permissão de administrador.');
           }
-        } catch {
+        } catch (err: any) {
           setServerAuthStatus('local_only');
-          setServerAuthMessage('Servidor inacessível para verificação JWT.');
+          setServerAuthMessage(`Servidor inacessível para verificação JWT. (Erro: ${err.message || 'Conexão recusada'}). O assistente operará em modo local.`);
         }
       } else {
         setServerAuthStatus('local_only');
-        setServerAuthMessage('Sem token de sessão JWT do Supabase no navegador.');
+        setServerAuthMessage('Sessão JWT não encontrada. Faça login como administrador para habilitar a validação do servidor.');
       }
 
       // Generate initial real proposals and stock report
