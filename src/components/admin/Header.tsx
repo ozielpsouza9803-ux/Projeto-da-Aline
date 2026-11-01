@@ -1,5 +1,5 @@
 import React from 'react';
-import { Menu, Search, ShieldCheck, Lock, LogOut } from 'lucide-react';
+import { Menu, Search, ShieldCheck, Lock, LogOut, Store } from 'lucide-react';
 import { User as SupabaseUser } from '@supabase/supabase-js';
 
 interface HeaderProps {
@@ -11,6 +11,7 @@ interface HeaderProps {
   setSearchQuery: (query: string) => void;
   currentUser: SupabaseUser | null;
   isAdminSession: boolean;
+  onGoToStorefront?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -21,7 +22,8 @@ export const Header: React.FC<HeaderProps> = ({
   searchQuery,
   setSearchQuery,
   currentUser,
-  isAdminSession
+  isAdminSession,
+  onGoToStorefront
 }) => {
   return (
     <header 
@@ -72,10 +74,19 @@ export const Header: React.FC<HeaderProps> = ({
         />
       </div>
 
-      {/* Right: Admin profile / Logout button */}
+      {/* Right: Loja Pública / Admin profile / Logout button */}
       <div className="flex items-center gap-2 sm:gap-3">
-        {/* Empty space placeholder */}
-        <div className="flex-1" />
+        {onGoToStorefront && (
+          <button
+            type="button"
+            onClick={onGoToStorefront}
+            className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold transition-all border border-slate-200 cursor-pointer"
+            title="Ir para a Loja Pública (sem encerrar sessão)"
+          >
+            <Store className="w-3.5 h-3.5 text-orange-500 shrink-0" />
+            <span>Loja Pública</span>
+          </button>
+        )}
 
         <div className="flex items-center gap-2 pl-2 border-l border-slate-200">
           {isAdminSession ? (

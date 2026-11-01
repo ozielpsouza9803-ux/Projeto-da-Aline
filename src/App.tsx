@@ -43,7 +43,6 @@ import { SecurityView } from './components/admin/SecurityView';
 import { SettingsView } from './components/admin/SettingsView';
 import { StockManagementView } from './components/admin/StockManagementView';
 import { AdminAssistantView } from './components/admin/AdminAssistantView';
-import { ChatbotProfilesView } from './components/admin/ChatbotProfilesView';
 import { CustomersManagementView } from './components/admin/CustomersManagementView';
 import { PublicStorefront } from './components/public/PublicStorefront';
 import { PublicLandingPage } from './components/public/PublicLandingPage';
@@ -328,8 +327,9 @@ export default function App() {
   // Tab titles mapping
   const tabTitles: Record<string, string> = {
     overview: 'Início do Painel',
-    assistant: 'Assistente de Gerência',
-    chatbots: 'Perfis dos Chatbots',
+    ai_assistant: 'IA Administrativa',
+    assistant: 'IA Administrativa',
+    chatbots: 'IA Administrativa',
     customers: 'Gestão de Clientes VIP',
     showcases: 'Vitrines Multimarcas',
     products: 'Produtos & Catálogo',
@@ -464,6 +464,7 @@ export default function App() {
               setSearchQuery={setSearchQuery}
               currentUser={currentUser}
               isAdminSession={isAdminSession}
+              onGoToStorefront={() => setViewMode('landing')}
             />
 
             <main className="flex-1 p-4 lg:p-8 max-w-7xl w-full mx-auto">
@@ -477,12 +478,8 @@ export default function App() {
                 />
               )}
 
-              {currentTab === 'assistant' && (
+              {(currentTab === 'ai_assistant' || currentTab === 'assistant' || currentTab === 'chatbots') && (
                 <AdminAssistantView />
-              )}
-
-              {currentTab === 'chatbots' && (
-                <ChatbotProfilesView />
               )}
 
               {currentTab === 'customers' && (

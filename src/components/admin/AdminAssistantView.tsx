@@ -26,10 +26,20 @@ import {
   User,
   PlusCircle,
   SlidersHorizontal,
-  Store
+  Store,
+  Camera,
+  Upload,
+  RotateCcw,
+  UserCheck,
+  MessageSquare,
+  Eye,
+  Link as LinkIcon,
+  Check,
+  ShoppingBag,
+  BarChart3
 } from 'lucide-react';
 import { Product, Showcase, AdminActionProposal, ReplenishmentReport, ReplenishmentItem, ChatbotProfile } from '../../types';
-import { fetchProductsFromSupabase, fetchShowcasesFromSupabase, getAdminAccessToken } from '../../services/supabaseClient';
+import { fetchProductsFromSupabase, fetchShowcasesFromSupabase, getAdminAccessToken, uploadMediaToSupabase } from '../../services/supabaseClient';
 import { storageService } from '../../services/storage';
 import { formatBRL } from '../../services/chatbotQueryService';
 import { chatbotProfileService } from '../../services/chatbotProfileService';
@@ -75,9 +85,128 @@ export const AdminAssistantView: React.FC = () => {
   const [selectedFilter, setSelectedFilter] = useState<'all' | 'pending' | 'reviewed'>('all');
   const [feedbackNotice, setFeedbackNotice] = useState<string | null>(null);
 
-  // UI Expandable Controls
+  // UI Expandable Controls & Sub-Tab Navigation
+  const [activeSubTab, setActiveSubTab] = useState<'conversations' | 'identity' | 'stock'>('conversations');
   const [isActionsMenuOpen, setIsActionsMenuOpen] = useState<boolean>(false);
   const [isStockReportOpen, setIsStockReportOpen] = useState<boolean>(false);
+
+  // Chatbot Profiles editing state (unified into Admin AI)
+  const [allProfiles, setAllProfiles] = useState<ChatbotProfile[]>([]);
+  const [selectedBotId, setSelectedBotId] = useState<string>('admin-assistant');
+  const [profileName, setProfileName] = useState<string>('');
+  const [profileRole, setProfileRole] = useState<string>('');
+  const [profileDesc, setProfileDesc] = useState<string>('');
+  const [profileAvatarUrl, setProfileAvatarUrl] = useState<string>('');
+  const [profilePreviewPhoto, setProfilePreviewPhoto] = useState<string>('');
+  const [isPhotoChanged, setIsPhotoChanged] = useState<boolean>(false);
+  const [isUploadingBotPhoto, setIsUploadingBotPhoto] = useState<boolean>(false);
+  const [showUrlField, setShowUrlField] = useState<boolean>(false);
+  const [tempBotUrl, setTempBotUrl] = useState<string>('');
+  const profileFileInputRef = useRef<HTMLInputElement>(null);
+
+  // Load profiles on mount and sync
+  useEffect(() => {
+    const loaded = chatbotProfileService.getAllProfiles();
+    setAllProfiles(loaded);
+    const curr = loaded.find(p => p.id === selectedBotId) || loaded[0];
+    if (curr) {
+      loadProfileIntoForm(curr);
+    }
+  }, []);
+
+  const loadProfileIntoForm = (p: ChatbotProfile) => {
+    setProfileName(p.name);
+    setProfileRole(p.role);
+    setProfileDesc(p.description);
+    setProfileAvatarUrl(p.avatarUrl);
+    setProfilePreviewPhoto(p.avatarUrl);
+    setIsPhotoChanged(false);
+    setShowUrlField(false);
+    setTempBotUrl('');
+  };
+
+  const handleSelectBotProfile = (id: string) => {
+    setSelectedBotId(id);
+    const target = allProfiles.find(p => p.id === id);
+    if (target) {
+      loadProfileIntoForm(target);
+    }
+  };
+
+  const handleSaveBotProfile = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!profileName.trim()) {
+      setFeedbackNotice('O nome do assistente não pode ficar vazio.');
+      return;
+    }
+    const current = allProfiles.find(p => p.id === selectedBotId);
+    if (!current) return;
+
+    const updatedProfile: ChatbotProfile = {
+      ...current,
+      name: profileName.trim(),
+      role: profileRole.trim(),
+      description: profileDesc.trim(),
+      avatarUrl: profileAvatarUrl || current.defaultAvatarUrl,
+      updatedAt: new Date().toISOString()
+    };
+
+    chatbotProfileService.saveProfile(updatedProfile);
+    setAllProfiles(prev => prev.map(p => p.id === updatedProfile.id ? updatedProfile : p));
+    setIsPhotoChanged(false);
+    if (updatedProfile.id === 'admin-assistant') {
+      setAdminBotProfile(updatedProfile);
+    }
+    setFeedbackNotice(`Identidade de "${updatedProfile.name}" salva com sucesso!`);
+  };
+
+  const handleRestoreBotDefault = () => {
+    const restored = chatbotProfileService.restoreDefault(selectedBotId);
+    loadProfileIntoForm(restored);
+    setAllProfiles(prev => prev.map(p => p.id === restored.id ? restored : p));
+    if (restored.id === 'admin-assistant') {
+      setAdminBotProfile(restored);
+    }
+    setFeedbackNotice(`Identidade de "${restored.name}" restaurada para os padrões originais.`);
+  };
+
+  const handleBotPhotoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) {
+      setFeedbackNotice('A foto selecionada deve ter até 5MB.');
+      return;
+    }
+    setIsUploadingBotPhoto(true);
+    const reader = new FileReader();
+    reader.onload = async (event) => {
+      const dataUrl = event.target?.result as string;
+      setProfilePreviewPhoto(dataUrl);
+      setProfileAvatarUrl(dataUrl);
+      setIsPhotoChanged(true);
+      setIsUploadingBotPhoto(false);
+      setFeedbackNotice('Foto carregada! Clique em "Salvar Identidade" para confirmar.');
+      try {
+        const uploadedUrl = await uploadMediaToSupabase(file);
+        if (uploadedUrl) {
+          setProfileAvatarUrl(uploadedUrl);
+          setProfilePreviewPhoto(uploadedUrl);
+        }
+      } catch (err) {
+        // Local state preserved
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleApplyBotUrl = () => {
+    if (!tempBotUrl.trim()) return;
+    setProfilePreviewPhoto(tempBotUrl.trim());
+    setProfileAvatarUrl(tempBotUrl.trim());
+    setIsPhotoChanged(true);
+    setShowUrlField(false);
+    setFeedbackNotice('URL de imagem aplicada! Clique em "Salvar Identidade" para efetivar.');
+  };
 
   // Centralized Chat State
   const [chatInput, setChatInput] = useState<string>('');
@@ -352,8 +481,25 @@ export const AdminAssistantView: React.FC = () => {
     setProposals(dynamicProposals);
   };
 
-  // 3. Handle Proposal Decision (STRICTLY in-memory proposal review, NO DB WRITES)
+  // 3. Handle Proposal Decision (EXPLICIT ADMIN CONFIRMATION REQUIRED)
   const handleProposalDecision = (proposalId: string, decision: 'approved' | 'rejected') => {
+    const target = proposals.find(p => p.id === proposalId);
+
+    // Explicit Administrator Confirmation
+    if (decision === 'approved') {
+      const confirmed = window.confirm(
+        `CONFIRMAÇÃO OBRIGATÓRIA DO ADMINISTRADOR\n\n` +
+        `Ação: Aprovar e validar a proposta "${target?.title || proposalId}"\n` +
+        `Entidade: ${target?.entityName || 'Catálogo'}\n` +
+        `Tipo de Operação: ${target?.type || 'Ação Administrativa'}\n` +
+        `Justificativa: ${target?.justification || 'Solicitação via IA Administrativa'}\n\n` +
+        `Deseja autorizar e validar esta alteração?`
+      );
+      if (!confirmed) {
+        return;
+      }
+    }
+
     setProposals(prev =>
       prev.map(p => {
         if (p.id === proposalId) {
@@ -368,7 +514,7 @@ export const AdminAssistantView: React.FC = () => {
     );
 
     const actionText = decision === 'approved' ? 'Aprovada' : 'Rejeitada';
-    const message = `Proposta marcada como ${actionText} no painel! Conforme a regra de segurança, nenhuma gravação foi salva no Supabase nesta etapa.`;
+    const message = `Proposta "${target?.title || proposalId}" foi ${actionText.toUpperCase()} com sucesso pelo administrador!`;
     setFeedbackNotice(message);
 
     // Notify inside chat
@@ -377,7 +523,7 @@ export const AdminAssistantView: React.FC = () => {
       {
         id: `msg-dec-${Date.now()}`,
         sender: 'assistant',
-        text: `Ação registrada: Proposta "${proposalId}" foi ${actionText.toUpperCase()} por você. (Status atualizado na interface; nenhuma gravação externa executada).`,
+        text: `Ação confirmada pelo administrador: Proposta "${target?.title || proposalId}" foi ${actionText.toUpperCase()}. Status atualizado na interface com validação segura.`,
         timestamp: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
         relatedProposalId: proposalId
       }
@@ -585,13 +731,166 @@ export const AdminAssistantView: React.FC = () => {
       return;
     }
 
+    // Scenario E: Showcase / Brand inquiry (Natura, O Boticário, Eudora, etc.)
+    if (q.includes('marca') || q.includes('marcas') || q.includes('vitrine') || q.includes('vitrines') || q.includes('natura') || q.includes('boticário') || q.includes('boticario') || q.includes('eudora') || q.includes('avon')) {
+      const activeShowcases = showcases.filter(s => s.isActive);
+      let reply = `Encontrei **${showcases.length} vitrines/marcas** cadastradas (${activeShowcases.length} ativas):\n\n`;
+      showcases.slice(0, 6).forEach(s => {
+        const prodCount = products.filter(p => p.showcaseId === s.id).length;
+        reply += `• **${s.name}** (${s.isActive ? 'Ativa' : 'Inativa'}) — ${prodCount} produtos vinculados\n`;
+      });
+      reply += `\nVocê pode me pedir para criar um banner ou destaque para qualquer uma dessas marcas, ou clicar no botão **Ações do Assistente** acima.`;
+
+      setChatMessages(prev => [
+        ...prev,
+        {
+          id: `msg-asst-${Date.now()}`,
+          sender: 'assistant',
+          text: reply,
+          timestamp: timeStr
+        }
+      ]);
+      return;
+    }
+
+    // Scenario F: Orders, Sales, Commissions & Financial Overview
+    if (q.includes('pedido') || q.includes('pedidos') || q.includes('venda') || q.includes('vendas') || q.includes('comiss') || q.includes('faturamento') || q.includes('lucro')) {
+      const commissions = storageService.getCommissions();
+      const clicks = storageService.getClicks();
+      const totalCommissions = commissions.reduce((sum, c) => sum + (c.commissionAmount || 0), 0);
+      const pendingCommissions = commissions.filter(c => c.status === 'Pendente').reduce((sum, c) => sum + (c.commissionAmount || 0), 0);
+      const totalClicks = clicks.length;
+
+      let reply = `📊 **Resumo de Vendas, Pedidos e Comissões:**\n\n`;
+      reply += `• **Total de Registros de Comissão:** ${commissions.length} transações\n`;
+      reply += `• **Total de Comissões Acumuladas:** ${formatBRL(totalCommissions)}\n`;
+      reply += `• **Comissões a Liberar:** ${formatBRL(pendingCommissions)}\n`;
+      reply += `• **Cliques de Afiliados Rastreados:** ${totalClicks} acessos\n\n`;
+      reply += `💡 Todos os pedidos de clientes são gerados com confirmação e integrados ao painel administrativo.`;
+
+      setChatMessages(prev => [
+        ...prev,
+        {
+          id: `msg-asst-${Date.now()}`,
+          sender: 'assistant',
+          text: reply,
+          timestamp: timeStr
+        }
+      ]);
+      return;
+    }
+
+    // Scenario G: Banners & Highlights
+    if (q.includes('banner') || q.includes('banners') || q.includes('carrossel') || q.includes('destaque')) {
+      const topShowcase = showcases[0];
+      const newPropId = `prop-banner-${Date.now()}`;
+      const newProposal: AdminActionProposal = {
+        id: newPropId,
+        type: 'create_banner',
+        title: `Novo Banner Promocional: Vitrine ${topShowcase?.name || 'Geral'}`,
+        entityType: 'banner',
+        entityId: `banner-${Date.now()}`,
+        entityName: `Banner ${topShowcase?.name || 'OmniBrand'}`,
+        justification: `Comando administrativo recebido: "${text}". Proposta gerada com chamada promocional e imagem de catálogo.`,
+        previousData: null,
+        proposedData: {
+          title: `Ofertas Imperdíveis ${topShowcase?.name || 'OmniBrand'}`,
+          subtitle: 'Fragrâncias, cuidados pessoais e maquiagem com entrega rápida',
+          imageUrl: topShowcase?.bannerUrl || 'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=1200&auto=format&fit=crop&q=80',
+          ctaText: 'Ver Seleção Especial',
+          ctaUrl: `#vitrine-${topShowcase?.slug || 'geral'}`,
+          order: 1,
+          isActive: true,
+          showcaseId: topShowcase?.id || ''
+        },
+        status: 'pending',
+        createdAt: new Date().toISOString()
+      };
+
+      setProposals(prev => [newProposal, ...prev]);
+
+      setChatMessages(prev => [
+        ...prev,
+        {
+          id: `msg-asst-${Date.now()}`,
+          sender: 'assistant',
+          text: `Preparei a proposta de um novo banner estratégico para a vitrine **${topShowcase?.name || 'Geral'}**! Você pode visualizá-la na lista de propostas abaixo e confirmar com segurança.`,
+          timestamp: timeStr,
+          relatedProposalId: newPropId
+        }
+      ]);
+      return;
+    }
+
+    // Scenario H: Reports & General Executive Overview
+    if (q.includes('relatório') || q.includes('relatorio') || q.includes('resumo') || q.includes('kpi') || q.includes('geral')) {
+      const lowStock = replenishmentReport?.lowStockCount || 0;
+      const outStock = replenishmentReport?.outOfStockCount || 0;
+      const activeShowcases = showcases.filter(s => s.isActive).length;
+
+      let reply = `📑 **Relatório Executivo Geral do Sistema:**\n\n`;
+      reply += `• **Produtos Cadastrados:** ${products.length} itens\n`;
+      reply += `• **Vitrines / Marcas:** ${showcases.length} (${activeShowcases} ativas)\n`;
+      reply += `• **Situação do Estoque:** ${outStock} esgotados | ${lowStock} em nível crítico\n`;
+      reply += `• **Investimento em Reposição:** ${formatBRL(replenishmentReport?.totalEstimatedInvestment || 0)}\n`;
+      reply += `• **Propostas Pendentes:** ${proposals.filter(p => p.status === 'pending').length} aguardando sua revisão\n\n`;
+      reply += `Você pode abrir o relatório completo de estoque abaixo ou navegar pelas abas superiores.`;
+
+      setChatMessages(prev => [
+        ...prev,
+        {
+          id: `msg-asst-${Date.now()}`,
+          sender: 'assistant',
+          text: reply,
+          timestamp: timeStr
+        }
+      ]);
+      return;
+    }
+
+    // Scenario I: AI Identity & Avatar Customization
+    if (q.includes('avatar') || q.includes('identidade') || q.includes('personalizar') || q.includes('foto da ia') || q.includes('nome da ia')) {
+      setActiveSubTab('identity');
+      setChatMessages(prev => [
+        ...prev,
+        {
+          id: `msg-asst-${Date.now()}`,
+          sender: 'assistant',
+          text: `Mudei para a aba **"Personalizar Identidade da IA"** acima! Nela você pode alterar o nome, função, descrição e enviar fotos da sua galeria ou câmera para personalizar tanto o meu avatar quanto o do atendimento público.`,
+          timestamp: timeStr
+        }
+      ]);
+      return;
+    }
+
+    // Scenario J: Catalog / Products inquiry
+    if (q.includes('catálogo') || q.includes('catalogo') || q.includes('produtos') || q.includes('quantos produtos')) {
+      let reply = `📦 Nosso catálogo conta atualmente com **${products.length} produtos** cadastrados no Supabase.\n\n`;
+      const categories = Array.from(new Set(products.map(p => p.category))).filter(Boolean);
+      reply += `• **Categorias:** ${categories.join(', ')}\n`;
+      reply += `• **Produtos em Promoção:** ${products.filter(p => p.promotionalPrice && p.promotionalPrice < p.price).length} itens\n`;
+      reply += `• **Estoque Normal:** ${products.filter(p => (p.stockQuantity ?? 0) > 5).length} itens\n\n`;
+      reply += `Digite o nome de qualquer produto (ex: "Kaiak", "Malbec", "Batom") para consultar dados específicos.`;
+
+      setChatMessages(prev => [
+        ...prev,
+        {
+          id: `msg-asst-${Date.now()}`,
+          sender: 'assistant',
+          text: reply,
+          timestamp: timeStr
+        }
+      ]);
+      return;
+    }
+
     // Default conversational reply
     setChatMessages(prev => [
       ...prev,
       {
         id: `msg-asst-${Date.now()}`,
         sender: 'assistant',
-        text: `Entendido! Você pode consultar preços, estoques, enviar fotos para produtos ou clicar no botão **"Ações do Assistente"** no canto superior para preparar ações estruturadas (preços, fotos, vitrines e banners).`,
+        text: `Comando compreendido! Sou a sua IA Administrativa Unificada. Você pode me consultar sobre **produtos, preços, estoque, vitrines, marcas, banners, promoções, pedidos e relatórios**, ou usar as abas superiores para personalizar a identidade dos assistentes.`,
         timestamp: timeStr
       }
     ]);
@@ -1023,15 +1322,248 @@ export const AdminAssistantView: React.FC = () => {
         </div>
       )}
 
-      {/* 2. Caixa de Conversa Centralizada (Texto + Foto) */}
+      {/* Sub-Abas de Navegação da IA Administrativa */}
       <div 
         style={{
           backgroundColor: 'var(--admin-card-bg, #ffffff)',
           borderColor: 'var(--admin-border, #e2e8f0)',
-          color: 'var(--admin-text-primary, #0f172a)'
         }}
-        className="rounded-2xl border shadow-xs overflow-hidden flex flex-col"
+        className="rounded-2xl border p-1.5 flex flex-wrap items-center gap-1.5 shadow-xs"
       >
+        <button
+          type="button"
+          onClick={() => setActiveSubTab('conversations')}
+          className={`flex-1 min-w-[140px] px-4 py-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-all ${
+            activeSubTab === 'conversations'
+              ? 'bg-indigo-600 text-white shadow-xs'
+              : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
+          }`}
+        >
+          <MessageSquare className="w-4 h-4" />
+          <span>Conversa & Propostas</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setActiveSubTab('identity')}
+          className={`flex-1 min-w-[140px] px-4 py-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-all ${
+            activeSubTab === 'identity'
+              ? 'bg-indigo-600 text-white shadow-xs'
+              : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
+          }`}
+        >
+          <UserCheck className="w-4 h-4" />
+          <span>Personalizar Identidade da IA</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => {
+            setActiveSubTab('stock');
+            setIsStockReportOpen(true);
+          }}
+          className={`flex-1 min-w-[140px] px-4 py-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-all ${
+            activeSubTab === 'stock'
+              ? 'bg-indigo-600 text-white shadow-xs'
+              : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
+          }`}
+        >
+          <Package className="w-4 h-4" />
+          <span>Relatório de Estoque ({replenishmentReport?.totalAlerts || 0})</span>
+        </button>
+      </div>
+
+      {/* ABA: Personalização de Identidade dos Chatbots */}
+      {activeSubTab === 'identity' && (
+        <div 
+          style={{
+            backgroundColor: 'var(--admin-card-bg, #ffffff)',
+            borderColor: 'var(--admin-border, #e2e8f0)',
+            color: 'var(--admin-text-primary, #0f172a)'
+          }}
+          className="rounded-2xl border p-6 shadow-xs space-y-6 animate-in fade-in duration-200"
+        >
+          <div>
+            <h2 className="text-base sm:text-lg font-bold">Personalizar Identidade dos Assistentes</h2>
+            <p style={{ color: 'var(--admin-text-secondary, #64748b)' }} className="text-xs mt-1">
+              Configure o avatar, nome e função da IA Administrativa e do Atendimento da Loja. As fotos podem ser enviadas do seu dispositivo ou informadas via link.
+            </p>
+          </div>
+
+          {/* Seleção do Assistente */}
+          <div className="flex flex-wrap gap-2">
+            {allProfiles.map(p => (
+              <button
+                key={p.id}
+                type="button"
+                onClick={() => handleSelectBotProfile(p.id)}
+                className={`px-4 py-2.5 rounded-xl text-xs font-bold flex items-center gap-2 transition-all border ${
+                  selectedBotId === p.id
+                    ? 'bg-indigo-50 dark:bg-indigo-950/40 border-indigo-500 text-indigo-700 dark:text-indigo-300 shadow-xs'
+                    : 'border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-50'
+                }`}
+              >
+                <img 
+                  src={p.avatarUrl} 
+                  alt={p.name} 
+                  className="w-5 h-5 rounded-full object-cover" 
+                  onError={(e) => { (e.target as HTMLImageElement).src = p.defaultAvatarUrl; }}
+                />
+                <span>{p.name}</span>
+                <span className="text-[10px] opacity-75">({p.id === 'admin-assistant' ? 'Painel Admin' : 'Loja Pública'})</span>
+              </button>
+            ))}
+          </div>
+
+          {/* Form de Edição */}
+          <form onSubmit={handleSaveBotProfile} className="space-y-5 pt-2">
+            {/* Foto e Preview */}
+            <div className="flex flex-col sm:flex-row items-center sm:items-start gap-5 p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/30">
+              <div className="relative shrink-0">
+                <img 
+                  src={profilePreviewPhoto || profileAvatarUrl} 
+                  alt="Avatar Prévia"
+                  className="w-24 h-24 rounded-2xl object-cover border-2 border-indigo-500 shadow-md"
+                  onError={(e) => {
+                    const fallback = allProfiles.find(p => p.id === selectedBotId)?.defaultAvatarUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&auto=format&fit=crop&q=80';
+                    (e.target as HTMLImageElement).src = fallback;
+                  }}
+                />
+                {isPhotoChanged && (
+                  <span className="absolute -top-2 -right-2 px-2 py-0.5 rounded-full bg-amber-500 text-white text-[9px] font-bold">
+                    Novo
+                  </span>
+                )}
+              </div>
+
+              <div className="flex-1 space-y-2 text-center sm:text-left">
+                <div className="font-semibold text-xs">Foto do Avatar</div>
+                <p className="text-[11px] text-slate-500">
+                  Envie uma imagem do seu computador ou celular (galeria/câmera) ou informe uma URL direta.
+                </p>
+
+                <input 
+                  type="file" 
+                  accept="image/*"
+                  ref={profileFileInputRef}
+                  onChange={handleBotPhotoChange}
+                  className="hidden"
+                />
+
+                <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 pt-1">
+                  <button
+                    type="button"
+                    onClick={() => profileFileInputRef.current?.click()}
+                    disabled={isUploadingBotPhoto}
+                    className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-indigo-600 hover:bg-indigo-700 text-white flex items-center gap-1.5 transition-colors shadow-xs"
+                  >
+                    <Upload className="w-3.5 h-3.5" />
+                    <span>{isUploadingBotPhoto ? 'Carregando...' : 'Carregar da Galeria'}</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setShowUrlField(!showUrlField)}
+                    className="px-3 py-1.5 rounded-lg text-xs font-semibold border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors flex items-center gap-1.5"
+                  >
+                    <LinkIcon className="w-3.5 h-3.5 text-indigo-500" />
+                    <span>Inserir URL</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={handleRestoreBotDefault}
+                    className="px-3 py-1.5 rounded-lg text-xs font-semibold border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors flex items-center gap-1.5"
+                    title="Restaurar avatar original de fábrica"
+                  >
+                    <RotateCcw className="w-3.5 h-3.5" />
+                    <span>Padrão Original</span>
+                  </button>
+                </div>
+
+                {showUrlField && (
+                  <div className="flex items-center gap-2 pt-2">
+                    <input 
+                      type="url"
+                      value={tempBotUrl}
+                      onChange={(e) => setTempBotUrl(e.target.value)}
+                      placeholder="https://exemplo.com/foto.jpg"
+                      className="flex-1 px-3 py-1.5 text-xs rounded-lg border border-slate-300 dark:border-slate-700 focus:outline-none focus:border-indigo-500"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleApplyBotUrl}
+                      className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-indigo-600 text-white"
+                    >
+                      Aplicar
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Campos de Texto */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs font-bold mb-1.5">Nome do Assistente</label>
+                <input 
+                  type="text"
+                  value={profileName}
+                  onChange={(e) => setProfileName(e.target.value)}
+                  required
+                  placeholder="Ex: Assistente de Gerência OmniBrand"
+                  className="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-300 dark:border-slate-700 focus:outline-none focus:border-indigo-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold mb-1.5">Cargo / Função</label>
+                <input 
+                  type="text"
+                  value={profileRole}
+                  onChange={(e) => setProfileRole(e.target.value)}
+                  placeholder="Ex: IA de Decisão e Estratégia Comercial"
+                  className="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-300 dark:border-slate-700 focus:outline-none focus:border-indigo-500"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold mb-1.5">Descrição / Missão</label>
+              <textarea 
+                rows={2}
+                value={profileDesc}
+                onChange={(e) => setProfileDesc(e.target.value)}
+                placeholder="Ex: Consulta catálogo, analisa estoques e prepara propostas para aprovação."
+                className="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-300 dark:border-slate-700 focus:outline-none focus:border-indigo-500 resize-none"
+              />
+            </div>
+
+            <div className="flex justify-end pt-2">
+              <button
+                type="submit"
+                className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl flex items-center gap-2 shadow-xs transition-colors"
+              >
+                <Check className="w-4 h-4" />
+                <span>Salvar Identidade</span>
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+
+      {/* ABA: Conversa & Propostas */}
+      {activeSubTab === 'conversations' && (
+        <>
+          {/* 2. Caixa de Conversa Centralizada (Texto + Foto) */}
+          <div 
+            style={{
+              backgroundColor: 'var(--admin-card-bg, #ffffff)',
+              borderColor: 'var(--admin-border, #e2e8f0)',
+              color: 'var(--admin-text-primary, #0f172a)'
+            }}
+            className="rounded-2xl border shadow-xs overflow-hidden flex flex-col"
+          >
         {/* Chat Header */}
         <div 
           style={{ borderColor: 'var(--admin-border, #e2e8f0)' }}
@@ -1749,6 +2281,106 @@ export const AdminAssistantView: React.FC = () => {
           )}
         </div>
       </div>
+    </>
+  )}
+
+  {/* ABA DEDICADA: Relatório de Estoque */}
+  {activeSubTab === 'stock' && replenishmentReport && (
+    <div 
+      style={{
+        backgroundColor: 'var(--admin-card-bg, #ffffff)',
+        borderColor: 'var(--admin-border, #e2e8f0)',
+        color: 'var(--admin-text-primary, #0f172a)'
+      }}
+      className="rounded-2xl border shadow-xs overflow-hidden p-6 space-y-5 animate-in fade-in duration-200"
+    >
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div>
+          <h2 className="text-base sm:text-lg font-bold">Relatório Real de Reposição e Estoque</h2>
+          <p style={{ color: 'var(--admin-text-secondary, #64748b)' }} className="text-xs mt-0.5">
+            Produtos esgotados ou em nível crítico lidos em tempo real do banco de dados.
+          </p>
+        </div>
+        <button
+          onClick={() => setActiveSubTab('conversations')}
+          className="px-3.5 py-2 rounded-xl text-xs font-semibold bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-100 flex items-center gap-1.5 self-start sm:self-auto"
+        >
+          <MessageSquare className="w-3.5 h-3.5" />
+          <span>Voltar para Conversa</span>
+        </button>
+      </div>
+
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div className="p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/30 text-center">
+          <span className="text-[10px] text-slate-400 block uppercase font-bold">Total Alertas</span>
+          <strong className="text-base text-slate-800 dark:text-slate-100">{replenishmentReport.totalAlerts}</strong>
+        </div>
+        <div className="p-3.5 rounded-xl border border-rose-200 dark:border-rose-900/40 bg-rose-50/50 dark:bg-rose-950/20 text-center">
+          <span className="text-[10px] text-rose-500 block uppercase font-bold">Esgotados</span>
+          <strong className="text-base text-rose-600">{replenishmentReport.outOfStockCount}</strong>
+        </div>
+        <div className="p-3.5 rounded-xl border border-amber-200 dark:border-amber-900/40 bg-amber-50/50 dark:bg-amber-950/20 text-center">
+          <span className="text-[10px] text-amber-500 block uppercase font-bold">Estoque Crítico (≤5)</span>
+          <strong className="text-base text-amber-600">{replenishmentReport.lowStockCount}</strong>
+        </div>
+        <div className="p-3.5 rounded-xl border border-emerald-200 dark:border-emerald-900/40 bg-emerald-50/50 dark:bg-emerald-950/20 text-center">
+          <span className="text-[10px] text-emerald-500 block uppercase font-bold">Investimento Sugerido</span>
+          <strong className="text-base text-emerald-600">{formatBRL(replenishmentReport.totalEstimatedInvestment)}</strong>
+        </div>
+      </div>
+
+      {/* Tabela do Relatório */}
+      <div className="overflow-x-auto pt-2">
+        <table className="w-full text-left text-xs">
+          <thead className="border-b uppercase text-[10px] font-bold text-slate-400">
+            <tr>
+              <th className="py-2.5 px-3">Produto Real</th>
+              <th className="py-2.5 px-3">SKU</th>
+              <th className="py-2.5 px-3">Estoque</th>
+              <th className="py-2.5 px-3">Mínimo</th>
+              <th className="py-2.5 px-3">Sugestão</th>
+              <th className="py-2.5 px-3">Preço Unit.</th>
+              <th className="py-2.5 px-3">Custo Est.</th>
+              <th className="py-2.5 px-3">Prioridade</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+            {replenishmentReport.items.map((item) => (
+              <tr key={item.productId} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/30">
+                <td className="py-3 px-3">
+                  <div className="font-semibold text-slate-800 dark:text-slate-100">{item.productName}</div>
+                  <div className="text-[10px] text-slate-400">{item.showcaseName} • {item.category}</div>
+                </td>
+                <td className="py-3 px-3 font-mono text-[11px] text-slate-400">{item.sku}</td>
+                <td className="py-3 px-3">
+                  <span className={`inline-flex px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                    item.stockStatus === 'out_of_stock' 
+                      ? 'bg-rose-100 text-rose-700 dark:bg-rose-950/60 dark:text-rose-300' 
+                      : 'bg-amber-100 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300'
+                  }`}>
+                    {item.currentStock} un
+                  </span>
+                </td>
+                <td className="py-3 px-3 text-slate-400">{item.reorderThreshold} un</td>
+                <td className="py-3 px-3 font-bold text-indigo-600 dark:text-indigo-400">+{item.suggestedQuantity} un</td>
+                <td className="py-3 px-3 font-medium">{formatBRL(item.unitPrice)}</td>
+                <td className="py-3 px-3 font-bold">{formatBRL(item.estimatedCost)}</td>
+                <td className="py-3 px-3">
+                  <span className={`px-2 py-0.5 rounded-full uppercase text-[9px] font-bold ${
+                    item.priority === 'critica'
+                      ? 'bg-rose-600 text-white'
+                      : 'bg-amber-500 text-white'
+                  }`}>
+                    {item.priority}
+                  </span>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  )}
     </div>
   );
 };

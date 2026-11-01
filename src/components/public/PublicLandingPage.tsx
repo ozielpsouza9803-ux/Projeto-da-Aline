@@ -20,7 +20,8 @@ import {
   MessageSquare,
   Send,
   Headset,
-  User
+  User,
+  LogOut
 } from 'lucide-react';
 import { Showcase, Product, Banner, ChatbotProfile, CustomerProfile, ShoppingBag as ShoppingBagType } from '../../types';
 import { ShoppingBagView } from '../customer/ShoppingBagView';
@@ -820,14 +821,42 @@ export const PublicLandingPage: React.FC<PublicLandingPageProps> = ({
               <span className="text-slate-950 font-extrabold">Explorar Vitrine</span>
             </button>
 
-            <button
-              onClick={onGoToAdmin}
-              className="hidden md:inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl font-medium text-xs text-slate-300 hover:text-white bg-slate-900 border border-slate-800 hover:border-slate-700 transition-all cursor-pointer"
-              title="Acesso Administrativo"
-            >
-              <Lock className="w-3.5 h-3.5 text-orange-400" />
-              <span>Painel Administrativo</span>
-            </button>
+            {isAdminSession ? (
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                <button
+                  type="button"
+                  onClick={onGoToAdmin}
+                  className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl font-bold text-xs bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 border border-emerald-500/30 transition-all cursor-pointer active:scale-95"
+                  title="Abrir Painel Administrativo"
+                >
+                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                  <span className="hidden sm:inline">Painel Admin</span>
+                  <span className="sm:hidden">Admin</span>
+                </button>
+
+                {onLogout && (
+                  <button
+                    type="button"
+                    onClick={onLogout}
+                    className="inline-flex items-center gap-1 px-2.5 py-2 rounded-xl font-bold text-xs bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/40 transition-all cursor-pointer active:scale-95"
+                    title="Sair da Sessão Administrativa"
+                  >
+                    <LogOut className="w-3.5 h-3.5 shrink-0" />
+                    <span>Sair</span>
+                  </button>
+                )}
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={onOpenAuthModal}
+                className="hidden xs:inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl font-medium text-xs text-slate-300 hover:text-white bg-slate-900 border border-slate-800 hover:border-slate-700 transition-all cursor-pointer"
+                title="Acesso Administrativo"
+              >
+                <Lock className="w-3.5 h-3.5 text-orange-400 shrink-0" />
+                <span>Login Admin</span>
+              </button>
+            )}
 
             {/* External Menu Toggle Button (Opens Public Drawer) */}
             <button

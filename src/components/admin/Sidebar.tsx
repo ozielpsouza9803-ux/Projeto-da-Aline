@@ -42,8 +42,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const menuItems = [
     { id: 'home', label: 'Início da Loja Pública', icon: Home },
     { id: 'overview', label: 'Início do Painel', icon: LayoutDashboard },
-    { id: 'assistant', label: 'Assistente de Gerência', icon: Sparkles },
-    { id: 'chatbots', label: 'Perfis dos Chatbots', icon: Bot },
+    { id: 'ai_assistant', label: 'IA Administrativa', icon: Sparkles },
     { id: 'customers', label: 'Clientes VIP', icon: Crown },
     { id: 'showcases', label: 'Vitrines', icon: Store },
     { id: 'products', label: 'Produtos', icon: Package },
