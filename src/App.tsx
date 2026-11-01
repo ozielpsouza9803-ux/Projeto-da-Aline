@@ -309,8 +309,8 @@ export default function App() {
   };
 
 
-  // Auth Session State
-  const isAdminSession = !!currentUser || localStorage.getItem('omnibrand_local_admin_session') === 'true';
+  // Auth Session State: Must strictly require admin role for Supabase user OR local admin session
+  const isAdminSession = (!!currentUser && isAdminRole) || localStorage.getItem('omnibrand_local_admin_session') === 'true';
 
   const handleLogout = async () => {
     localStorage.removeItem('omnibrand_local_admin_session');
@@ -322,6 +322,11 @@ export default function App() {
     setCurrentUser(null);
     setIsAdminRole(false);
     setViewMode('landing');
+  };
+
+  const handleCustomerLogout = async () => {
+    await customerService.logout();
+    setCurrentCustomer(null);
   };
 
   // Tab titles mapping
@@ -396,6 +401,7 @@ export default function App() {
           currentCustomer={currentCustomer}
           onOpenCustomerAuthModal={() => setIsCustomerAuthModalOpen(true)}
           onGoToCustomerAccount={() => setViewMode('customer_account')}
+          onCustomerLogout={handleCustomerLogout}
           bag={bag}
           onUpdateQuantity={handleUpdateQuantity}
           onRemoveItem={handleRemoveFromBag}
@@ -421,6 +427,10 @@ export default function App() {
           isAdminSession={isAdminSession}
           onLogout={handleLogout}
           onOpenAuthModal={() => setIsAuthModalOpen(true)}
+          currentCustomer={currentCustomer}
+          onOpenCustomerAuthModal={() => setIsCustomerAuthModalOpen(true)}
+          onGoToCustomerAccount={() => setViewMode('customer_account')}
+          onCustomerLogout={handleCustomerLogout}
           onAddToBag={handleAddToBag}
           bag={bag}
           onUpdateQuantity={handleUpdateQuantity}
@@ -598,7 +608,7 @@ export default function App() {
         onClose={() => setIsCustomerAuthModalOpen(false)}
         onAuthSuccess={(cust) => {
           setCurrentCustomer(cust);
-          setViewMode('customer_account');
+          setIsCustomerAuthModalOpen(false);
         }}
       />
     </>

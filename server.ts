@@ -12,6 +12,80 @@ const port = process.env.PORT || 3000;
 
 app.use(express.json());
 
+// Helper to extract structured recommended products from AI response or catalog match
+function extractRecommendedProducts(
+  rawText: string,
+  catalogProducts: any[]
+): { cleanReply: string; recommendedProducts: any[] } {
+  let cleanReply = rawText;
+  const recommendedIds = new Set<string>();
+
+  // 1. Detect explicit technical tag: [PRODUTOS_RECOMENDADOS: id1, id2]
+  const tagRegex = /\[(?:PRODUTOS_RECOMENDADOS|RECOMENDACOES):\s*([^\]]+)\]/i;
+  const match = rawText.match(tagRegex);
+  if (match) {
+    cleanReply = rawText.replace(tagRegex, '').trim();
+    const rawIds = match[1].split(',').map(id => id.trim().toLowerCase());
+    for (const id of rawIds) {
+      if (id) recommendedIds.add(id);
+    }
+  }
+
+  let recommended = catalogProducts.filter(p => recommendedIds.has(p.id.toLowerCase()));
+
+  // 2. Heuristic extraction if tag not present: search for products mentioned in reply
+  if (recommended.length === 0) {
+    const textNorm = cleanReply.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    for (const p of catalogProducts) {
+      const pNameNorm = p.name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+      const pSkuNorm = p.sku.toLowerCase();
+
+      if (textNorm.includes(pSkuNorm)) {
+        recommended.push(p);
+        continue;
+      }
+
+      // Check distinctive name parts (e.g., "kaiak", "malbec", "ekos", "castanha", "lily", "soul kiss me")
+      const distinctiveTokens = pNameNorm
+        .split(/\s+/)
+        .filter((token: string) => token.length >= 4 && !['para', 'corpo', 'banho', 'colonia', 'desodorante', 'hidratante', 'oleo', 'creme'].includes(token));
+
+      const matchesToken = distinctiveTokens.some((token: string) => textNorm.includes(token));
+      if (matchesToken) {
+        recommended.push(p);
+      }
+    }
+    // Limit to maximum 4 products
+    recommended = recommended.slice(0, 4);
+  }
+
+  // Format structured products for client consumption
+  const formattedProducts = recommended.map(p => {
+    const hasDiscount = p.promotionalPrice !== undefined && p.promotionalPrice !== null && p.promotionalPrice < p.price;
+    return {
+      id: p.id,
+      name: p.name,
+      brandName: p.brandName,
+      brandId: p.brandId,
+      sku: p.sku,
+      category: p.category,
+      price: p.price,
+      promotionalPrice: p.promotionalPrice,
+      priceFormatted: formatBRL(p.price),
+      promotionalPriceFormatted: hasDiscount ? formatBRL(p.promotionalPrice) : null,
+      savingsFormatted: hasDiscount ? formatBRL(p.price - p.promotionalPrice) : null,
+      stockQuantity: p.stockQuantity,
+      stockStatus: p.stockStatus,
+      isAvailable: p.isAvailable,
+      mainPhoto: p.mainPhoto,
+      photos: p.photos,
+      affiliateUrl: p.affiliateUrl
+    };
+  });
+
+  return { cleanReply, recommendedProducts: formattedProducts };
+}
+
 // API route for Chatbot
 app.post('/api/chat', async (req, res) => {
   const startTime = Date.now();
@@ -19,14 +93,47 @@ app.post('/api/chat', async (req, res) => {
   let geminiTime = 0;
 
   try {
-    const { messages } = req.body;
+    const { messages, commercialSettings } = req.body;
     if (!messages || !Array.isArray(messages)) {
       return res.status(400).json({ error: 'Formato de mensagens inválido' });
     }
 
     const apiKey = process.env.GEMINI_API_KEY;
 
-    // 1. Measure Catalog Fetch Time (with in-memory TTL cache)
+    // 1. Commercial Settings (Strictly derived from real request settings; no fake defaults or assumptions)
+    const rawDeliveryFee = commercialSettings?.deliveryFee;
+    const hasValidDeliveryFee = typeof rawDeliveryFee === 'number' && !isNaN(rawDeliveryFee) && rawDeliveryFee >= 0;
+    const deliveryFeeNum = hasValidDeliveryFee ? rawDeliveryFee : null;
+    const deliveryFeeFormatted = deliveryFeeNum !== null ? formatBRL(deliveryFeeNum) : 'Necessário consultar a loja';
+
+    const configuredWhatsApp = commercialSettings?.whatsapp?.trim() || null;
+    const storeSiteName = commercialSettings?.siteName || 'OmniBrand Afiliados';
+
+    const deliveryMethods = deliveryFeeNum !== null ? [
+      { id: 'motoboy', name: 'Motoboy / Delivery', price: deliveryFeeNum, priceFormatted: deliveryFeeFormatted, description: 'Entrega na sua região' }
+    ] : [
+      { id: 'consult', name: 'Entrega / Frete', price: null, priceFormatted: 'Necessário consultar a loja', description: 'Taxa de entrega sob consulta' }
+    ];
+
+    const rawPaymentMethods = commercialSettings?.paymentMethods;
+    const paymentMethods = Array.isArray(rawPaymentMethods) && rawPaymentMethods.length > 0 
+      ? rawPaymentMethods 
+      : [
+          { id: 'consult_store', name: 'Condições da Loja', description: 'Formas de pagamento sujeitas à confirmação com a loja ou canal oficial da marca.' }
+        ];
+
+    const commercialContext = {
+      siteName: storeSiteName,
+      deliveryFee: deliveryFeeNum,
+      deliveryFeeFormatted: deliveryFeeFormatted,
+      deliveryMethods,
+      paymentMethods,
+      whatsappSupport: configuredWhatsApp,
+      hasWhatsAppSupport: !!configuredWhatsApp,
+      couponsPolicy: 'Não há cupons avulsos. Condições comerciais aplicadas conforme o catálogo oficial.'
+    };
+
+    // 2. Measure Catalog Fetch Time (with in-memory TTL cache)
     const tCatStart = Date.now();
     const [brands, products] = await Promise.all([
       chatbotQueryService.getAvailableBrands(),
@@ -36,7 +143,7 @@ app.post('/api/chat', async (req, res) => {
 
     // Format real catalog snapshot for AI System Instruction
     const brandsFormatted = brands.length > 0 
-      ? brands.map(b => `- ${b.name} (Categoria: ${b.category})`).join('\n')
+      ? brands.map(b => `- ${b.name} (ID: ${b.id} | Categoria: ${b.category})`).join('\n')
       : 'Nenhuma marca ativa no momento.';
 
     const productsFormatted = products.length > 0
@@ -50,19 +157,22 @@ app.post('/api/chat', async (req, res) => {
             ? `Preço Atual: ${currentFormatted} (Preço Promocional) | Preço Normal: ${normalFormatted} | Economia: ${savingsFormatted}`
             : `Preço Atual: ${normalFormatted}`;
 
-          return `- PRODUTO: "${p.name}" | Marca: ${p.brandName} | Categoria: ${p.category} | ${priceInfo} | Estoque: ${p.stockQuantity} un (${p.stockStatus === 'available' ? 'Disponível' : p.stockStatus === 'low' ? 'Estoque Baixo' : 'Esgotado'}) | SKU: ${p.sku} | Descrição: ${p.description}`;
+          return `- PRODUTO: "${p.name}" (ID: ${p.id}) | Marca: ${p.brandName} | Categoria: ${p.category} | ${priceInfo} | Estoque: ${p.stockQuantity} un (${p.stockStatus === 'available' ? 'Disponível' : p.stockStatus === 'low' ? 'Estoque Baixo' : 'Esgotado'}) | SKU: ${p.sku} | Descrição: ${p.description}`;
         }).join('\n')
       : 'Nenhum produto ativo no momento.';
 
     const lastUserMsg = [...messages].reverse().find(m => m.role === 'user')?.content || '';
 
-    // 2. If GEMINI_API_KEY is not available in environment, use fast algorithmic search fallback
+    // 3. Fallback when GEMINI_API_KEY is not available in environment
     if (!apiKey) {
       const fallbackReply = await chatbotQueryService.generateFallbackResponse(lastUserMsg, products, brands, messages);
+      const { cleanReply, recommendedProducts } = extractRecommendedProducts(fallbackReply, products);
       const totalTime = Date.now() - startTime;
       console.log(`[Chatbot Performance] Catalog: ${catalogTime}ms | Fallback: ${totalTime - catalogTime}ms | Total: ${totalTime}ms (No GEMINI_API_KEY)`);
       return res.json({ 
-        reply: fallbackReply,
+        reply: cleanReply,
+        recommendedProducts,
+        commercialContext,
         metrics: { catalogTimeMs: catalogTime, totalTimeMs: totalTime, fallback: true }
       });
     }
@@ -78,29 +188,37 @@ app.post('/api/chat', async (req, res) => {
     });
 
     const systemInstruction = `
-Você é o Assistente de Atendimento Virtual da OmniBrand Afiliados, um consultor de compras inteligente, educado, amigável e especializado em produtos de beleza, perfumaria e cosméticos (Natura, O Boticário, Eudora e marcas parceiras).
+Você é a Consultora Virtual Multimarcas da OmniBrand Afiliados, uma especialista em beleza, perfumaria e cosméticos, amigável, acolhedora, objetiva e que conhece a fundo as marcas parceiras oficiais (Natura, O Boticário, Eudora).
 
-REGRAS FUNDAMENTAIS E INEGOCIÁVEIS:
-1. **NUNCA INVENTE PRODUTOS, PREÇOS, CUPONS OU DADOS DE ESTOQUE**: Utilize EXCLUSIVAMENTE as informações do Catálogo Real do Supabase fornecidas abaixo.
-2. **IDENTIFICAÇÃO DE PRODUTOS E BUSCA COM PALAVRAS ADICIONAIS**:
-   - Quando o cliente perguntar "Qual é o preço do Kaiak?", "Quanto custa o Kaiak?", "Tem desconto no Kaiak?" ou "Quantas unidades do Kaiak estão disponíveis?", extraia a palavra-chave do produto ("Kaiak") ignorando palavras adicionais ("qual é o preço do", "tem desconto no", "quantas unidades de", "estão disponíveis").
-   - Pesquise e encontre o produto correspondente ("Kaiak Desodorante Colônia Masculino" ou similar) no catálogo do Supabase.
-3. **ENTENDIMENTO DE CONTEXTO E PERGUNTAS DE ACOMPANHAMENTO**:
-   - Entenda e utilize todo o histórico da conversa. Se o usuário perguntou anteriormente sobre um produto ou marca (ex: "Quais perfumes vocês têm da Natura?") e depois faz uma pergunta de acompanhamento como "Qual é o preço do Kaiak?", "Tem desconto?" ou "Quantas unidades estão disponíveis?", responda com base no contexto recente do produto mencionado.
-4. **INFORMAÇÃO PRECISA E CONSISTENTE DE PREÇO, PROMOÇÃO E ESTOQUE**:
-   - **Formatação Monetária**: Exiba SEMPRE os preços e economias no formato brasileiro BRL, utilizando vírgula para os centavos (exemplo: R$ 119,90, R$ 149,90, R$ 30,00).
-   - **Preço Atual vs Preço Normal**: Quando houver Preço Promocional cadastrado para o produto (ex: Kaiak com preço promocional de R$ 119,90 e preço normal de R$ 149,90), informe SEMPRE que o **Preço Atual (Promocional)** é **R$ 119,90** e o **Preço Normal** é **R$ 149,90**.
-   - **Cálculo de Economia**: Em perguntas sobre desconto, promoção ou preço, informe explicitamente a economia de **R$ 30,00** (calculada como R$ 149,90 - R$ 119,90).
-   - **Estoque**: Informe a quantidade exata de unidades em estoque e a situação (Disponível, Estoque Baixo ou Esgotado) exatamente como indicado no catálogo.
-5. **SEPARAÇÃO RÍGIDA DE CATEGORIAS (PROIBIDA A MISTURA DE CATEGORIAS)**:
-   - Se o usuário pedir **PERFUMES, COLÔNIAS ou FRAGRÂNCIAS**, liste APENAS produtos da Categoria "Perfumaria". NUNCA apresente hidratantes, cremes corporais ou sabonetes.
-   - Se o usuário pedir **HIDRATANTES, CREMES ou LOÇÕES**, liste APENAS produtos da Categoria "Corpo e Banho". NUNCA apresente perfumes.
-   - Se o usuário pedir **BATONS ou MAQUIAGEM**, liste APENAS produtos da Categoria "Maquiagem".
-6. **FILTRAGEM RÍGIDA POR MARCA**: Ao pesquisar por uma marca (ex: Natura, O Boticário, Eudora), limite as respostas estritamente a produtos cadastrados dessa marca.
-7. **TRATAMENTO DE MARCAS NÃO CADASTRADAS**: Se o usuário perguntar por uma marca inexistente no catálogo (ex: Avène, Chanel, Avon), informe claramente que não temos essa marca cadastrada e liste as marcas parceiras ativas.
-8. **CLARIFICAÇÃO DE PERGUNTAS AMBÍGUAS**: Se a pergunta for vaga (ex: "me indica algo bom"), faça uma pergunta objetiva para esclarecer as preferências.
-9. **ACESSO ADMINISTRATIVO**: Se perguntarem sobre o painel admin ou login, explique que o acesso é feito pelo botão "Menu" na página pública e clicando em "Painel Administrativo".
-10. **ATENDIMENTO HUMANO**: Se a solicitação exigir suporte direto, informe educadamente como solicitar ajuda da equipe humana.
+REGRAS COMERCIAIS E DE NEGÓCIO REAIS DA LOJA:
+1. **ENTREGA E RETIRADA**:
+   ${deliveryFeeNum !== null 
+     ? `- Taxa de entrega confirmada: ${deliveryFeeFormatted}.`
+     : `- Taxa de entrega: Nenhuma taxa padrão automática configurada. É OBRIGATÓRIO informar ao cliente que é necessário consultar a loja para confirmar o valor do frete.`}
+2. **FORMAS DE PAGAMENTO E PARCELAMENTO**:
+   - NUNCA presuma ou invente que Pix, cartão ou parcelamento estão disponíveis a menos que explicitamente confirmados nas configurações reais da loja. Caso contrário, informe que as formas de pagamento devem ser confirmadas com a loja ou no canal oficial da marca parceira.
+3. **CUPONS E PROMOÇÕES**:
+   - NUNCA invente cupons de desconto. Apenas os preços e descontos promocionais reais cadastrados no catálogo devem ser informados.
+4. **SUPORTE E WHATSAPP COMERCIAL**:
+   ${commercialContext.whatsappSupport 
+     ? `- WhatsApp oficial para atendimento: ${commercialContext.whatsappSupport}.`
+     : `- WhatsApp: Nenhum número de WhatsApp configurado ou confirmado. Não invente números de telefone.`}
+5. **CONSULTORIA, COMPARAÇÃO E COMBOS MULTIMARCAS**:
+   - Compare produtos entre marcas com base nas notas e categorias reais do catálogo (ex: Malbec vs Kaiak, Ekos Castanha vs Lily).
+   - Quando o cliente pedir sugestões para um orçamento (ex: "até R$ 80", "presente até R$ 100"), selecione apenas produtos cujo preço real (promocional ou normal) caiba no valor estipulado.
+   - Separe rigorosamente as categorias (Perfumaria, Corpo e Banho, Maquiagem).
+6. **RECOMENDAÇÃO ESTRUTURADA DE PRODUTOS**:
+   - Sempre que você recomendar, comparar ou citar um ou mais produtos específicos do catálogo para o cliente, inclua no FINAL absoluto da sua resposta uma linha técnica no seguinte formato exato:
+     [PRODUTOS_RECOMENDADOS: id_do_produto_1, id_do_produto_2]
+     (Utilize apenas os IDs reais dos produtos fornecidos no catálogo abaixo).
+     Exemplo: [PRODUTOS_RECOMENDADOS: a0000000-0000-4000-a000-000000000001]
+   - Se a resposta for apenas uma saudação ou esclarecimento geral sem produtos específicos, não inclua essa linha.
+
+REGRAS DE FORMATAÇÃO E INFORMAÇÃO:
+- Preços: Exiba SEMPRE no padrão brasileiro BRL (ex: R$ 119,90).
+- Descontos: Apresente o Preço Normal, Preço Atual Promocional e o valor economizado.
+- Estoque: Informe a quantidade real de unidades e o status (Disponível, Estoque Baixo ou Esgotado).
+- Contexto: Considere o histórico da conversa e esclareça dúvidas de acompanhamento com naturalidade.
 
 === CATÁLOGO REAL DO SUPABASE (DADOS ATUAIS) ===
 MARCAS PARCEIRAS ATIVAS:
@@ -124,7 +242,7 @@ ${productsFormatted}
       }
     }
 
-    // 3. Gemini API Request with 3500ms Timeout Wrapper
+    // 4. Gemini API Request with 3500ms Timeout Wrapper
     const tGeminiStart = Date.now();
     const GEMINI_TIMEOUT_MS = 3500;
 
@@ -145,9 +263,12 @@ ${productsFormatted}
 
     if (result && result.text) {
       const totalTime = Date.now() - startTime;
-      console.log(`[Chatbot Performance] Catalog: ${catalogTime}ms | Gemini: ${geminiTime}ms | Total: ${totalTime}ms`);
+      const { cleanReply, recommendedProducts } = extractRecommendedProducts(result.text, products);
+      console.log(`[Chatbot Performance] Catalog: ${catalogTime}ms | Gemini: ${geminiTime}ms | Total: ${totalTime}ms | Recommended: ${recommendedProducts.length}`);
       return res.json({ 
-        reply: result.text,
+        reply: cleanReply,
+        recommendedProducts,
+        commercialContext,
         metrics: { catalogTimeMs: catalogTime, geminiTimeMs: geminiTime, totalTimeMs: totalTime, fallback: false }
       });
     }
@@ -155,9 +276,12 @@ ${productsFormatted}
     // Fast fallback if Gemini times out (>3.5s) or returns empty
     console.warn(`[Chatbot Performance] Gemini API timed out after ${geminiTime}ms or returned empty. Responding with fast fallback.`);
     const fallbackReply = await chatbotQueryService.generateFallbackResponse(lastUserMsg, products, brands, messages);
+    const { cleanReply, recommendedProducts } = extractRecommendedProducts(fallbackReply, products);
     const totalTime = Date.now() - startTime;
     return res.json({ 
-      reply: fallbackReply,
+      reply: cleanReply,
+      recommendedProducts,
+      commercialContext,
       metrics: { catalogTimeMs: catalogTime, geminiTimeMs: geminiTime, totalTimeMs: totalTime, fallback: true, timeout: true }
     });
 
@@ -166,22 +290,48 @@ ${productsFormatted}
 
     // Fallback in case of API error or quota limit
     try {
-      const { messages } = req.body;
+      const { messages, commercialSettings } = req.body;
+      const rawDeliveryFee = commercialSettings?.deliveryFee;
+      const deliveryFeeNum = typeof rawDeliveryFee === 'number' && !isNaN(rawDeliveryFee) ? rawDeliveryFee : 15.00;
+      const deliveryFeeFormatted = formatBRL(deliveryFeeNum);
+      const commercialContext = {
+        siteName: commercialSettings?.siteName || 'OmniBrand',
+        deliveryFee: deliveryFeeNum,
+        deliveryFeeFormatted,
+        deliveryMethods: [
+          { id: 'motoboy', name: 'Motoboy / Delivery', price: deliveryFeeNum, priceFormatted: deliveryFeeFormatted, description: 'Entrega na sua região' },
+          { id: 'pickup', name: 'Retirada Presencial', price: 0, priceFormatted: 'Grátis', description: 'Retirada na loja física' }
+        ],
+        paymentMethods: [
+          { id: 'pix', name: 'Pix', description: 'Aprovação imediata com chave Pix' },
+          { id: 'credit_card', name: 'Cartão de Crédito', description: 'Parcelamento seguro' },
+          { id: 'partner_official', name: 'Loja Oficial da Marca', description: 'Condições diretas no canal oficial (Pix, Cartão, Boleto)' }
+        ],
+        whatsappSupport: commercialSettings?.whatsapp?.trim() || null,
+        hasWhatsAppSupport: !!commercialSettings?.whatsapp?.trim(),
+        couponsPolicy: 'Os descontos estão aplicados diretamente no Preço Promocional do catálogo. Não há cupons avulsos adicionais no momento.'
+      };
+
       const lastUserMsg = [...messages].reverse().find(m => m.role === 'user')?.content || '';
       const [brands, products] = await Promise.all([
         chatbotQueryService.getAvailableBrands(),
         chatbotQueryService.searchProducts({})
       ]);
       const fallbackReply = await chatbotQueryService.generateFallbackResponse(lastUserMsg, products, brands, messages);
+      const { cleanReply, recommendedProducts } = extractRecommendedProducts(fallbackReply, products);
       const totalTime = Date.now() - startTime;
       return res.json({ 
-        reply: fallbackReply,
+        reply: cleanReply,
+        recommendedProducts,
+        commercialContext,
         metrics: { catalogTimeMs: catalogTime, geminiTimeMs: geminiTime, totalTimeMs: totalTime, fallback: true, error: error.message }
       });
     } catch {
       return res.status(500).json({
         error: 'Erro temporário',
-        reply: 'Desculpe, enfrentamos uma breve instabilidade no assistente virtual. Por favor, navegue diretamente por nossas vitrines ou tente novamente em alguns instantes.'
+        reply: 'Desculpe, enfrentamos uma breve instabilidade no assistente virtual. Por favor, navegue diretamente por nossas vitrines ou tente novamente em alguns instantes.',
+        recommendedProducts: [],
+        commercialContext: null
       });
     }
   }

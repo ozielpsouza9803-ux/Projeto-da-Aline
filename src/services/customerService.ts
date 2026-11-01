@@ -82,7 +82,144 @@ export const customerService = {
   },
 
   /**
-   * Register a new customer.
+   * Register a new customer using Supabase Auth with password.
+   */
+  async registerWithSupabase(data: { 
+    email: string; 
+    password: string; 
+    name: string; 
+    phone?: string; 
+    whatsapp?: string 
+  }): Promise<{ success: boolean; message: string; customer?: CustomerProfile }> {
+    const email = data.email.trim().toLowerCase();
+    const name = data.name.trim();
+    const password = data.password;
+
+    if (!email || !name) {
+      return { success: false, message: 'Nome e e-mail são obrigatórios.' };
+    }
+    if (!password || password.length < 6) {
+      return { success: false, message: 'A senha deve conter no mínimo 6 caracteres.' };
+    }
+
+    try {
+      const { data: authData, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            full_name: name,
+            name: name,
+            phone: data.phone?.trim() || '',
+            whatsapp: data.whatsapp?.trim() || ''
+          }
+        }
+      });
+
+      if (error) {
+        if (error.message.toLowerCase().includes('already registered') || error.message.toLowerCase().includes('already exists')) {
+          return { success: false, message: 'Este e-mail já está cadastrado. Faça login com sua senha.' };
+        }
+        return { success: false, message: error.message };
+      }
+
+      const customers = this.getAllCustomers();
+      const newProfile: CustomerProfile = {
+        id: authData.user?.id || `cust-${Date.now()}`,
+        email,
+        name,
+        phone: data.phone?.trim() || '',
+        whatsapp: data.whatsapp?.trim() || '',
+        address: {
+          street: '',
+          number: '',
+          neighborhood: '',
+          city: '',
+          state: 'SP',
+          zipcode: ''
+        },
+        isVip: false, // Default client is standard (non-VIP)
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+
+      customers[email] = newProfile;
+      this.saveAllCustomers(customers);
+      localStorage.setItem(CURRENT_CUSTOMER_SESSION_KEY, email);
+
+      return { 
+        success: true, 
+        message: 'Cadastro realizado com sucesso! Bem-vindo(a) à OmniBrand.', 
+        customer: newProfile 
+      };
+    } catch (err: any) {
+      return { success: false, message: err.message || 'Erro ao realizar cadastro no Supabase.' };
+    }
+  },
+
+  /**
+   * Login customer using Supabase Auth with password.
+   */
+  async loginWithSupabase(
+    emailInput: string, 
+    passwordInput: string
+  ): Promise<{ success: boolean; message: string; customer?: CustomerProfile }> {
+    const email = emailInput.trim().toLowerCase();
+    const password = passwordInput;
+
+    if (!email || !password) {
+      return { success: false, message: 'Informe seu e-mail e senha de acesso.' };
+    }
+
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password
+      });
+
+      if (error) {
+        if (error.message.toLowerCase().includes('invalid login credentials')) {
+          return { success: false, message: 'E-mail ou senha incorretos. Verifique suas credenciais.' };
+        }
+        return { success: false, message: error.message };
+      }
+
+      const user = data.user;
+      const customers = this.getAllCustomers();
+      let profile = customers[email];
+
+      if (!profile) {
+        profile = {
+          id: user.id,
+          email,
+          name: user.user_metadata?.full_name || user.user_metadata?.name || email.split('@')[0],
+          phone: user.user_metadata?.phone || '',
+          whatsapp: user.user_metadata?.whatsapp || '',
+          address: {
+            street: '',
+            number: '',
+            neighborhood: '',
+            city: '',
+            state: 'SP',
+            zipcode: ''
+          },
+          isVip: false,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        };
+        customers[email] = profile;
+        this.saveAllCustomers(customers);
+      }
+
+      localStorage.setItem(CURRENT_CUSTOMER_SESSION_KEY, email);
+      return { success: true, message: 'Login realizado com sucesso!', customer: profile };
+    } catch (err: any) {
+      return { success: false, message: err.message || 'Erro ao efetuar login no Supabase.' };
+    }
+  },
+
+  /**
+   * Register a new customer locally.
    */
   register(data: { email: string; name: string; phone?: string; whatsapp?: string }): { success: boolean; message: string; customer?: CustomerProfile } {
     const email = data.email.trim().toLowerCase();
@@ -142,8 +279,16 @@ export const customerService = {
   /**
    * Logout current customer session.
    */
-  logout(): void {
+  async logout(): Promise<void> {
     localStorage.removeItem(CURRENT_CUSTOMER_SESSION_KEY);
+    try {
+      // Only sign out from Supabase if this is not a local admin session
+      if (localStorage.getItem('omnibrand_local_admin_session') !== 'true') {
+        await supabase.auth.signOut();
+      }
+    } catch (e) {
+      console.warn('Erro ao deslogar do Supabase:', e);
+    }
   },
 
   /**

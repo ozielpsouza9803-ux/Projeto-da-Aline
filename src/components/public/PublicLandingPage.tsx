@@ -21,11 +21,16 @@ import {
   Send,
   Headset,
   User,
-  LogOut
+  LogOut,
+  Volume2,
+  VolumeX,
+  Mic,
+  MicOff
 } from 'lucide-react';
 import { Showcase, Product, Banner, ChatbotProfile, CustomerProfile, ShoppingBag as ShoppingBagType } from '../../types';
 import { ShoppingBagView } from '../customer/ShoppingBagView';
 import { chatbotProfileService } from '../../services/chatbotProfileService';
+import { storageService } from '../../services/storage';
 
 interface PublicLandingPageProps {
   showcases: Showcase[];
@@ -41,6 +46,7 @@ interface PublicLandingPageProps {
   currentCustomer?: CustomerProfile | null;
   onOpenCustomerAuthModal?: () => void;
   onGoToCustomerAccount?: () => void;
+  onCustomerLogout?: () => void;
   bag: ShoppingBagType;
   onUpdateQuantity: (productId: string, quantity: number) => void;
   onRemoveItem: (productId: string) => void;
@@ -62,6 +68,7 @@ export const PublicLandingPage: React.FC<PublicLandingPageProps> = ({
   currentCustomer,
   onOpenCustomerAuthModal,
   onGoToCustomerAccount,
+  onCustomerLogout,
   bag,
   onUpdateQuantity,
   onRemoveItem,
@@ -92,8 +99,53 @@ export const PublicLandingPage: React.FC<PublicLandingPageProps> = ({
     return unsubscribe;
   }, []);
 
-  // Chat State
-  const [chatMessages, setChatMessages] = useState<Array<{ sender: 'bot' | 'user'; text: string; time: string }>>([
+  // Chat State & Voice/Audio configuration
+  const [audioEnabled, setAudioEnabled] = useState(true);
+  const [isListening, setIsListening] = useState(false);
+
+  const speakText = (text: string) => {
+    if (!audioEnabled || typeof window === 'undefined' || !('speechSynthesis' in window)) return;
+    try {
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'pt-BR';
+      utterance.rate = 1.0;
+      window.speechSynthesis.speak(utterance);
+    } catch (e) {
+      console.warn('Speech synthesis error:', e);
+    }
+  };
+
+  const toggleListening = () => {
+    if (typeof window === 'undefined') return;
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      alert('Seu navegador não suporta reconhecimento de voz.');
+      return;
+    }
+    try {
+      const recognition = new SpeechRecognition();
+      recognition.lang = 'pt-BR';
+      recognition.interimResults = false;
+      recognition.maxAlternatives = 1;
+
+      recognition.onstart = () => setIsListening(true);
+      recognition.onend = () => setIsListening(false);
+      recognition.onerror = () => setIsListening(false);
+      recognition.onresult = (event: any) => {
+        const transcript = event.results[0][0].transcript;
+        if (transcript) {
+          handleSendMessage(undefined, transcript);
+        }
+      };
+      recognition.start();
+    } catch (err) {
+      console.warn('Speech recognition error:', err);
+      setIsListening(false);
+    }
+  };
+
+  const [chatMessages, setChatMessages] = useState<Array<{ sender: 'bot' | 'user'; text: string; time: string; recommendedProducts?: any[] }>>([
     {
       sender: 'bot',
       text: `Olá! Sou ${chatbotProfileService.getProfile('public-support').name}, sua consultora virtual na OmniBrand Afiliados.\n\nComo posso te ajudar hoje? Você pode me perguntar sobre marcas, produtos, preços, disponibilidade de estoque ou comparar opções!`,
@@ -203,10 +255,18 @@ export const PublicLandingPage: React.FC<PublicLandingPageProps> = ({
         content: m.text
       }));
 
+      const storeSettings = storageService.getSettings();
       const res = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messages: apiMessages })
+        body: JSON.stringify({ 
+          messages: apiMessages,
+          commercialSettings: {
+            deliveryFee: storeSettings.deliveryFee || 15.00,
+            currency: storeSettings.currency || 'BRL',
+            siteName: storeSettings.siteName || 'OmniBrand'
+          }
+        })
       });
 
       if (!res.ok) {
@@ -215,15 +275,18 @@ export const PublicLandingPage: React.FC<PublicLandingPageProps> = ({
 
       const data = await res.json();
       const botResponse = data.reply || 'Como posso te ajudar com nossos produtos em estoque?';
+      const recommendedProducts = data.recommendedProducts || [];
 
       setChatMessages(prev => [
         ...prev,
         {
           sender: 'bot',
           text: botResponse,
-          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          recommendedProducts
         }
       ]);
+      speakText(botResponse);
     } catch (err) {
       console.warn('Erro ao conectar à API do Chatbot, utilizando fallback local:', err);
       try {
@@ -234,18 +297,23 @@ export const PublicLandingPage: React.FC<PublicLandingPageProps> = ({
           {
             sender: 'bot',
             text: fallback,
-            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            recommendedProducts: []
           }
         ]);
+        speakText(fallback);
       } catch {
+        const fallbackMsg = 'Estou enfrentando uma breve oscilação de rede, mas você pode navegar normalmente pelas nossas vitrines de produtos!';
         setChatMessages(prev => [
           ...prev,
           {
             sender: 'bot',
-            text: 'Estou enfrentando uma breve oscilação de rede, mas você pode navegar normalmente pelas nossas vitrines de produtos!',
-            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+            text: fallbackMsg,
+            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            recommendedProducts: []
           }
         ]);
+        speakText(fallbackMsg);
       }
     } finally {
       setIsTyping(false);
@@ -661,13 +729,22 @@ export const PublicLandingPage: React.FC<PublicLandingPageProps> = ({
               </div>
             </div>
 
-            <button
-              onClick={() => setIsChatOpen(false)}
-              className="p-1.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors cursor-pointer"
-              title="Fechar chat"
-            >
-              <X className="w-5 h-5" />
-            </button>
+            <div className="flex items-center gap-1.5">
+              <button
+                onClick={() => setAudioEnabled(!audioEnabled)}
+                className={`p-1.5 rounded-lg transition-colors cursor-pointer ${audioEnabled ? 'text-orange-400 bg-orange-500/10' : 'text-slate-500 bg-slate-800'}`}
+                title={audioEnabled ? 'Desativar voz do assistente' : 'Ativar voz do assistente'}
+              >
+                {audioEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
+              </button>
+              <button
+                onClick={() => setIsChatOpen(false)}
+                className="p-1.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors cursor-pointer"
+                title="Fechar chat"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
           </div>
 
           {/* Chat Message List */}
@@ -675,7 +752,7 @@ export const PublicLandingPage: React.FC<PublicLandingPageProps> = ({
             {chatMessages.map((msg, idx) => (
               <div
                 key={idx}
-                className={`flex items-start gap-2.5 max-w-[90%] ${
+                className={`flex items-start gap-2.5 max-w-[95%] ${
                   msg.sender === 'user' ? 'ml-auto flex-row-reverse' : 'mr-auto flex-row'
                 }`}
               >
@@ -689,7 +766,7 @@ export const PublicLandingPage: React.FC<PublicLandingPageProps> = ({
                     }}
                   />
                 )}
-                <div className={`flex flex-col ${msg.sender === 'user' ? 'items-end' : 'items-start'}`}>
+                <div className={`flex flex-col ${msg.sender === 'user' ? 'items-end' : 'items-start'} max-w-[calc(100%-35px)]`}>
                   <div
                     className={`p-3.5 rounded-2xl text-xs leading-relaxed whitespace-pre-line ${
                       msg.sender === 'user'
@@ -700,6 +777,57 @@ export const PublicLandingPage: React.FC<PublicLandingPageProps> = ({
                   >
                     {msg.text}
                   </div>
+
+                  {/* Recommended Products Interactive Cards */}
+                  {msg.recommendedProducts && msg.recommendedProducts.length > 0 && (
+                    <div className="mt-3 grid grid-cols-1 gap-2 w-full">
+                      <p className="text-[10px] font-bold text-orange-400 uppercase tracking-wider">Produtos recomendados:</p>
+                      {msg.recommendedProducts.map((prod: any) => {
+                        const brandShowcase = showcases.find(s => s.id === prod.brandId) || showcases[0];
+                        return (
+                          <div key={prod.id} className="p-2.5 rounded-xl bg-slate-900 border border-slate-700/80 flex items-center gap-3">
+                            <img 
+                              src={prod.mainPhoto || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=200&auto=format&fit=crop&q=80'} 
+                              alt={prod.name} 
+                              className="w-12 h-12 rounded-lg object-cover bg-slate-950 shrink-0 border border-slate-800"
+                            />
+                            <div className="flex-1 min-w-0">
+                              <h5 className="font-bold text-xs text-white truncate">{prod.name}</h5>
+                              <p className="text-[10px] text-slate-400">{prod.brandName || 'Natura / Boticário'}</p>
+                              <div className="flex items-center gap-2 mt-0.5">
+                                <span className="text-xs font-black text-orange-400">{prod.promotionalPriceFormatted || prod.priceFormatted}</span>
+                                {prod.promotionalPriceFormatted && (
+                                  <span className="text-[10px] text-slate-500 line-through">{prod.priceFormatted}</span>
+                                )}
+                              </div>
+                            </div>
+                            <div className="flex flex-col gap-1.5 shrink-0">
+                              <button
+                                onClick={() => onGoToStorefront(prod.brandId)}
+                                className="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-white font-bold text-[10px] flex items-center gap-1 cursor-pointer"
+                                title="Ver na Vitrine"
+                              >
+                                <ExternalLink className="w-3 h-3" />
+                                <span>Ver</span>
+                              </button>
+                              <button
+                                onClick={() => {
+                                  const productObj = products.find(p => p.id === prod.id);
+                                  if (productObj && brandShowcase) onAddToBag(productObj, brandShowcase);
+                                }}
+                                className="px-2.5 py-1 rounded-lg bg-orange-500 hover:bg-orange-600 text-slate-950 font-black text-[10px] flex items-center gap-1 cursor-pointer shadow-sm"
+                                title="Adicionar à Sacola"
+                              >
+                                <ShoppingBag className="w-3 h-3 text-slate-950" />
+                                <span>Comprar</span>
+                              </button>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+
                   <span className="text-[10px] text-slate-500 mt-1 px-1">{msg.time}</span>
                 </div>
               </div>
@@ -713,17 +841,45 @@ export const PublicLandingPage: React.FC<PublicLandingPageProps> = ({
                   className="w-7 h-7 rounded-xl object-cover border border-slate-700 shrink-0 mt-0.5"
                 />
                 <div className="p-3.5 rounded-2xl bg-slate-800 text-slate-300 border border-slate-700/80 rounded-tl-xs flex items-center gap-1.5">
-                  <span className="text-xs text-slate-400 font-medium">Consultando catálogo</span>
+                  <span className="text-xs text-slate-400 font-medium">Consultando catálogo real do Supabase...</span>
                 </div>
               </div>
             )}
           </div>
 
+          {/* Quick Suggestions Chips */}
+          <div className="px-3 py-2 bg-slate-900/90 border-t border-slate-800 flex items-center gap-1.5 overflow-x-auto scrollbar-none">
+            {[
+              'Perfumes mais vendidos',
+              'Qual a taxa de entrega?',
+              'Formas de pagamento (Pix / Cartão)',
+              'Presentes até R$ 80',
+              'Falar no WhatsApp'
+            ].map((suggestion, sIdx) => (
+              <button
+                key={sIdx}
+                onClick={() => handleSendMessage(undefined, suggestion)}
+                disabled={isTyping}
+                className="px-2.5 py-1 rounded-full bg-slate-800 hover:bg-slate-700 border border-slate-700/80 text-[10px] font-semibold text-slate-300 hover:text-white whitespace-nowrap transition-colors cursor-pointer shrink-0"
+              >
+                {suggestion}
+              </button>
+            ))}
+          </div>
+
           {/* Chat Input Form */}
           <form onSubmit={handleSendMessage} className="p-3 bg-slate-900 border-t border-slate-800 flex items-center gap-2">
+            <button
+              type="button"
+              onClick={toggleListening}
+              className={`p-2.5 rounded-xl border transition-colors cursor-pointer ${isListening ? 'bg-rose-500/20 border-rose-500 text-rose-400 animate-pulse' : 'bg-slate-950 border-slate-800 text-slate-400 hover:text-white'}`}
+              title={isListening ? 'Ouvindo microfone...' : 'Falar por microfone'}
+            >
+              {isListening ? <Mic className="w-4 h-4" /> : <MicOff className="w-4 h-4" />}
+            </button>
             <input
               type="text"
-              placeholder="Escreva sua dúvida..."
+              placeholder={isListening ? 'Ouvindo sua voz...' : 'Escreva sua dúvida ou peça uma recomendação...'}
               value={inputMessage}
               onChange={(e) => setInputMessage(e.target.value)}
               disabled={isTyping}
@@ -732,7 +888,7 @@ export const PublicLandingPage: React.FC<PublicLandingPageProps> = ({
             <button
               type="submit"
               disabled={isTyping || !inputMessage.trim()}
-              className="p-2.5 rounded-xl text-white transition-opacity cursor-pointer shadow-md"
+              className="p-2.5 rounded-xl text-white transition-opacity cursor-pointer shadow-md disabled:opacity-50"
               style={{ backgroundColor: buttonColor }}
             >
               <Send className="w-4 h-4" />
@@ -822,40 +978,37 @@ export const PublicLandingPage: React.FC<PublicLandingPageProps> = ({
               <span className="text-slate-950 font-extrabold sm:hidden">Vitrine</span>
             </button>
 
-            {isAdminSession ? (
-              <div className="flex items-center gap-1.5 sm:gap-2">
+            {currentCustomer ? (
+              <div className="flex items-center gap-1.5">
                 <button
                   type="button"
-                  onClick={onGoToAdmin}
-                  className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl font-bold text-xs bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 border border-emerald-500/30 transition-all cursor-pointer active:scale-95"
-                  title="Abrir Painel Administrativo"
+                  onClick={onGoToCustomerAccount || onOpenCustomerAuthModal}
+                  className="hidden xs:inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold bg-slate-900 border border-slate-800 text-slate-200 hover:text-white transition-all cursor-pointer"
+                  title="Acessar Minha Conta de Cliente"
                 >
-                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-                  <span className="hidden sm:inline">Painel Admin</span>
-                  <span className="sm:hidden">Admin</span>
+                  <User className="w-3.5 h-3.5 text-orange-400" />
+                  <span className="max-w-[120px] truncate">{currentCustomer.name}</span>
                 </button>
-
-                {onLogout && (
+                {onCustomerLogout && (
                   <button
                     type="button"
-                    onClick={onLogout}
-                    className="inline-flex items-center gap-1 px-2.5 py-2 rounded-xl font-bold text-xs bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/40 transition-all cursor-pointer active:scale-95"
-                    title="Sair da Sessão Administrativa"
+                    onClick={onCustomerLogout}
+                    className="hidden xs:inline-flex p-2 rounded-xl text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 transition-colors cursor-pointer"
+                    title="Sair da Conta de Cliente"
                   >
-                    <LogOut className="w-3.5 h-3.5 shrink-0" />
-                    <span>Sair</span>
+                    <LogOut className="w-3.5 h-3.5" />
                   </button>
                 )}
               </div>
             ) : (
               <button
                 type="button"
-                onClick={onOpenAuthModal}
+                onClick={onOpenCustomerAuthModal}
                 className="hidden xs:inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl font-medium text-xs text-slate-300 hover:text-white bg-slate-900 border border-slate-800 hover:border-slate-700 transition-all cursor-pointer"
-                title="Acesso Administrativo"
+                title="Entrar ou Cadastrar-se na Conta de Cliente"
               >
-                <Lock className="w-3.5 h-3.5 text-orange-400 shrink-0" />
-                <span>Login Admin</span>
+                <User className="w-3.5 h-3.5 text-orange-400 shrink-0" />
+                <span>Entrar / Conta</span>
               </button>
             )}
 
