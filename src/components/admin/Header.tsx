@@ -80,11 +80,12 @@ export const Header: React.FC<HeaderProps> = ({
           <button
             type="button"
             onClick={onGoToStorefront}
-            className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold transition-all border border-slate-200 cursor-pointer"
+            className="flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold transition-all border border-slate-200 cursor-pointer"
             title="Ir para a Loja Pública (sem encerrar sessão)"
           >
             <Store className="w-3.5 h-3.5 text-orange-500 shrink-0" />
-            <span>Loja Pública</span>
+            <span className="hidden sm:inline">Loja Pública</span>
+            <span className="sm:hidden text-[11px]">Loja</span>
           </button>
         )}
 

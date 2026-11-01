@@ -814,11 +814,12 @@ export const PublicLandingPage: React.FC<PublicLandingPageProps> = ({
 
             <button
               onClick={() => onGoToStorefront()}
-              className="hidden sm:inline-flex items-center gap-2 px-4 py-2.5 rounded-xl font-semibold text-sm text-slate-950 transition-all active:scale-[0.98] shadow-md cursor-pointer"
+              className="inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl font-semibold text-xs sm:text-sm text-slate-950 transition-all active:scale-[0.98] shadow-md cursor-pointer"
               style={{ backgroundColor: buttonColor }}
             >
               <ShoppingBag className="w-4 h-4 text-slate-950" />
-              <span className="text-slate-950 font-extrabold">Explorar Vitrine</span>
+              <span className="text-slate-950 font-extrabold hidden sm:inline">Explorar Vitrine</span>
+              <span className="text-slate-950 font-extrabold sm:hidden">Vitrine</span>
             </button>
 
             {isAdminSession ? (

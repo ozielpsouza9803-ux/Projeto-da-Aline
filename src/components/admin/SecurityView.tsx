@@ -106,11 +106,13 @@ export const SecurityView: React.FC<SecurityViewProps> = ({ currentUser, isAdmin
 
     try {
       // 1. If user is authenticated in Supabase Auth, update remote password securely
+      let supabaseUpdated = false;
       if (currentUser && newPassword) {
         const { error: authError } = await supabase.auth.updateUser({ password: newPassword });
         if (authError) {
-          console.warn('Supabase Auth update error:', authError.message);
+          throw new Error(`Erro no Supabase Auth: ${authError.message}`);
         }
+        supabaseUpdated = true;
       }
 
       // 2. Save credentials in local storage
@@ -122,7 +124,9 @@ export const SecurityView: React.FC<SecurityViewProps> = ({ currentUser, isAdmin
 
       setCredsMessage({
         type: 'success',
-        text: `Credenciais salvas com sucesso! Login: "${updated.username}" ou "${updated.email}".`
+        text: supabaseUpdated
+          ? `Senha alterada com sucesso no Supabase Auth para "${currentUser?.email}" e credenciais locais sincronizadas!`
+          : `Credenciais salvas com sucesso! Login: "${updated.username}" ou "${updated.email}".`
       });
       setNewPassword('');
       setConfirmPassword('');
