@@ -1,79 +1,98 @@
-import React from 'react';
-import { BarChart3, TrendingUp, MousePointerClick, DollarSign } from 'lucide-react';
-import { Showcase, Product } from '../../types';
+import React, { useMemo } from 'react';
+import { BarChart3, TrendingUp, MousePointerClick, DollarSign, Wallet } from 'lucide-react';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, PieChart, Pie, Legend, LineChart, Line } from 'recharts';
+import { Showcase, Product, CommissionRecord } from '../../types';
+import { formatBRL } from '../../services/chatbotQueryService';
 
 interface ChartsViewProps {
   showcases: Showcase[];
   products: Product[];
+  commissions: CommissionRecord[];
 }
 
-export const ChartsView: React.FC<ChartsViewProps> = ({ showcases, products }) => {
+export const ChartsView: React.FC<ChartsViewProps> = ({ showcases, products, commissions }) => {
+  // Dados para Gráficos
+  const clicksData = useMemo(() => showcases.map(s => ({
+    name: s.name,
+    clicks: products.filter(p => p.showcaseId === s.id).reduce((acc, p) => acc + (p.clicksCount || 0), 0)
+  })), [showcases, products]);
+
+  const commissionData = useMemo(() => showcases.map(s => ({
+    name: s.name,
+    amount: commissions.filter(c => c.showcaseId === s.id).reduce((acc, c) => acc + c.commissionAmount, 0)
+  })), [showcases, commissions]);
+
+  const totalCommissions = useMemo(() => commissions.reduce((sum, c) => sum + c.commissionAmount, 0), [commissions]);
+  const pendingCommissions = useMemo(() => commissions.filter(c => c.status === 'Pendente').reduce((sum, c) => sum + c.commissionAmount, 0), [commissions]);
+
+  if (products.length === 0 && commissions.length === 0) {
+    return (
+      <div className="p-12 text-center bg-white rounded-2xl border border-slate-200">
+        <p className="text-slate-500">Sem dados registrados para exibição de gráficos.</p>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
-      <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs">
-        <h3 className="text-lg font-bold text-slate-900">Gráficos de Desempenho e Cliques</h3>
-        <p className="text-xs text-slate-500">Análise visual de engajamento por vitrine e conversão de afiliados.</p>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Clicks distribution */}
-        <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs">
-          <h4 className="font-bold text-slate-900 text-sm mb-6 flex items-center gap-2">
-            <MousePointerClick className="w-4 h-4 text-blue-500" /> Cliques por Vitrine de Marca
-          </h4>
-          <div className="space-y-4">
-            {showcases.map(s => {
-              const count = products.filter(p => p.showcaseId === s.id).reduce((acc, p) => acc + p.clicksCount, 150);
-              const maxCount = 1000;
-              const percentage = Math.min(100, (count / maxCount) * 100);
-
-              return (
-                <div key={s.id} className="space-y-1.5">
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="font-semibold text-slate-800">{s.name}</span>
-                    <span className="font-bold text-slate-900 tabular-nums">{count} cliques</span>
-                  </div>
-                  <div className="w-full h-3 bg-slate-100 rounded-full overflow-hidden">
-                    <div 
-                      className="h-full bg-gradient-to-r from-orange-500 to-pink-500 rounded-full transition-all duration-500"
-                      style={{ width: `${percentage}%` }}
-                    />
-                  </div>
-                </div>
-              );
-            })}
+      {/* Cards Financeiros */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4">
+          <div className="p-3 rounded-xl bg-emerald-50 text-emerald-600"><DollarSign className="w-6 h-6" /></div>
+          <div>
+            <p className="text-xs text-slate-500 font-semibold">Total em Comissões</p>
+            <p className="text-xl font-bold text-slate-900">{formatBRL(totalCommissions)}</p>
           </div>
         </div>
-
-        {/* Conversions & Commissions distribution */}
-        <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs">
-          <h4 className="font-bold text-slate-900 text-sm mb-6 flex items-center gap-2">
-            <DollarSign className="w-4 h-4 text-emerald-500" /> Participação nas Comissões
-          </h4>
-          <div className="space-y-4">
-            {showcases.map((s, idx) => {
-              const commissionsShare = idx === 0 ? '48%' : idx === 1 ? '38%' : '14%';
-              const barWidth = idx === 0 ? '48%' : idx === 1 ? '38%' : '14%';
-              const color = idx === 0 ? 'bg-orange-500' : idx === 1 ? 'bg-blue-600' : 'bg-purple-600';
-
-              return (
-                <div key={s.id} className="space-y-1.5">
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="font-semibold text-slate-800">{s.name}</span>
-                    <span className="font-bold text-slate-900 tabular-nums">{commissionsShare} do total</span>
-                  </div>
-                  <div className="w-full h-3 bg-slate-100 rounded-full overflow-hidden">
-                    <div 
-                      className={`h-full ${color} rounded-full transition-all duration-500`}
-                      style={{ width: barWidth }}
-                    />
-                  </div>
-                </div>
-              );
-            })}
+        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4">
+          <div className="p-3 rounded-xl bg-amber-50 text-amber-600"><Wallet className="w-6 h-6" /></div>
+          <div>
+            <p className="text-xs text-slate-500 font-semibold">Pendente de Recebimento</p>
+            <p className="text-xl font-bold text-slate-900">{formatBRL(pendingCommissions)}</p>
           </div>
+        </div>
+        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4">
+          <div className="p-3 rounded-xl bg-blue-50 text-blue-600"><MousePointerClick className="w-6 h-6" /></div>
+          <div>
+            <p className="text-xs text-slate-500 font-semibold">Total de Cliques</p>
+            <p className="text-xl font-bold text-slate-900">{products.reduce((acc, p) => acc + (p.clicksCount || 0), 0)}</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Gráficos */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+          <h4 className="font-bold text-slate-900 text-sm mb-6 flex items-center gap-2">
+            <BarChart3 className="w-4 h-4 text-blue-500" /> Cliques por Vitrine
+          </h4>
+          <ResponsiveContainer width="100%" height={300}>
+            <BarChart data={clicksData}>
+              <CartesianGrid strokeDasharray="3 3" vertical={false} />
+              <XAxis dataKey="name" fontSize={12} />
+              <YAxis fontSize={12} />
+              <Tooltip cursor={{ fill: '#f1f5f9' }} />
+              <Bar dataKey="clicks" fill="#3b82f6" radius={[6, 6, 0, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+
+        <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+          <h4 className="font-bold text-slate-900 text-sm mb-6 flex items-center gap-2">
+            <DollarSign className="w-4 h-4 text-emerald-500" /> Distribuição de Comissões
+          </h4>
+          <ResponsiveContainer width="100%" height={300}>
+            <PieChart>
+              <Pie data={commissionData} dataKey="amount" nameKey="name" cx="50%" cy="50%" innerRadius={60} outerRadius={80} paddingAngle={5} label>
+                {commissionData.map((_, index) => <Cell key={`cell-${index}`} fill={['#f97316', '#3b82f6', '#a855f7'][index % 3]} />)}
+              </Pie>
+              <Tooltip formatter={(val: number) => formatBRL(val)} />
+              <Legend />
+            </PieChart>
+          </ResponsiveContainer>
         </div>
       </div>
     </div>
   );
 };
+

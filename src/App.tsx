@@ -569,6 +569,7 @@ export default function App() {
                 <ChartsView
                   showcases={showcases}
                   products={products}
+                  commissions={commissions}
                 />
               )}
 
