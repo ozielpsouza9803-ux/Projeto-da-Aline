@@ -4,6 +4,26 @@
   functions = "netlify/functions"
 
 [[redirects]]
+  from = "/api/chat"
+  to = "/.netlify/functions/chat"
+  status = 200
+
+[[redirects]]
+  from = "/api/admin/assistant/verify-auth"
+  to = "/.netlify/functions/admin_verify_auth"
+  status = 200
+
+[[redirects]]
+  from = "/api/admin/assistant/catalog-query"
+  to = "/.netlify/functions/admin_catalog_query"
+  status = 200
+
+[[redirects]]
+  from = "/api/admin/assistant/replenishment-report"
+  to = "/.netlify/functions/admin_replenishment_report"
+  status = 200
+
+[[redirects]]
   from = "/api/*"
   to = "/.netlify/functions/:splat"
   status = 200
