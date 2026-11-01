@@ -68,6 +68,17 @@ export interface CommissionRecord {
   status: 'Pendente' | 'Aprovado' | 'Pago';
 }
 
+export interface CustomButtonConfig {
+  id: string;
+  name: string;
+  text: string;
+  color: string;
+  size: 'sm' | 'md' | 'lg';
+  shape: 'rounded' | 'pill' | 'square';
+  position: 'header' | 'hero' | 'product_card' | 'footer';
+  link: string;
+}
+
 export interface AdminSettings {
   siteName: string;
   adminEmail: string;
@@ -79,6 +90,17 @@ export interface AdminSettings {
   primaryButtonColor?: string;
   showcasePosition?: 'above_banner' | 'below_banner';
   deliveryFee: number;
+  adminProfilePhoto?: string;
+  headerLogoUrl?: string;
+  headerBgColor?: string;
+  headerTextColor?: string;
+  heroTitle?: string;
+  heroSubtitle?: string;
+  bgColor?: string;
+  bgImageUrl?: string;
+  footerText?: string;
+  footerBgColor?: string;
+  customButtons?: CustomButtonConfig[];
 }
 
 // ==========================================

@@ -28,6 +28,8 @@ interface SidebarProps {
   setIsMobileOpen: (open: boolean) => void;
   onLogout?: () => void;
   isAdminSession?: boolean;
+  adminProfilePhoto?: string;
+  onUpdateProfilePhoto?: (url: string) => void;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({ 
@@ -37,7 +39,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
   isMobileOpen,
   setIsMobileOpen,
   onLogout,
-  isAdminSession
+  isAdminSession,
+  adminProfilePhoto,
+  onUpdateProfilePhoto
 }) => {
   const menuItems = [
     { id: 'home', label: 'Início da Loja Pública', icon: Home },
@@ -77,7 +81,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           lg:translate-x-0 ${isMobileOpen ? 'translate-x-0' : '-translate-x-full'}
         `}
       >
-        {/* Brand Header */}
+        {/* Brand Header & Profile Photo */}
         <div 
           style={{ borderColor: 'var(--admin-card-border, #1c2d5a)' }}
           className="p-6 border-b flex items-center justify-between"
@@ -88,9 +92,20 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 backgroundColor: 'var(--admin-accent, #f59e0b)',
                 boxShadow: '0 0 15px var(--admin-accent-glow, rgba(245,158,11,0.3))'
               }}
-              className="w-10 h-10 rounded-xl flex items-center justify-center"
+              className="w-10 h-10 rounded-xl flex items-center justify-center overflow-hidden relative group cursor-pointer"
+              title="Clique para alterar a foto de perfil do admin"
+              onClick={() => {
+                const url = prompt('Insira a URL da nova foto de perfil do administrador:', adminProfilePhoto || '');
+                if (url !== null && onUpdateProfilePhoto) {
+                  onUpdateProfilePhoto(url.trim());
+                }
+              }}
             >
-              <Sparkles className="w-5 h-5 text-slate-950" />
+              {adminProfilePhoto ? (
+                <img src={adminProfilePhoto} alt="Perfil Admin" className="w-full h-full object-cover" />
+              ) : (
+                <Sparkles className="w-5 h-5 text-slate-950" />
+              )}
             </div>
             <div>
               <h1 className="font-bold text-base tracking-tight text-white flex items-center gap-1.5">

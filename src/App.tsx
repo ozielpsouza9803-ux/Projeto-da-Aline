@@ -461,6 +461,11 @@ export default function App() {
             setIsMobileOpen={setIsMobileOpen}
             onLogout={handleLogout}
             isAdminSession={isAdminSession}
+            adminProfilePhoto={settings.adminProfilePhoto}
+            onUpdateProfilePhoto={(url) => {
+              const updated = { ...settings, adminProfilePhoto: url };
+              handleSaveSettings(updated);
+            }}
           />
 
           {/* Main Content Area */}
