@@ -1,5 +1,20 @@
 @import "tailwindcss";
 
+:root {
+  --bg-deep-navy: #0B1020;
+  --card-graphite-blue: #151E33;
+  --accent-amber: #D97706;
+  --accent-amber-hover: #B45309;
+  --text-light-gray: #E5E7EB;
+  --text-muted: #94A3B8;
+  --border-subtle: #1C2D4A;
+}
+
+body {
+  background-color: var(--bg-deep-navy);
+  color: var(--text-light-gray);
+}
+
 /* ==========================================================================
    Suporte de Tema para Caixas de Entrada de Valores e Textos (Painel Admin)
    Aplica os temas escuro e claro aos campos de preço, estoque e valores.

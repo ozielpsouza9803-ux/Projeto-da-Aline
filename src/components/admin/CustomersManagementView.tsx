@@ -60,9 +60,9 @@ export const CustomersManagementView: React.FC<CustomersManagementProps> = ({ is
   return (
     <div className="space-y-6 max-w-6xl mx-auto">
       {!isAdmin ? (
-        <div className="p-12 bg-white rounded-2xl border border-rose-200 text-center shadow-xs">
+        <div className="p-12 bg-[#151E33] rounded-2xl border border-rose-200 text-center shadow-xs">
           <ShieldCheck className="w-12 h-12 text-rose-500 mx-auto mb-4" />
-          <h2 className="text-lg font-bold text-slate-900">Acesso Restrito</h2>
+          <h2 className="text-lg font-bold text-[#E5E7EB]">Acesso Restrito</h2>
           <p className="text-sm text-slate-500 mt-2">Você não tem permissão para acessar a Gestão de Clientes VIP.</p>
         </div>
       ) : (
@@ -116,7 +116,7 @@ export const CustomersManagementView: React.FC<CustomersManagementProps> = ({ is
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 placeholder="Pesquisar cliente por nome, e-mail ou WhatsApp..."
-                className="w-full px-4 py-2.5 pl-10 text-xs rounded-xl border bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100"
+                className="w-full px-4 py-2.5 pl-10 text-xs rounded-xl border bg-[#151E33] dark:bg-slate-900 text-[#E5E7EB] dark:text-slate-100"
               />
             </div>
           </div>
@@ -143,7 +143,7 @@ export const CustomersManagementView: React.FC<CustomersManagementProps> = ({ is
                 </div>
               ) : (
                 <table className="w-full text-left text-xs">
-                  <thead className="bg-slate-50 dark:bg-slate-900/50 uppercase text-[10px] font-bold text-slate-400 border-b border-slate-200 dark:border-slate-800">
+                  <thead className="bg-[#0B1020] dark:bg-slate-900/50 uppercase text-[10px] font-bold text-slate-400 border-b border-[#1C2D4A] dark:border-slate-800">
                     <tr>
                       <th className="py-3 px-4">Cliente</th>
                       <th className="py-3 px-4">Contato / WhatsApp</th>
@@ -158,7 +158,7 @@ export const CustomersManagementView: React.FC<CustomersManagementProps> = ({ is
                       const defaultAvatar = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&auto=format&fit=crop&q=80';
 
                       return (
-                        <tr key={customer.email} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors">
+                        <tr key={customer.email} className="hover:bg-[#0B1020]/50 dark:hover:bg-slate-800/30 transition-colors">
                           <td className="py-3.5 px-4">
                             <div className="flex items-center gap-3">
                               <div className="relative shrink-0">
@@ -194,7 +194,7 @@ export const CustomersManagementView: React.FC<CustomersManagementProps> = ({ is
                           </td>
 
                           <td className="py-3.5 px-4">
-                            <div className="text-slate-700 dark:text-slate-300 font-medium">
+                            <div className="text-[#E5E7EB] dark:text-slate-300 font-medium">
                               {customer.whatsapp || customer.phone || 'Não informado'}
                             </div>
                           </td>
@@ -212,7 +212,7 @@ export const CustomersManagementView: React.FC<CustomersManagementProps> = ({ is
                                 VIP Autorizado
                               </span>
                             ) : (
-                              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-medium bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400">
+                              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-medium bg-[#0B1020] text-[#94A3B8] dark:bg-slate-800 dark:text-slate-400">
                                 Cliente Padrão
                               </span>
                             )}

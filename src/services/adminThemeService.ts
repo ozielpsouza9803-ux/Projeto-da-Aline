@@ -65,14 +65,14 @@ export const ADMIN_THEMES: Record<AdminThemeId, ThemeDefinition> = {
     name: 'Azul-marinho',
     description: 'Tom clássico marinho elegante e profundo',
     dark: {
-      bg: '#0a1128',
-      sidebarBg: '#060c1e',
-      headerBg: 'rgba(10, 17, 40, 0.95)',
-      cardBg: '#101c3d',
-      cardBorder: '#1c2d5a',
-      textPrimary: '#f8fafc',
-      textSecondary: '#94a3b8',
-      inputBg: '#0d1733'
+      bg: '#0B1020',
+      sidebarBg: '#080C1A',
+      headerBg: 'rgba(11, 16, 32, 0.95)',
+      cardBg: '#151E33',
+      cardBorder: '#1C2D4A',
+      textPrimary: '#E5E7EB',
+      textSecondary: '#94A3B8',
+      inputBg: '#0F172A'
     },
     light: {
       bg: '#f1f5f9',
@@ -215,13 +215,13 @@ export const ADMIN_THEMES: Record<AdminThemeId, ThemeDefinition> = {
 export const ADMIN_ACCENTS: Record<AdminAccentId, AccentDefinition> = {
   'dourado': {
     id: 'dourado',
-    name: 'Dourado',
-    colorHex: '#f59e0b',
-    hoverHex: '#d97706',
-    textOnAccent: '#0f172a',
-    badgeBg: '#fef3c7',
-    badgeText: '#92400e',
-    glowRgba: 'rgba(245, 158, 11, 0.3)'
+    name: 'Âmbar Premium',
+    colorHex: '#D97706',
+    hoverHex: '#B45309',
+    textOnAccent: '#0B1020',
+    badgeBg: '#451a03',
+    badgeText: '#fbbf24',
+    glowRgba: 'rgba(217, 119, 6, 0.3)'
   },
   'ciano': {
     id: 'ciano',

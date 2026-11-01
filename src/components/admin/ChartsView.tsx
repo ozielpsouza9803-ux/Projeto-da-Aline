@@ -45,7 +45,7 @@ export const ChartsView: React.FC<ChartsViewProps> = ({ showcases, products, com
 
   if (products.length === 0 && commissions.length === 0) {
     return (
-      <div className="p-12 text-center bg-white rounded-2xl border border-slate-200">
+      <div className="p-12 text-center bg-[#151E33] rounded-2xl border border-[#1C2D4A]">
         <p className="text-slate-500">Sem dados registrados para exibição de gráficos.</p>
       </div>
     );
@@ -54,12 +54,12 @@ export const ChartsView: React.FC<ChartsViewProps> = ({ showcases, products, com
   return (
     <div className="space-y-6">
       {/* Filtros */}
-      <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4">
-        <label className="text-xs font-bold text-slate-700">Filtrar por Vitrine:</label>
+      <div className="bg-[#151E33] p-4 rounded-2xl border border-[#1C2D4A] shadow-sm flex items-center gap-4">
+        <label className="text-xs font-bold text-[#E5E7EB]">Filtrar por Vitrine:</label>
         <select 
           value={selectedBrandId} 
           onChange={(e) => setSelectedBrandId(e.target.value)}
-          className="bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-xs font-semibold"
+          className="bg-[#0B1020] border border-[#1C2D4A] rounded-lg px-3 py-1.5 text-xs font-semibold"
         >
           <option value="all">Todas as Marcas</option>
           {showcases.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
@@ -68,33 +68,33 @@ export const ChartsView: React.FC<ChartsViewProps> = ({ showcases, products, com
 
       {/* Cards Financeiros */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4">
+        <div className="bg-[#151E33] p-5 rounded-2xl border border-[#1C2D4A] shadow-sm flex items-center gap-4">
           <div className="p-3 rounded-xl bg-emerald-50 text-emerald-600"><DollarSign className="w-6 h-6" /></div>
           <div>
             <p className="text-xs text-slate-500 font-semibold">Total em Comissões</p>
-            <p className="text-xl font-bold text-slate-900">{formatBRL(totalCommissions)}</p>
+            <p className="text-xl font-bold text-[#E5E7EB]">{formatBRL(totalCommissions)}</p>
           </div>
         </div>
-        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4">
+        <div className="bg-[#151E33] p-5 rounded-2xl border border-[#1C2D4A] shadow-sm flex items-center gap-4">
           <div className="p-3 rounded-xl bg-amber-50 text-amber-600"><Wallet className="w-6 h-6" /></div>
           <div>
             <p className="text-xs text-slate-500 font-semibold">Pendente de Recebimento</p>
-            <p className="text-xl font-bold text-slate-900">{formatBRL(pendingCommissions)}</p>
+            <p className="text-xl font-bold text-[#E5E7EB]">{formatBRL(pendingCommissions)}</p>
           </div>
         </div>
-        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4">
+        <div className="bg-[#151E33] p-5 rounded-2xl border border-[#1C2D4A] shadow-sm flex items-center gap-4">
           <div className="p-3 rounded-xl bg-blue-50 text-blue-600"><MousePointerClick className="w-6 h-6" /></div>
           <div>
             <p className="text-xs text-slate-500 font-semibold">Total de Cliques</p>
-            <p className="text-xl font-bold text-slate-900">{totalClicks}</p>
+            <p className="text-xl font-bold text-[#E5E7EB]">{totalClicks}</p>
           </div>
         </div>
       </div>
 
       {/* Gráficos */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-          <h4 className="font-bold text-slate-900 text-sm mb-6 flex items-center gap-2">
+        <div className="bg-[#151E33] p-6 rounded-2xl border border-[#1C2D4A] shadow-sm">
+          <h4 className="font-bold text-[#E5E7EB] text-sm mb-6 flex items-center gap-2">
             <BarChart3 className="w-4 h-4 text-blue-500" /> Cliques por Vitrine
           </h4>
           <ResponsiveContainer width="100%" height={300}>
@@ -108,8 +108,8 @@ export const ChartsView: React.FC<ChartsViewProps> = ({ showcases, products, com
           </ResponsiveContainer>
         </div>
 
-        <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-          <h4 className="font-bold text-slate-900 text-sm mb-6 flex items-center gap-2">
+        <div className="bg-[#151E33] p-6 rounded-2xl border border-[#1C2D4A] shadow-sm">
+          <h4 className="font-bold text-[#E5E7EB] text-sm mb-6 flex items-center gap-2">
             <DollarSign className="w-4 h-4 text-emerald-500" /> Distribuição de Comissões
           </h4>
           <ResponsiveContainer width="100%" height={300}>

@@ -144,7 +144,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-sm font-semibold transition-all duration-150 text-left
                   ${isActive 
                     ? 'border-0' 
-                    : 'text-slate-300 hover:bg-white/10 hover:text-white'}
+                    : 'text-slate-300 hover:bg-[#151E33]/10 hover:text-white'}
                 `}
               >
                 <Icon className={`w-5 h-5 shrink-0 ${isActive ? 'text-inherit' : 'text-slate-400'}`} />

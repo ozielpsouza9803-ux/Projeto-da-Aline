@@ -189,7 +189,7 @@ export const CustomerAccountView: React.FC<CustomerAccountViewProps> = ({
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
                   disabled={isUploading}
-                  className="px-2.5 py-1.5 rounded-lg bg-orange-500 text-slate-950 font-bold text-[11px] flex items-center gap-1 hover:bg-orange-400 transition-colors cursor-pointer"
+                  className="px-2.5 py-1.5 rounded-lg bg-[#D97706] text-slate-950 font-bold text-[11px] flex items-center gap-1 hover:bg-orange-400 transition-colors cursor-pointer"
                 >
                   <Upload className="w-3.5 h-3.5" />
                   <span>Alterar Foto</span>
@@ -348,7 +348,7 @@ export const CustomerAccountView: React.FC<CustomerAccountViewProps> = ({
             <div className="pt-4 border-t border-slate-800 flex justify-end">
               <button
                 type="submit"
-                className="px-6 py-3 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs transition-all shadow-md flex items-center gap-2 cursor-pointer"
+                className="px-6 py-3 rounded-xl bg-[#D97706] hover:bg-orange-600 text-white font-bold text-xs transition-all shadow-md flex items-center gap-2 cursor-pointer"
                 style={{ backgroundColor: buttonColor }}
               >
                 <CheckCircle2 className="w-4 h-4" />

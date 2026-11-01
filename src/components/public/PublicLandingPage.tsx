@@ -343,7 +343,7 @@ export const PublicLandingPage: React.FC<PublicLandingPageProps> = ({
         
         {/* Automatic Banner Carousel Container */}
         <div 
-          className="relative rounded-3xl overflow-hidden shadow-2xl bg-slate-900 border border-slate-800/80 aspect-[16/9] sm:aspect-[21/9] max-h-[460px] flex items-center group select-none touch-pan-y"
+          className="relative rounded-3xl overflow-hidden shadow-2xl bg-[#151E33] border border-[#1C2D4A]/80 aspect-[16/9] sm:aspect-[21/9] max-h-[460px] flex items-center group select-none touch-pan-y"
           onTouchStart={handleTouchStart}
           onTouchMove={handleTouchMove}
           onTouchEnd={handleTouchEnd}
@@ -358,13 +358,13 @@ export const PublicLandingPage: React.FC<PublicLandingPageProps> = ({
           <div className="absolute inset-0 bg-gradient-to-r from-slate-950/95 via-slate-950/60 to-transparent" />
 
           {/* Active Slide Text Content */}
-          <div className="relative z-10 p-6 sm:p-12 max-w-2xl text-white space-y-4">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-500/20 text-orange-400 border border-orange-500/30 text-xs font-bold tracking-wider uppercase">
+          <div className="relative z-10 p-6 sm:p-12 max-w-2xl text-[#E5E7EB] space-y-4">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#D97706]/20 text-[#D97706] border border-orange-500/30 text-xs font-bold tracking-wider uppercase">
               <Sparkles className="w-3.5 h-3.5" />
               Destaques da Semana
             </div>
 
-            <h2 className="text-2xl sm:text-4xl md:text-5xl font-black text-white tracking-tight leading-tight">
+            <h2 className="text-2xl sm:text-4xl md:text-5xl font-black text-[#E5E7EB] tracking-tight leading-tight">
               {carouselSlides[currentSlideIndex]?.title}
             </h2>
 
@@ -387,7 +387,7 @@ export const PublicLandingPage: React.FC<PublicLandingPageProps> = ({
 
               <button
                 onClick={() => scrollToSection('marcas-section')}
-                className="px-4 py-3 rounded-xl bg-slate-900/80 hover:bg-slate-800 border border-slate-700 text-white font-bold text-xs transition-colors cursor-pointer"
+                className="px-4 py-3 rounded-xl bg-[#151E33]/80 hover:bg-slate-800 border border-slate-700 text-[#E5E7EB] font-bold text-xs transition-colors cursor-pointer"
               >
                 Ver Marcas
               </button>
@@ -399,14 +399,14 @@ export const PublicLandingPage: React.FC<PublicLandingPageProps> = ({
             <>
               <button 
                 onClick={() => setCurrentSlideIndex((prev) => (prev - 1 + carouselSlides.length) % carouselSlides.length)}
-                className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-slate-950/60 border border-slate-800 text-white flex items-center justify-center hover:bg-slate-900 transition-colors opacity-80 group-hover:opacity-100 z-20 cursor-pointer"
+                className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-[#0B1020]/60 border border-[#1C2D4A] text-[#E5E7EB] flex items-center justify-center hover:bg-[#151E33] transition-colors opacity-80 group-hover:opacity-100 z-20 cursor-pointer"
                 aria-label="Banner Anterior"
               >
                 <ChevronLeft className="w-6 h-6" />
               </button>
               <button 
                 onClick={() => setCurrentSlideIndex((prev) => (prev + 1) % carouselSlides.length)}
-                className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-slate-950/60 border border-slate-800 text-white flex items-center justify-center hover:bg-slate-900 transition-colors opacity-80 group-hover:opacity-100 z-20 cursor-pointer"
+                className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-[#0B1020]/60 border border-[#1C2D4A] text-[#E5E7EB] flex items-center justify-center hover:bg-[#151E33] transition-colors opacity-80 group-hover:opacity-100 z-20 cursor-pointer"
                 aria-label="Próximo Banner"
               >
                 <ChevronRight className="w-6 h-6" />
@@ -420,8 +420,8 @@ export const PublicLandingPage: React.FC<PublicLandingPageProps> = ({
                     onClick={() => setCurrentSlideIndex(idx)}
                     className={`h-2 rounded-full transition-all cursor-pointer ${
                       currentSlideIndex === idx 
-                        ? 'w-8 bg-orange-500' 
-                        : 'w-2 bg-white/40 hover:bg-white/70'
+                        ? 'w-8 bg-[#D97706]' 
+                        : 'w-2 bg-[#151E33]/40 hover:bg-[#151E33]/70'
                     }`}
                     aria-label={`Ir para o slide ${idx + 1}`}
                   />
@@ -437,23 +437,23 @@ export const PublicLandingPage: React.FC<PublicLandingPageProps> = ({
 
   // Brand Showcase Row section
   const renderMarcasSection = () => (
-    <section id="marcas-section" className="py-10 bg-slate-900/60 border-y border-slate-800/80">
+    <section id="marcas-section" className="py-10 bg-[#151E33]/60 border-y border-[#1C2D4A]/80">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         <div className="flex items-center justify-between mb-6">
           <div>
-            <div className="inline-flex items-center gap-1.5 text-xs font-bold text-orange-400 uppercase tracking-wider mb-1">
+            <div className="inline-flex items-center gap-1.5 text-xs font-bold text-[#D97706] uppercase tracking-wider mb-1">
               <Tag className="w-3.5 h-3.5" />
               Vitrines das Marcas
             </div>
-            <h3 className="text-xl sm:text-2xl font-extrabold text-white tracking-tight">
+            <h3 className="text-xl sm:text-2xl font-extrabold text-[#E5E7EB] tracking-tight">
               Selecione uma Marca para Explorar
             </h3>
           </div>
 
           <button
             onClick={() => onGoToStorefront()}
-            className="text-xs font-semibold text-orange-400 hover:text-orange-300 flex items-center gap-1 transition-colors cursor-pointer"
+            className="text-xs font-semibold text-[#D97706] hover:text-orange-300 flex items-center gap-1 transition-colors cursor-pointer"
           >
             <span>Ver Todas</span>
             <ChevronRight className="w-4 h-4" />
@@ -468,7 +468,7 @@ export const PublicLandingPage: React.FC<PublicLandingPageProps> = ({
               <div
                 key={showcase.id}
                 onClick={() => onGoToStorefront(showcase.id)}
-                className="snap-start shrink-0 w-64 sm:w-72 bg-slate-900 border border-slate-800 hover:border-orange-500/50 rounded-2xl p-4 cursor-pointer transition-all hover:-translate-y-1 hover:shadow-xl group flex flex-col justify-between"
+                className="snap-start shrink-0 w-64 sm:w-72 bg-[#151E33] border border-[#1C2D4A] hover:border-orange-500/50 rounded-2xl p-4 cursor-pointer transition-all hover:-translate-y-1 hover:shadow-xl group flex flex-col justify-between"
               >
                 <div className="flex items-center gap-3 mb-3">
                   <div className="w-12 h-12 rounded-xl bg-slate-800 border border-slate-700 overflow-hidden flex items-center justify-center shrink-0">
@@ -482,11 +482,11 @@ export const PublicLandingPage: React.FC<PublicLandingPageProps> = ({
                         }}
                       />
                     ) : (
-                      <Store className="w-6 h-6 text-orange-400" />
+                      <Store className="w-6 h-6 text-[#D97706]" />
                     )}
                   </div>
                   <div>
-                    <h4 className="font-bold text-sm text-white group-hover:text-orange-400 transition-colors">
+                    <h4 className="font-bold text-sm text-[#E5E7EB] group-hover:text-[#D97706] transition-colors">
                       {showcase.name}
                     </h4>
                     <span className="text-[11px] font-medium text-slate-400 block">
@@ -499,11 +499,11 @@ export const PublicLandingPage: React.FC<PublicLandingPageProps> = ({
                   {showcase.description || 'Vitrine oficial de produtos e ofertas selecionadas.'}
                 </p>
 
-                <div className="pt-2 border-t border-slate-800/80 flex items-center justify-between text-xs">
+                <div className="pt-2 border-t border-[#1C2D4A]/80 flex items-center justify-between text-xs">
                   <span className="text-slate-400 font-medium">
                     {showcaseProdCount} {showcaseProdCount === 1 ? 'produto' : 'produtos'}
                   </span>
-                  <span className="font-bold text-orange-400 flex items-center gap-1 group-hover:translate-x-1 transition-transform">
+                  <span className="font-bold text-[#D97706] flex items-center gap-1 group-hover:translate-x-1 transition-transform">
                     <span>Abrir</span>
                     <ArrowRight className="w-3.5 h-3.5" />
                   </span>
@@ -518,7 +518,7 @@ export const PublicLandingPage: React.FC<PublicLandingPageProps> = ({
   );
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 font-sans selection:bg-orange-500 selection:text-white flex flex-col pb-20">
+    <div className="min-h-screen bg-[#0B1020] text-[#E5E7EB] font-sans selection:bg-[#D97706] selection:text-[#E5E7EB] flex flex-col pb-20">
       
       {/* 1. Backdrop Overlay for External Lateral Drawer */}
       {isExternalDrawerOpen && (
@@ -531,29 +531,29 @@ export const PublicLandingPage: React.FC<PublicLandingPageProps> = ({
 
       {/* 2. External Navigation Drawer (Slide-Over Lateral Menu for Visitors) */}
       <aside 
-        className={`fixed top-0 right-0 h-full w-80 max-w-[85vw] bg-slate-900 border-l border-slate-800 shadow-2xl z-50 transform transition-transform duration-300 ease-in-out flex flex-col ${
+        className={`fixed top-0 right-0 h-full w-80 max-w-[85vw] bg-[#151E33] border-l border-[#1C2D4A] shadow-2xl z-50 transform transition-transform duration-300 ease-in-out flex flex-col ${
           isExternalDrawerOpen ? 'translate-x-0' : 'translate-x-full'
         }`}
         aria-label="Menu de Navegação Pública"
       >
         {/* Drawer Header */}
-        <div className="p-5 border-b border-slate-800 flex items-center justify-between bg-slate-900/90">
+        <div className="p-5 border-b border-[#1C2D4A] flex items-center justify-between bg-[#151E33]/90">
           <div className="flex items-center gap-2.5">
             <div 
-              className="w-9 h-9 rounded-xl flex items-center justify-center text-white shadow-lg"
+              className="w-9 h-9 rounded-xl flex items-center justify-center text-[#E5E7EB] shadow-lg"
               style={{ backgroundColor: buttonColor }}
             >
               <Store className="w-5 h-5" />
             </div>
             <div>
-              <span className="font-bold text-base text-white block leading-none">OmniBrand</span>
-              <span className="text-[10px] font-semibold tracking-wider text-orange-400 uppercase">Afiliados</span>
+              <span className="font-bold text-base text-[#E5E7EB] block leading-none">OmniBrand</span>
+              <span className="text-[10px] font-semibold tracking-wider text-[#D97706] uppercase">Afiliados</span>
             </div>
           </div>
 
           <button
             onClick={() => setIsExternalDrawerOpen(false)}
-            className="p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors cursor-pointer"
+            className="p-2 text-slate-400 hover:text-[#E5E7EB] hover:bg-slate-800 rounded-lg transition-colors cursor-pointer"
             title="Fechar menu"
             aria-label="Fechar menu lateral externo"
           >
@@ -573,9 +573,9 @@ export const PublicLandingPage: React.FC<PublicLandingPageProps> = ({
                   setIsExternalDrawerOpen(false);
                   window.scrollTo({ top: 0, behavior: 'smooth' });
                 }}
-                className="w-full text-left px-3.5 py-3 rounded-xl font-medium text-slate-200 hover:text-white hover:bg-slate-800/80 transition-all flex items-center gap-3 cursor-pointer"
+                className="w-full text-left px-3.5 py-3 rounded-xl font-medium text-slate-200 hover:text-[#E5E7EB] hover:bg-slate-800/80 transition-all flex items-center gap-3 cursor-pointer"
               >
-                <Compass className="w-4 h-4 text-orange-400" />
+                <Compass className="w-4 h-4 text-[#D97706]" />
                 Início
               </button>
 
@@ -584,25 +584,25 @@ export const PublicLandingPage: React.FC<PublicLandingPageProps> = ({
                   setIsExternalDrawerOpen(false);
                   onGoToStorefront();
                 }}
-                className="w-full text-left px-3.5 py-3 rounded-xl font-medium text-slate-200 hover:text-white hover:bg-slate-800/80 transition-all flex items-center gap-3 cursor-pointer"
+                className="w-full text-left px-3.5 py-3 rounded-xl font-medium text-slate-200 hover:text-[#E5E7EB] hover:bg-slate-800/80 transition-all flex items-center gap-3 cursor-pointer"
               >
-                <ShoppingBag className="w-4 h-4 text-orange-400" />
+                <ShoppingBag className="w-4 h-4 text-[#D97706]" />
                 Vitrine de Produtos
               </button>
 
               <button
                 onClick={() => scrollToSection('marcas-section')}
-                className="w-full text-left px-3.5 py-3 rounded-xl font-medium text-slate-200 hover:text-white hover:bg-slate-800/80 transition-all flex items-center gap-3 cursor-pointer"
+                className="w-full text-left px-3.5 py-3 rounded-xl font-medium text-slate-200 hover:text-[#E5E7EB] hover:bg-slate-800/80 transition-all flex items-center gap-3 cursor-pointer"
               >
-                <Tag className="w-4 h-4 text-orange-400" />
+                <Tag className="w-4 h-4 text-[#D97706]" />
                 Vitrines & Marcas
               </button>
 
               <button
                 onClick={() => scrollToSection('como-funciona-section')}
-                className="w-full text-left px-3.5 py-3 rounded-xl font-medium text-slate-200 hover:text-white hover:bg-slate-800/80 transition-all flex items-center gap-3 cursor-pointer"
+                className="w-full text-left px-3.5 py-3 rounded-xl font-medium text-slate-200 hover:text-[#E5E7EB] hover:bg-slate-800/80 transition-all flex items-center gap-3 cursor-pointer"
               >
-                <Zap className="w-4 h-4 text-orange-400" />
+                <Zap className="w-4 h-4 text-[#D97706]" />
                 Como Funciona
               </button>
 
@@ -611,16 +611,16 @@ export const PublicLandingPage: React.FC<PublicLandingPageProps> = ({
                   setIsExternalDrawerOpen(false);
                   setIsChatOpen(true);
                 }}
-                className="w-full text-left px-3.5 py-3 rounded-xl font-medium text-slate-200 hover:text-white hover:bg-slate-800/80 transition-all flex items-center gap-3 cursor-pointer"
+                className="w-full text-left px-3.5 py-3 rounded-xl font-medium text-slate-200 hover:text-[#E5E7EB] hover:bg-slate-800/80 transition-all flex items-center gap-3 cursor-pointer"
               >
-                <Headset className="w-4 h-4 text-orange-400" />
+                <Headset className="w-4 h-4 text-[#D97706]" />
                 Chat de Atendimento
               </button>
             </nav>
           </div>
 
           {/* Área do Cliente */}
-          <div className="pt-4 border-t border-slate-800/80">
+          <div className="pt-4 border-t border-[#1C2D4A]/80">
             <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3 px-2">
               Área do Cliente
             </p>
@@ -648,19 +648,19 @@ export const PublicLandingPage: React.FC<PublicLandingPageProps> = ({
                     setIsExternalDrawerOpen(false);
                     if (onOpenCustomerAuthModal) onOpenCustomerAuthModal();
                   }}
-                  className="w-full text-left px-3.5 py-3 rounded-xl font-semibold text-orange-400 hover:text-orange-300 bg-orange-500/10 hover:bg-orange-500/20 border border-orange-500/20 transition-all flex items-center justify-between cursor-pointer"
+                  className="w-full text-left px-3.5 py-3 rounded-xl font-semibold text-[#D97706] hover:text-orange-300 bg-[#D97706]/10 hover:bg-[#D97706]/20 border border-orange-500/20 transition-all flex items-center justify-between cursor-pointer"
                 >
                   <div className="flex items-center gap-3">
-                    <User className="w-4 h-4 text-orange-400" />
+                    <User className="w-4 h-4 text-[#D97706]" />
                     <span>Entrar / Cadastrar-se</span>
                   </div>
-                  <ChevronRight className="w-4 h-4 text-orange-400" />
+                  <ChevronRight className="w-4 h-4 text-[#D97706]" />
                 </button>
               )}
             </div>
           </div>
 
-          <div className="pt-4 border-t border-slate-800/80">
+          <div className="pt-4 border-t border-[#1C2D4A]/80">
             <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3 px-2">
               Acesso Restrito
             </p>
@@ -670,32 +670,22 @@ export const PublicLandingPage: React.FC<PublicLandingPageProps> = ({
                   setIsExternalDrawerOpen(false);
                   onGoToAdmin();
                 }}
-                className="w-full text-left px-3.5 py-3 rounded-xl font-semibold text-orange-400 hover:text-orange-300 bg-orange-500/10 hover:bg-orange-500/20 border border-orange-500/20 transition-all flex items-center justify-between cursor-pointer"
+                className="w-full text-left px-3.5 py-3 rounded-xl font-semibold text-[#D97706] hover:text-orange-300 bg-[#D97706]/10 hover:bg-[#D97706]/20 border border-orange-500/20 transition-all flex items-center justify-between cursor-pointer"
               >
                 <div className="flex items-center gap-3">
-                  <Lock className="w-4 h-4 text-orange-400" />
+                  <Lock className="w-4 h-4 text-[#D97706]" />
                   <span>Painel Administrativo</span>
                 </div>
-                <ChevronRight className="w-4 h-4 text-orange-400" />
+                <ChevronRight className="w-4 h-4 text-[#D97706]" />
               </button>
 
-              {isAdminSession && onLogout && (
-                <button
-                  onClick={() => {
-                    setIsExternalDrawerOpen(false);
-                    onLogout();
-                  }}
-                  className="w-full text-left px-3.5 py-2.5 rounded-xl text-sm font-medium text-rose-400 hover:bg-rose-500/10 transition-colors cursor-pointer"
-                >
-                  Sair da Sessão Admin
-                </button>
-              )}
+              {/* Admin logout removed from public drawer as requested */}
             </div>
           </div>
         </div>
 
         {/* Drawer Footer */}
-        <div className="p-4 border-t border-slate-800 bg-slate-900/50 text-center">
+        <div className="p-4 border-t border-[#1C2D4A] bg-[#151E33]/50 text-center">
           <p className="text-xs text-slate-500">
             OmniBrand Afiliados &copy; {new Date().getFullYear()}
           </p>
@@ -704,11 +694,11 @@ export const PublicLandingPage: React.FC<PublicLandingPageProps> = ({
 
       {isChatOpen && (
         <div 
-          className="fixed inset-0 sm:inset-auto sm:bottom-6 sm:right-6 sm:w-[400px] sm:h-[600px] z-50 sm:rounded-3xl shadow-2xl flex flex-col overflow-hidden border border-slate-800 bg-slate-900"
+          className="fixed inset-0 sm:inset-auto sm:bottom-6 sm:right-6 sm:w-[400px] sm:h-[600px] z-50 sm:rounded-3xl shadow-2xl flex flex-col overflow-hidden border border-[#1C2D4A] bg-[#151E33]"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Chat Header */}
-          <div className="p-4 border-b border-slate-800 bg-slate-900/90 flex items-center justify-between">
+          <div className="p-4 border-b border-[#1C2D4A] bg-[#151E33]/90 flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="relative">
                 <img 
@@ -722,7 +712,7 @@ export const PublicLandingPage: React.FC<PublicLandingPageProps> = ({
                 <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 absolute -bottom-0.5 -right-0.5 border-2 border-slate-900 animate-pulse" />
               </div>
               <div>
-                <h3 className="font-bold text-sm text-white flex items-center gap-2">
+                <h3 className="font-bold text-sm text-[#E5E7EB] flex items-center gap-2">
                   <span>{botProfile.name}</span>
                 </h3>
                 <p className="text-[11px] text-slate-400">{botProfile.role || 'Suporte rápido ao visitante'}</p>
@@ -732,14 +722,14 @@ export const PublicLandingPage: React.FC<PublicLandingPageProps> = ({
             <div className="flex items-center gap-1.5">
               <button
                 onClick={() => setAudioEnabled(!audioEnabled)}
-                className={`p-1.5 rounded-lg transition-colors cursor-pointer ${audioEnabled ? 'text-orange-400 bg-orange-500/10' : 'text-slate-500 bg-slate-800'}`}
+                className={`p-1.5 rounded-lg transition-colors cursor-pointer ${audioEnabled ? 'text-[#D97706] bg-[#D97706]/10' : 'text-slate-500 bg-slate-800'}`}
                 title={audioEnabled ? 'Desativar voz do assistente' : 'Ativar voz do assistente'}
               >
                 {audioEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
               </button>
               <button
                 onClick={() => setIsChatOpen(false)}
-                className="p-1.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors cursor-pointer"
+                className="p-1.5 text-slate-400 hover:text-[#E5E7EB] hover:bg-slate-800 rounded-lg transition-colors cursor-pointer"
                 title="Fechar chat"
               >
                 <X className="w-5 h-5" />
@@ -748,7 +738,7 @@ export const PublicLandingPage: React.FC<PublicLandingPageProps> = ({
           </div>
 
           {/* Chat Message List */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-3.5 bg-slate-950/40">
+          <div className="flex-1 overflow-y-auto p-4 space-y-3.5 bg-[#0B1020]/40">
             {chatMessages.map((msg, idx) => (
               <div
                 key={idx}
@@ -770,8 +760,8 @@ export const PublicLandingPage: React.FC<PublicLandingPageProps> = ({
                   <div
                     className={`p-3.5 rounded-2xl text-xs leading-relaxed whitespace-pre-line ${
                       msg.sender === 'user'
-                        ? 'text-white rounded-br-xs'
-                        : 'bg-slate-800 text-slate-100 border border-slate-700/80 rounded-tl-xs shadow-xs'
+                        ? 'text-[#E5E7EB] rounded-br-xs'
+                        : 'bg-slate-800 text-[#E5E7EB] border border-slate-700/80 rounded-tl-xs shadow-xs'
                     }`}
                     style={msg.sender === 'user' ? { backgroundColor: buttonColor } : undefined}
                   >
@@ -781,21 +771,21 @@ export const PublicLandingPage: React.FC<PublicLandingPageProps> = ({
                   {/* Recommended Products Interactive Cards */}
                   {msg.recommendedProducts && msg.recommendedProducts.length > 0 && (
                     <div className="mt-3 grid grid-cols-1 gap-2 w-full">
-                      <p className="text-[10px] font-bold text-orange-400 uppercase tracking-wider">Produtos recomendados:</p>
+                      <p className="text-[10px] font-bold text-[#D97706] uppercase tracking-wider">Produtos recomendados:</p>
                       {msg.recommendedProducts.map((prod: any) => {
                         const brandShowcase = showcases.find(s => s.id === prod.brandId) || showcases[0];
                         return (
-                          <div key={prod.id} className="p-2.5 rounded-xl bg-slate-900 border border-slate-700/80 flex items-center gap-3">
+                          <div key={prod.id} className="p-2.5 rounded-xl bg-[#151E33] border border-slate-700/80 flex items-center gap-3">
                             <img 
                               src={prod.mainPhoto || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=200&auto=format&fit=crop&q=80'} 
                               alt={prod.name} 
-                              className="w-12 h-12 rounded-lg object-cover bg-slate-950 shrink-0 border border-slate-800"
+                              className="w-12 h-12 rounded-lg object-cover bg-[#0B1020] shrink-0 border border-[#1C2D4A]"
                             />
                             <div className="flex-1 min-w-0">
-                              <h5 className="font-bold text-xs text-white truncate">{prod.name}</h5>
+                              <h5 className="font-bold text-xs text-[#E5E7EB] truncate">{prod.name}</h5>
                               <p className="text-[10px] text-slate-400">{prod.brandName || 'Natura / Boticário'}</p>
                               <div className="flex items-center gap-2 mt-0.5">
-                                <span className="text-xs font-black text-orange-400">{prod.promotionalPriceFormatted || prod.priceFormatted}</span>
+                                <span className="text-xs font-black text-[#D97706]">{prod.promotionalPriceFormatted || prod.priceFormatted}</span>
                                 {prod.promotionalPriceFormatted && (
                                   <span className="text-[10px] text-slate-500 line-through">{prod.priceFormatted}</span>
                                 )}
@@ -804,7 +794,7 @@ export const PublicLandingPage: React.FC<PublicLandingPageProps> = ({
                             <div className="flex flex-col gap-1.5 shrink-0">
                               <button
                                 onClick={() => onGoToStorefront(prod.brandId)}
-                                className="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-white font-bold text-[10px] flex items-center gap-1 cursor-pointer"
+                                className="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-[#E5E7EB] font-bold text-[10px] flex items-center gap-1 cursor-pointer"
                                 title="Ver na Vitrine"
                               >
                                 <ExternalLink className="w-3 h-3" />
@@ -815,7 +805,7 @@ export const PublicLandingPage: React.FC<PublicLandingPageProps> = ({
                                   const productObj = products.find(p => p.id === prod.id);
                                   if (productObj && brandShowcase) onAddToBag(productObj, brandShowcase);
                                 }}
-                                className="px-2.5 py-1 rounded-lg bg-orange-500 hover:bg-orange-600 text-slate-950 font-black text-[10px] flex items-center gap-1 cursor-pointer shadow-sm"
+                                className="px-2.5 py-1 rounded-lg bg-[#D97706] hover:bg-orange-600 text-slate-950 font-black text-[10px] flex items-center gap-1 cursor-pointer shadow-sm"
                                 title="Adicionar à Sacola"
                               >
                                 <ShoppingBag className="w-3 h-3 text-slate-950" />
@@ -848,7 +838,7 @@ export const PublicLandingPage: React.FC<PublicLandingPageProps> = ({
           </div>
 
           {/* Quick Suggestions Chips */}
-          <div className="px-3 py-2 bg-slate-900/90 border-t border-slate-800 flex items-center gap-1.5 overflow-x-auto scrollbar-none">
+          <div className="px-3 py-2 bg-[#151E33]/90 border-t border-[#1C2D4A] flex items-center gap-1.5 overflow-x-auto scrollbar-none">
             {[
               'Perfumes mais vendidos',
               'Qual a taxa de entrega?',
@@ -860,7 +850,7 @@ export const PublicLandingPage: React.FC<PublicLandingPageProps> = ({
                 key={sIdx}
                 onClick={() => handleSendMessage(undefined, suggestion)}
                 disabled={isTyping}
-                className="px-2.5 py-1 rounded-full bg-slate-800 hover:bg-slate-700 border border-slate-700/80 text-[10px] font-semibold text-slate-300 hover:text-white whitespace-nowrap transition-colors cursor-pointer shrink-0"
+                className="px-2.5 py-1 rounded-full bg-slate-800 hover:bg-slate-700 border border-slate-700/80 text-[10px] font-semibold text-slate-300 hover:text-[#E5E7EB] whitespace-nowrap transition-colors cursor-pointer shrink-0"
               >
                 {suggestion}
               </button>
@@ -868,11 +858,11 @@ export const PublicLandingPage: React.FC<PublicLandingPageProps> = ({
           </div>
 
           {/* Chat Input Form */}
-          <form onSubmit={handleSendMessage} className="p-3 bg-slate-900 border-t border-slate-800 flex items-center gap-2">
+          <form onSubmit={handleSendMessage} className="p-3 bg-[#151E33] border-t border-[#1C2D4A] flex items-center gap-2">
             <button
               type="button"
               onClick={toggleListening}
-              className={`p-2.5 rounded-xl border transition-colors cursor-pointer ${isListening ? 'bg-rose-500/20 border-rose-500 text-rose-400 animate-pulse' : 'bg-slate-950 border-slate-800 text-slate-400 hover:text-white'}`}
+              className={`p-2.5 rounded-xl border transition-colors cursor-pointer ${isListening ? 'bg-rose-500/20 border-rose-500 text-rose-400 animate-pulse' : 'bg-[#0B1020] border-[#1C2D4A] text-slate-400 hover:text-[#E5E7EB]'}`}
               title={isListening ? 'Ouvindo microfone...' : 'Falar por microfone'}
             >
               {isListening ? <Mic className="w-4 h-4" /> : <MicOff className="w-4 h-4" />}
@@ -883,12 +873,12 @@ export const PublicLandingPage: React.FC<PublicLandingPageProps> = ({
               value={inputMessage}
               onChange={(e) => setInputMessage(e.target.value)}
               disabled={isTyping}
-              className="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-orange-500"
+              className="flex-1 bg-[#0B1020] border border-[#1C2D4A] rounded-xl px-3.5 py-2.5 text-xs text-[#E5E7EB] placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-orange-500"
             />
             <button
               type="submit"
               disabled={isTyping || !inputMessage.trim()}
-              className="p-2.5 rounded-xl text-white transition-opacity cursor-pointer shadow-md disabled:opacity-50"
+              className="p-2.5 rounded-xl text-[#E5E7EB] transition-opacity cursor-pointer shadow-md disabled:opacity-50"
               style={{ backgroundColor: buttonColor }}
             >
               <Send className="w-4 h-4" />
@@ -898,7 +888,7 @@ export const PublicLandingPage: React.FC<PublicLandingPageProps> = ({
       )}
 
       {/* Main Public Header */}
-      <header className="sticky top-0 z-30 bg-slate-950/90 backdrop-blur-md border-b border-slate-800/80">
+      <header className="sticky top-0 z-30 bg-[#0B1020]/90 backdrop-blur-md border-b border-[#1C2D4A]/80">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-4">
           
           {/* Logo Brand */}
@@ -907,15 +897,15 @@ export const PublicLandingPage: React.FC<PublicLandingPageProps> = ({
             className="flex items-center gap-3 cursor-pointer group"
           >
             <div 
-              className="w-10 h-10 rounded-2xl flex items-center justify-center text-white shadow-lg group-hover:scale-105 transition-transform"
+              className="w-10 h-10 rounded-2xl flex items-center justify-center text-[#E5E7EB] shadow-lg group-hover:scale-105 transition-transform"
               style={{ backgroundColor: buttonColor }}
             >
               <Store className="w-6 h-6" />
             </div>
             <div>
               <div className="flex items-center gap-1.5">
-                <span className="font-extrabold text-xl text-white tracking-tight">OmniBrand</span>
-                <span className="px-1.5 py-0.5 text-[10px] font-bold bg-orange-500/20 text-orange-400 border border-orange-500/30 rounded">
+                <span className="font-extrabold text-xl text-[#E5E7EB] tracking-tight">OmniBrand</span>
+                <span className="px-1.5 py-0.5 text-[10px] font-bold bg-[#D97706]/20 text-[#D97706] border border-orange-500/30 rounded">
                   AFILIADOS
                 </span>
               </div>
@@ -927,7 +917,7 @@ export const PublicLandingPage: React.FC<PublicLandingPageProps> = ({
           <nav className="hidden lg:flex items-center gap-8 text-sm font-medium text-slate-300">
             <button 
               onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} 
-              className="hover:text-orange-400 transition-colors cursor-pointer"
+              className="hover:text-[#D97706] transition-colors cursor-pointer"
             >
               Início
             </button>
@@ -939,13 +929,13 @@ export const PublicLandingPage: React.FC<PublicLandingPageProps> = ({
                   if (onOpenCustomerAuthModal) onOpenCustomerAuthModal();
                 }
               }}
-              className="hover:text-orange-400 transition-colors cursor-pointer"
+              className="hover:text-[#D97706] transition-colors cursor-pointer"
             >
               Clientes
             </button>
             <button 
               onClick={() => setIsChatOpen(true)} 
-              className="hover:text-orange-400 transition-colors cursor-pointer"
+              className="hover:text-[#D97706] transition-colors cursor-pointer"
             >
               Chat de Atendimento
             </button>
@@ -956,12 +946,12 @@ export const PublicLandingPage: React.FC<PublicLandingPageProps> = ({
             {currentCustomer && (
               <button
                 onClick={() => setIsBagOpen(true)}
-                className="relative p-2.5 rounded-xl bg-slate-900 border border-slate-800 text-slate-200 hover:text-white hover:border-slate-700 transition-all cursor-pointer"
+                className="relative p-2.5 rounded-xl bg-[#151E33] border border-[#1C2D4A] text-slate-200 hover:text-[#E5E7EB] hover:border-slate-700 transition-all cursor-pointer"
                 aria-label="Ver Sacola"
               >
-                <ShoppingBag className="w-5 h-5 text-orange-400" />
+                <ShoppingBag className="w-5 h-5 text-[#D97706]" />
                 {bag.items.length > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-orange-500 text-slate-950 text-[10px] font-black w-4.5 h-4.5 flex items-center justify-center rounded-full border-2 border-slate-950">
+                  <span className="absolute -top-1 -right-1 bg-[#D97706] text-slate-950 text-[10px] font-black w-4.5 h-4.5 flex items-center justify-center rounded-full border-2 border-slate-950">
                     {bag.items.length}
                   </span>
                 )}
@@ -983,10 +973,10 @@ export const PublicLandingPage: React.FC<PublicLandingPageProps> = ({
                 <button
                   type="button"
                   onClick={onGoToCustomerAccount || onOpenCustomerAuthModal}
-                  className="hidden xs:inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold bg-slate-900 border border-slate-800 text-slate-200 hover:text-white transition-all cursor-pointer"
+                  className="hidden xs:inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold bg-[#151E33] border border-[#1C2D4A] text-slate-200 hover:text-[#E5E7EB] transition-all cursor-pointer"
                   title="Acessar Minha Conta de Cliente"
                 >
-                  <User className="w-3.5 h-3.5 text-orange-400" />
+                  <User className="w-3.5 h-3.5 text-[#D97706]" />
                   <span className="max-w-[120px] truncate">{currentCustomer.name}</span>
                 </button>
                 {onCustomerLogout && (
@@ -1004,10 +994,10 @@ export const PublicLandingPage: React.FC<PublicLandingPageProps> = ({
               <button
                 type="button"
                 onClick={onOpenCustomerAuthModal}
-                className="hidden xs:inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl font-medium text-xs text-slate-300 hover:text-white bg-slate-900 border border-slate-800 hover:border-slate-700 transition-all cursor-pointer"
+                className="hidden xs:inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl font-medium text-xs text-slate-300 hover:text-[#E5E7EB] bg-[#151E33] border border-[#1C2D4A] hover:border-slate-700 transition-all cursor-pointer"
                 title="Entrar ou Cadastrar-se na Conta de Cliente"
               >
-                <User className="w-3.5 h-3.5 text-orange-400 shrink-0" />
+                <User className="w-3.5 h-3.5 text-[#D97706] shrink-0" />
                 <span>Entrar / Conta</span>
               </button>
             )}
@@ -1015,10 +1005,10 @@ export const PublicLandingPage: React.FC<PublicLandingPageProps> = ({
             {/* External Menu Toggle Button (Opens Public Drawer) */}
             <button
               onClick={() => setIsExternalDrawerOpen(true)}
-              className="p-2.5 rounded-xl bg-slate-900 border border-slate-800 text-slate-200 hover:text-white hover:border-slate-700 transition-all flex items-center gap-2 focus:outline-none focus:ring-2 focus:ring-orange-500 cursor-pointer"
+              className="p-2.5 rounded-xl bg-[#151E33] border border-[#1C2D4A] text-slate-200 hover:text-[#E5E7EB] hover:border-slate-700 transition-all flex items-center gap-2 focus:outline-none focus:ring-2 focus:ring-orange-500 cursor-pointer"
               aria-label="Abrir menu externo"
             >
-              <Menu className="w-5 h-5 text-orange-400" />
+              <Menu className="w-5 h-5 text-[#D97706]" />
               <span className="text-xs font-semibold hidden xs:inline">Menu</span>
             </button>
           </div>
@@ -1045,11 +1035,11 @@ export const PublicLandingPage: React.FC<PublicLandingPageProps> = ({
           
           <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-8 gap-4">
             <div>
-              <div className="inline-flex items-center gap-2 text-xs font-bold text-orange-400 uppercase tracking-wider mb-1">
+              <div className="inline-flex items-center gap-2 text-xs font-bold text-[#D97706] uppercase tracking-wider mb-1">
                 <TrendingUp className="w-3.5 h-3.5" />
                 Produtos em Destaque
               </div>
-              <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+              <h2 className="text-2xl sm:text-3xl font-extrabold text-[#E5E7EB] tracking-tight">
                 Mais Buscados do Mês
               </h2>
             </div>
@@ -1062,7 +1052,7 @@ export const PublicLandingPage: React.FC<PublicLandingPageProps> = ({
                 placeholder="Buscar produto..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-9 pr-4 py-2 bg-slate-900 border border-slate-800 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                className="w-full pl-9 pr-4 py-2 bg-[#151E33] border border-[#1C2D4A] rounded-xl text-xs text-[#E5E7EB] placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-orange-500"
               />
             </div>
           </div>
@@ -1076,10 +1066,10 @@ export const PublicLandingPage: React.FC<PublicLandingPageProps> = ({
               return (
                 <div
                   key={product.id}
-                  className="group rounded-3xl bg-slate-900 border border-slate-800 hover:border-slate-700 overflow-hidden flex flex-col justify-between transition-all duration-300 hover:shadow-xl"
+                  className="group rounded-3xl bg-[#151E33] border border-[#1C2D4A] hover:border-slate-700 overflow-hidden flex flex-col justify-between transition-all duration-300 hover:shadow-xl"
                 >
                   <div>
-                    <div className="relative aspect-video bg-slate-950 overflow-hidden">
+                    <div className="relative aspect-video bg-[#0B1020] overflow-hidden">
                       <img
                         src={displayImage}
                         alt={product.name}
@@ -1090,15 +1080,15 @@ export const PublicLandingPage: React.FC<PublicLandingPageProps> = ({
                       />
 
                       {parentShowcase && (
-                        <div className="absolute top-3 left-3 px-3 py-1 rounded-full bg-slate-900/90 backdrop-blur-md border border-slate-700/80 text-white text-xs font-semibold flex items-center gap-1.5 shadow-md">
-                          <span className="w-2 h-2 rounded-full bg-orange-500" />
+                        <div className="absolute top-3 left-3 px-3 py-1 rounded-full bg-[#151E33]/90 backdrop-blur-md border border-slate-700/80 text-[#E5E7EB] text-xs font-semibold flex items-center gap-1.5 shadow-md">
+                          <span className="w-2 h-2 rounded-full bg-[#D97706]" />
                           {parentShowcase.name}
                         </div>
                       )}
                     </div>
 
                     <div className="p-5">
-                      <h4 className="font-bold text-base text-white group-hover:text-orange-400 transition-colors line-clamp-2 mb-2">
+                      <h4 className="font-bold text-base text-[#E5E7EB] group-hover:text-[#D97706] transition-colors line-clamp-2 mb-2">
                         {product.name}
                       </h4>
                       <p className="text-slate-400 text-xs line-clamp-2 mb-4">
@@ -1106,7 +1096,7 @@ export const PublicLandingPage: React.FC<PublicLandingPageProps> = ({
                       </p>
 
                       <div className="flex items-baseline gap-2 mb-2">
-                        <span className="text-xl font-extrabold text-white">
+                        <span className="text-xl font-extrabold text-[#E5E7EB]">
                           R$ {(product.promotionalPrice || product.price).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                         </span>
                         {hasDiscount && (
@@ -1121,7 +1111,7 @@ export const PublicLandingPage: React.FC<PublicLandingPageProps> = ({
                   <div className="p-5 pt-0 space-y-2">
                     <button
                       onClick={() => onGoToStorefront(product.showcaseId)}
-                      className="w-full py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-white font-bold text-xs transition-all flex items-center justify-center gap-2 cursor-pointer"
+                      className="w-full py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-[#E5E7EB] font-bold text-xs transition-all flex items-center justify-center gap-2 cursor-pointer"
                     >
                       <ExternalLink className="w-3.5 h-3.5" />
                       <span>Ver na Vitrine</span>
@@ -1130,7 +1120,7 @@ export const PublicLandingPage: React.FC<PublicLandingPageProps> = ({
                       onClick={() => {
                         if (parentShowcase) onAddToBag(product, parentShowcase);
                       }}
-                      className="w-full py-2.5 rounded-xl bg-orange-500 hover:bg-orange-600 text-slate-950 font-black text-xs transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md"
+                      className="w-full py-2.5 rounded-xl bg-[#D97706] hover:bg-orange-600 text-slate-950 font-black text-xs transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md"
                     >
                       <ShoppingBag className="w-4 h-4 text-slate-950" />
                       <span>Adicionar à Sacola</span>
@@ -1145,15 +1135,15 @@ export const PublicLandingPage: React.FC<PublicLandingPageProps> = ({
       </section>
 
       {/* Como Funciona Section */}
-      <section id="como-funciona-section" className="py-16 bg-slate-900/60 border-t border-slate-800">
+      <section id="como-funciona-section" className="py-16 bg-[#151E33]/60 border-t border-[#1C2D4A]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           
           <div className="text-center max-w-2xl mx-auto mb-12">
-            <div className="inline-flex items-center gap-2 text-xs font-bold text-orange-400 uppercase tracking-wider mb-2">
+            <div className="inline-flex items-center gap-2 text-xs font-bold text-[#D97706] uppercase tracking-wider mb-2">
               <Zap className="w-3.5 h-3.5" />
               Simples & Seguro
             </div>
-            <h2 className="text-3xl font-extrabold text-white tracking-tight">
+            <h2 className="text-3xl font-extrabold text-[#E5E7EB] tracking-tight">
               Como Funciona a OmniBrand
             </h2>
             <p className="text-slate-400 text-sm mt-2">
@@ -1162,31 +1152,31 @@ export const PublicLandingPage: React.FC<PublicLandingPageProps> = ({
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="p-6 rounded-3xl bg-slate-900 border border-slate-800 text-center">
-              <div className="w-12 h-12 rounded-2xl bg-orange-500/10 text-orange-400 border border-orange-500/20 flex items-center justify-center font-bold text-lg mx-auto mb-4">
+            <div className="p-6 rounded-3xl bg-[#151E33] border border-[#1C2D4A] text-center">
+              <div className="w-12 h-12 rounded-2xl bg-[#D97706]/10 text-[#D97706] border border-orange-500/20 flex items-center justify-center font-bold text-lg mx-auto mb-4">
                 1
               </div>
-              <h3 className="text-base font-bold text-white mb-2">Escolha a Marca</h3>
+              <h3 className="text-base font-bold text-[#E5E7EB] mb-2">Escolha a Marca</h3>
               <p className="text-slate-400 text-xs leading-relaxed">
                 Navegue pelas vitrines oficiais de Natura, O Boticário, Eudora e parceiras ativas.
               </p>
             </div>
 
-            <div className="p-6 rounded-3xl bg-slate-900 border border-slate-800 text-center">
+            <div className="p-6 rounded-3xl bg-[#151E33] border border-[#1C2D4A] text-center">
               <div className="w-12 h-12 rounded-2xl bg-amber-500/10 text-amber-400 border border-amber-500/20 flex items-center justify-center font-bold text-lg mx-auto mb-4">
                 2
               </div>
-              <h3 className="text-base font-bold text-white mb-2">Links Oficiais</h3>
+              <h3 className="text-base font-bold text-[#E5E7EB] mb-2">Links Oficiais</h3>
               <p className="text-slate-400 text-xs leading-relaxed">
                 Clique nos produtos para ser direcionado aos canais de venda com suporte do consultor.
               </p>
             </div>
 
-            <div className="p-6 rounded-3xl bg-slate-900 border border-slate-800 text-center">
+            <div className="p-6 rounded-3xl bg-[#151E33] border border-[#1C2D4A] text-center">
               <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center justify-center font-bold text-lg mx-auto mb-4">
                 3
               </div>
-              <h3 className="text-base font-bold text-white mb-2">Total Transparência</h3>
+              <h3 className="text-base font-bold text-[#E5E7EB] mb-2">Total Transparência</h3>
               <p className="text-slate-400 text-xs leading-relaxed">
                 Painel administrativo integrado para gestão de vitrines, banners e acompanhamento.
               </p>
@@ -1197,23 +1187,23 @@ export const PublicLandingPage: React.FC<PublicLandingPageProps> = ({
       </section>
 
       {/* 5. Fixed Bottom Navigation Bar for Mobile/Tablet/Desktop Visitors */}
-      <div className="fixed bottom-0 left-0 right-0 h-16 bg-slate-900/95 border-t border-slate-800/90 backdrop-blur-md z-40 flex items-center justify-around px-2">
+      <div className="fixed bottom-0 left-0 right-0 h-16 bg-[#151E33]/95 border-t border-[#1C2D4A]/90 backdrop-blur-md z-40 flex items-center justify-around px-2">
         
         {/* Início Button */}
         <button
           onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-          className="flex flex-col items-center justify-center gap-1 text-slate-300 hover:text-white transition-colors cursor-pointer w-full"
+          className="flex flex-col items-center justify-center gap-1 text-slate-300 hover:text-[#E5E7EB] transition-colors cursor-pointer w-full"
         >
-          <Compass className="w-5 h-5 text-orange-400" />
+          <Compass className="w-5 h-5 text-[#D97706]" />
           <span className="text-[10px] font-semibold">Início</span>
         </button>
 
         {/* Vitrine Button */}
         <button
           onClick={() => onGoToStorefront()}
-          className="flex flex-col items-center justify-center gap-1 text-slate-300 hover:text-white transition-colors cursor-pointer w-full"
+          className="flex flex-col items-center justify-center gap-1 text-slate-300 hover:text-[#E5E7EB] transition-colors cursor-pointer w-full"
         >
-          <Store className="w-5 h-5 text-orange-400" />
+          <Store className="w-5 h-5 text-[#D97706]" />
           <span className="text-[10px] font-semibold">Vitrine</span>
         </button>
 
@@ -1226,18 +1216,18 @@ export const PublicLandingPage: React.FC<PublicLandingPageProps> = ({
               if (onOpenCustomerAuthModal) onOpenCustomerAuthModal();
             }
           }}
-          className="flex flex-col items-center justify-center gap-1 text-slate-300 hover:text-white transition-colors cursor-pointer w-full"
+          className="flex flex-col items-center justify-center gap-1 text-slate-300 hover:text-[#E5E7EB] transition-colors cursor-pointer w-full"
         >
-          <User className="w-5 h-5 text-orange-400" />
+          <User className="w-5 h-5 text-[#D97706]" />
           <span className="text-[10px] font-semibold">Clientes</span>
         </button>
 
         {/* Chat Button */}
         <button
           onClick={() => setIsChatOpen(true)}
-          className="flex flex-col items-center justify-center gap-1 text-slate-300 hover:text-white transition-colors cursor-pointer w-full relative"
+          className="flex flex-col items-center justify-center gap-1 text-slate-300 hover:text-[#E5E7EB] transition-colors cursor-pointer w-full relative"
         >
-          <MessageSquare className="w-5 h-5 text-orange-400" />
+          <MessageSquare className="w-5 h-5 text-[#D97706]" />
           <span className="text-[10px] font-semibold">Chat</span>
         </button>
       </div>
@@ -1246,12 +1236,12 @@ export const PublicLandingPage: React.FC<PublicLandingPageProps> = ({
       {currentCustomer && (
         <button
           onClick={() => setIsBagOpen(true)}
-          className="fixed bottom-24 right-6 z-40 w-14 h-14 bg-white rounded-full shadow-2xl flex items-center justify-center text-slate-900 transition-all hover:scale-110 cursor-pointer border border-slate-800"
+          className="fixed bottom-24 right-6 z-40 w-14 h-14 bg-[#151E33] rounded-full shadow-2xl flex items-center justify-center text-[#E5E7EB] transition-all hover:scale-110 cursor-pointer border border-[#1C2D4A]"
           title="Sacola de Compras"
         >
-          <ShoppingBag className="w-6 h-6 text-orange-500" />
+          <ShoppingBag className="w-6 h-6 text-[#D97706]" />
           {bag.items.length > 0 && (
-            <span className="absolute -top-1 -right-1 bg-orange-500 text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full border border-slate-950">
+            <span className="absolute -top-1 -right-1 bg-[#D97706] text-[#E5E7EB] text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full border border-slate-950">
               {bag.items.length}
             </span>
           )}

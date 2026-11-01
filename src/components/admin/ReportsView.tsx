@@ -25,9 +25,9 @@ export const ReportsView: React.FC<ReportsViewProps> = ({ showcases, products, c
 
   return (
     <div className="space-y-6">
-      <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div className="bg-[#151E33] p-6 rounded-2xl border border-[#1C2D4A] shadow-xs flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h3 className="text-lg font-bold text-slate-900">Relatórios e Exportação</h3>
+          <h3 className="text-lg font-bold text-[#E5E7EB]">Relatórios e Exportação</h3>
           <p className="text-xs text-slate-500">Gere relatórios consolidados de desempenho por vitrine e período.</p>
         </div>
         <button
@@ -39,9 +39,9 @@ export const ReportsView: React.FC<ReportsViewProps> = ({ showcases, products, c
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs">
-          <h4 className="font-bold text-slate-900 text-sm mb-4 flex items-center gap-2">
-            <Store className="w-4 h-4 text-orange-500" /> Desempenho por Vitrine
+        <div className="bg-[#151E33] p-6 rounded-2xl border border-[#1C2D4A] shadow-xs">
+          <h4 className="font-bold text-[#E5E7EB] text-sm mb-4 flex items-center gap-2">
+            <Store className="w-4 h-4 text-[#D97706]" /> Desempenho por Vitrine
           </h4>
           <div className="space-y-4">
             {showcases.map((s) => {
@@ -50,15 +50,15 @@ export const ReportsView: React.FC<ReportsViewProps> = ({ showcases, products, c
               const totalConv = showcaseProducts.reduce((acc, p) => acc + p.conversionsCount, 0);
 
               return (
-                <div key={s.id} className="p-4 rounded-xl border border-slate-100 bg-slate-50">
+                <div key={s.id} className="p-4 rounded-xl border border-slate-100 bg-[#0B1020]">
                   <div className="flex items-center justify-between mb-2">
-                    <span className="font-bold text-slate-900 text-sm">{s.name}</span>
-                    <span className="text-xs font-bold text-orange-600">{s.commissionRate}% Com.</span>
+                    <span className="font-bold text-[#E5E7EB] text-sm">{s.name}</span>
+                    <span className="text-xs font-bold text-[#D97706]">{s.commissionRate}% Com.</span>
                   </div>
-                  <div className="grid grid-cols-3 gap-2 text-xs text-slate-600">
-                    <div>Produtos: <strong className="text-slate-900">{showcaseProducts.length}</strong></div>
-                    <div>Cliques: <strong className="text-slate-900">{totalClicks}</strong></div>
-                    <div>Vendas: <strong className="text-slate-900">{totalConv}</strong></div>
+                  <div className="grid grid-cols-3 gap-2 text-xs text-[#94A3B8]">
+                    <div>Produtos: <strong className="text-[#E5E7EB]">{showcaseProducts.length}</strong></div>
+                    <div>Cliques: <strong className="text-[#E5E7EB]">{totalClicks}</strong></div>
+                    <div>Vendas: <strong className="text-[#E5E7EB]">{totalConv}</strong></div>
                   </div>
                 </div>
               );
@@ -66,22 +66,22 @@ export const ReportsView: React.FC<ReportsViewProps> = ({ showcases, products, c
           </div>
         </div>
 
-        <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs flex flex-col justify-between">
+        <div className="bg-[#151E33] p-6 rounded-2xl border border-[#1C2D4A] shadow-xs flex flex-col justify-between">
           <div>
-            <h4 className="font-bold text-slate-900 text-sm mb-4 flex items-center gap-2">
+            <h4 className="font-bold text-[#E5E7EB] text-sm mb-4 flex items-center gap-2">
               <TrendingUp className="w-4 h-4 text-emerald-500" /> Resumo Financeiro Consolidado
             </h4>
-            <p className="text-xs text-slate-600 leading-relaxed mb-6">
+            <p className="text-xs text-[#94A3B8] leading-relaxed mb-6">
               Todos os dados financeiros são sincronizados automaticamente com base nos cliques em links de afiliados de Natura, O Boticário e Eudora.
             </p>
             <div className="space-y-3">
-              <div className="flex items-center justify-between p-3 rounded-xl bg-slate-50 text-xs">
-                <span className="text-slate-600">Total de Pedidos Aprovados:</span>
-                <span className="font-bold text-slate-900">184 pedidos</span>
+              <div className="flex items-center justify-between p-3 rounded-xl bg-[#0B1020] text-xs">
+                <span className="text-[#94A3B8]">Total de Pedidos Aprovados:</span>
+                <span className="font-bold text-[#E5E7EB]">184 pedidos</span>
               </div>
-              <div className="flex items-center justify-between p-3 rounded-xl bg-slate-50 text-xs">
-                <span className="text-slate-600">Volume Bruto Transacionado:</span>
-                <span className="font-bold text-slate-900">R$ 28.450,00</span>
+              <div className="flex items-center justify-between p-3 rounded-xl bg-[#0B1020] text-xs">
+                <span className="text-[#94A3B8]">Volume Bruto Transacionado:</span>
+                <span className="font-bold text-[#E5E7EB]">R$ 28.450,00</span>
               </div>
               <div className="flex items-center justify-between p-3 rounded-xl bg-orange-50 text-xs text-orange-900 border border-orange-100">
                 <span className="font-semibold">Comissão Total Líquida:</span>

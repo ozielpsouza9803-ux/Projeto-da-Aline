@@ -83,7 +83,7 @@ export const CustomerAuthModal: React.FC<CustomerAuthModalProps> = ({
         <div className="p-6 border-b border-slate-800 flex items-center justify-between bg-slate-950/50">
           <div>
             <h3 className="text-lg font-bold flex items-center gap-2">
-              <User className="w-5 h-5 text-orange-500" />
+              <User className="w-5 h-5 text-[#D97706]" />
               <span>{isLoginMode ? 'Acessar Minha Conta' : 'Cadastre-se na OmniBrand'}</span>
             </h3>
             <p className="text-xs text-slate-400 mt-0.5">
@@ -203,7 +203,7 @@ export const CustomerAuthModal: React.FC<CustomerAuthModalProps> = ({
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 rounded-xl bg-orange-500 hover:bg-orange-600 disabled:opacity-50 text-white font-bold text-xs transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer"
+              className="w-full py-3 rounded-xl bg-[#D97706] hover:bg-orange-600 disabled:opacity-50 text-white font-bold text-xs transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer"
             >
               {loading ? (
                 <>

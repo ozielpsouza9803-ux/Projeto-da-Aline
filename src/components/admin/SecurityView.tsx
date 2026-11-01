@@ -172,9 +172,9 @@ export const SecurityView: React.FC<SecurityViewProps> = ({ currentUser, isAdmin
   return (
     <div className="space-y-6 max-w-4xl font-sans">
       {/* Header Banner */}
-      <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div className="bg-[#151E33] p-6 rounded-2xl border border-[#1C2D4A] shadow-xs flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+          <h3 className="text-lg font-bold text-[#E5E7EB] flex items-center gap-2">
             <ShieldCheck className="w-5 h-5 text-emerald-600" />
             <span>Segurança e Acesso do Painel</span>
           </h3>
@@ -193,11 +193,11 @@ export const SecurityView: React.FC<SecurityViewProps> = ({ currentUser, isAdmin
       </div>
 
       {/* 1. SEÇÃO: MEU ACESSO E SENHA */}
-      <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs space-y-5">
+      <div className="bg-[#151E33] p-6 rounded-2xl border border-[#1C2D4A] shadow-xs space-y-5">
         <div className="border-b border-slate-100 pb-3 flex items-center justify-between">
           <div>
-            <h4 className="font-bold text-slate-900 text-sm flex items-center gap-2">
-              <Key className="w-4 h-4 text-orange-500" />
+            <h4 className="font-bold text-[#E5E7EB] text-sm flex items-center gap-2">
+              <Key className="w-4 h-4 text-[#D97706]" />
               <span>Meu Acesso de Administrador (Login e Senha)</span>
             </h4>
             <p className="text-xs text-slate-500 mt-0.5">
@@ -205,7 +205,7 @@ export const SecurityView: React.FC<SecurityViewProps> = ({ currentUser, isAdmin
             </p>
           </div>
           {currentUser && (
-            <span className="text-[11px] font-semibold text-slate-500 bg-slate-100 px-2.5 py-1 rounded-lg">
+            <span className="text-[11px] font-semibold text-slate-500 bg-[#0B1020] px-2.5 py-1 rounded-lg">
               Conectado: {currentUser.email}
             </span>
           )}
@@ -225,7 +225,7 @@ export const SecurityView: React.FC<SecurityViewProps> = ({ currentUser, isAdmin
         <form onSubmit={handleSaveCredentials} className="space-y-4 max-w-xl">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">
+              <label className="block text-xs font-semibold text-[#E5E7EB] mb-1">
                 Usuário de Acesso
               </label>
               <input
@@ -234,12 +234,12 @@ export const SecurityView: React.FC<SecurityViewProps> = ({ currentUser, isAdmin
                 value={adminUsername}
                 onChange={(e) => setAdminUsername(e.target.value)}
                 placeholder="admin"
-                className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-orange-500/20"
+                className="w-full px-3.5 py-2.5 bg-[#0B1020] border border-[#1C2D4A] rounded-xl text-xs font-medium text-[#E5E7EB] focus:outline-none focus:ring-2 focus:ring-orange-500/20"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">
+              <label className="block text-xs font-semibold text-[#E5E7EB] mb-1">
                 E-mail do Administrador
               </label>
               <input
@@ -248,14 +248,14 @@ export const SecurityView: React.FC<SecurityViewProps> = ({ currentUser, isAdmin
                 value={adminEmail}
                 onChange={(e) => setAdminEmail(e.target.value)}
                 placeholder="admin@omnibrand.com.br"
-                className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-orange-500/20"
+                className="w-full px-3.5 py-2.5 bg-[#0B1020] border border-[#1C2D4A] rounded-xl text-xs font-medium text-[#E5E7EB] focus:outline-none focus:ring-2 focus:ring-orange-500/20"
               />
             </div>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">
+              <label className="block text-xs font-semibold text-[#E5E7EB] mb-1">
                 Nova Senha <span className="text-slate-400 font-normal">(opcional)</span>
               </label>
               <input
@@ -263,13 +263,13 @@ export const SecurityView: React.FC<SecurityViewProps> = ({ currentUser, isAdmin
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
                 placeholder="Deixe em branco para manter a atual"
-                className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-orange-500/20"
+                className="w-full px-3.5 py-2.5 bg-[#0B1020] border border-[#1C2D4A] rounded-xl text-xs font-medium text-[#E5E7EB] focus:outline-none focus:ring-2 focus:ring-orange-500/20"
               />
             </div>
 
             {newPassword.length > 0 && (
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                <label className="block text-xs font-semibold text-[#E5E7EB] mb-1">
                   Confirmar Nova Senha
                 </label>
                 <input
@@ -277,7 +277,7 @@ export const SecurityView: React.FC<SecurityViewProps> = ({ currentUser, isAdmin
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   placeholder="Repita a nova senha"
-                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-orange-500/20"
+                  className="w-full px-3.5 py-2.5 bg-[#0B1020] border border-[#1C2D4A] rounded-xl text-xs font-medium text-[#E5E7EB] focus:outline-none focus:ring-2 focus:ring-orange-500/20"
                 />
               </div>
             )}
@@ -290,7 +290,7 @@ export const SecurityView: React.FC<SecurityViewProps> = ({ currentUser, isAdmin
             <button
               type="submit"
               disabled={isSavingCreds}
-              className="px-5 py-2.5 rounded-xl bg-orange-500 hover:bg-orange-600 text-white text-xs font-bold transition-all shadow-sm flex items-center gap-2 cursor-pointer disabled:opacity-60"
+              className="px-5 py-2.5 rounded-xl bg-[#D97706] hover:bg-orange-600 text-white text-xs font-bold transition-all shadow-sm flex items-center gap-2 cursor-pointer disabled:opacity-60"
             >
               {isSavingCreds ? (
                 <>
@@ -309,10 +309,10 @@ export const SecurityView: React.FC<SecurityViewProps> = ({ currentUser, isAdmin
       </div>
 
       {/* 2. SEÇÃO: STATUS DE PROTEÇÃO DAS TABELAS SUPABASE */}
-      <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs space-y-4">
+      <div className="bg-[#151E33] p-6 rounded-2xl border border-[#1C2D4A] shadow-xs space-y-4">
         <div className="flex items-center justify-between border-b border-slate-100 pb-3">
           <div>
-            <h4 className="font-bold text-slate-900 text-sm flex items-center gap-2">
+            <h4 className="font-bold text-[#E5E7EB] text-sm flex items-center gap-2">
               <Database className="w-4 h-4 text-indigo-600" />
               <span>Proteção e Conexão com o Supabase (6 Tabelas)</span>
             </h4>
@@ -323,7 +323,7 @@ export const SecurityView: React.FC<SecurityViewProps> = ({ currentUser, isAdmin
           <button
             onClick={runTableVerification}
             disabled={isTestingTables}
-            className="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold transition-colors flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+            className="px-3.5 py-2 rounded-xl bg-[#0B1020] hover:bg-slate-200 text-[#E5E7EB] text-xs font-semibold transition-colors flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
           >
             <RefreshCcw className={`w-3.5 h-3.5 ${isTestingTables ? 'animate-spin' : ''}`} />
             <span>{isTestingTables ? 'Testando...' : 'Re-testar Conexões'}</span>
@@ -349,7 +349,7 @@ export const SecurityView: React.FC<SecurityViewProps> = ({ currentUser, isAdmin
                     ? 'bg-emerald-50/60 border-emerald-200 text-emerald-950' 
                     : tableResult 
                     ? 'bg-rose-50/60 border-rose-200 text-rose-950' 
-                    : 'bg-slate-50 border-slate-200 text-slate-600'
+                    : 'bg-[#0B1020] border-[#1C2D4A] text-[#94A3B8]'
                 }`}
               >
                 {isApproved ? (
@@ -366,7 +366,7 @@ export const SecurityView: React.FC<SecurityViewProps> = ({ currentUser, isAdmin
                       {isApproved ? 'Conectado' : 'Atenção'}
                     </span>
                   </div>
-                  <p className="text-[11px] mt-1 text-slate-600 leading-snug">
+                  <p className="text-[11px] mt-1 text-[#94A3B8] leading-snug">
                     {tableResult ? tableResult.message : 'Aguardando verificação...'}
                   </p>
                 </div>
@@ -377,21 +377,21 @@ export const SecurityView: React.FC<SecurityViewProps> = ({ currentUser, isAdmin
       </div>
 
       {/* 3. SEÇÃO: GESTÃO DE ADMINISTRADORES (PROFILES) */}
-      <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs space-y-4">
+      <div className="bg-[#151E33] p-6 rounded-2xl border border-[#1C2D4A] shadow-xs space-y-4">
         <div className="flex items-center justify-between border-b border-slate-100 pb-3">
           <div>
-            <h4 className="font-bold text-slate-900 text-sm flex items-center gap-2">
-              <Users className="w-4 h-4 text-orange-500" />
+            <h4 className="font-bold text-[#E5E7EB] text-sm flex items-center gap-2">
+              <Users className="w-4 h-4 text-[#D97706]" />
               <span>Controle de Usuários e Administradores (Tabela profiles)</span>
             </h4>
             <p className="text-xs text-slate-500 mt-0.5">
-              Somente contas com papel <code className="bg-slate-100 px-1 py-0.5 rounded text-slate-800 font-mono">admin</code> podem fazer alterações no banco do Supabase.
+              Somente contas com papel <code className="bg-[#0B1020] px-1 py-0.5 rounded text-[#E5E7EB] font-mono">admin</code> podem fazer alterações no banco do Supabase.
             </p>
           </div>
           <button
             onClick={loadProfiles}
             disabled={isLoadingProfiles}
-            className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold transition-colors flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+            className="px-3 py-1.5 rounded-xl bg-[#0B1020] hover:bg-slate-200 text-[#E5E7EB] text-xs font-semibold transition-colors flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
           >
             <RefreshCcw className={`w-3.5 h-3.5 ${isLoadingProfiles ? 'animate-spin' : ''}`} />
             <span>Atualizar Lista</span>
@@ -412,7 +412,7 @@ export const SecurityView: React.FC<SecurityViewProps> = ({ currentUser, isAdmin
             Carregando perfis da base de dados...
           </div>
         ) : profiles.length === 0 ? (
-          <div className="py-6 px-4 bg-slate-50 rounded-xl text-center text-xs text-slate-500">
+          <div className="py-6 px-4 bg-[#0B1020] rounded-xl text-center text-xs text-slate-500">
             Nenhum perfil adicional encontrado na tabela profiles. Sua sessão atual está operando com permissões de administrador.
           </div>
         ) : (
@@ -431,13 +431,13 @@ export const SecurityView: React.FC<SecurityViewProps> = ({ currentUser, isAdmin
                   const isUserAdmin = p.role === 'admin';
                   const isCurrentLogged = p.id === currentUser?.id;
                   return (
-                    <tr key={p.id} className="hover:bg-slate-50/60">
-                      <td className="py-3 px-3 font-mono text-[11px] text-slate-700">
+                    <tr key={p.id} className="hover:bg-[#0B1020]/60">
+                      <td className="py-3 px-3 font-mono text-[11px] text-[#E5E7EB]">
                         {p.id} {isCurrentLogged && <span className="ml-1 text-[10px] text-emerald-600 font-bold">(Você)</span>}
                       </td>
                       <td className="py-3 px-3">
                         <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${
-                          isUserAdmin ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-600'
+                          isUserAdmin ? 'bg-emerald-100 text-emerald-800' : 'bg-[#0B1020] text-[#94A3B8]'
                         }`}>
                           {isUserAdmin ? 'Administrador' : 'Cliente'}
                         </span>

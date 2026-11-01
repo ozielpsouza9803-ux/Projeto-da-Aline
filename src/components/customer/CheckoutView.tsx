@@ -55,18 +55,18 @@ export const CheckoutView: React.FC<CheckoutViewProps> = ({
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 font-sans pb-24">
+    <div className="min-h-screen bg-[#0B1020] text-[#E5E7EB] font-sans pb-24">
       {/* Header */}
-      <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200 px-4 lg:px-12 py-4 flex items-center justify-between shadow-xs">
+      <header className="sticky top-0 z-40 bg-[#151E33]/95 backdrop-blur-md border-b border-[#1C2D4A] px-4 lg:px-12 py-4 flex items-center justify-between shadow-xs">
         <div className="flex items-center gap-4">
           <button
             onClick={onBack}
-            className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors flex items-center justify-center cursor-pointer shadow-xs"
+            className="p-2 rounded-xl bg-[#0B1020] hover:bg-slate-200 text-[#E5E7EB] transition-colors flex items-center justify-center cursor-pointer shadow-xs"
           >
             <ArrowLeft className="w-5 h-5" />
           </button>
           <div>
-            <h1 className="font-black text-lg lg:text-xl tracking-tight text-slate-900">Finalizar Pedido</h1>
+            <h1 className="font-black text-lg lg:text-xl tracking-tight text-[#E5E7EB]">Finalizar Pedido</h1>
             <p className="text-[11px] text-slate-500 font-medium">Revise suas informações antes de confirmar</p>
           </div>
         </div>
@@ -81,25 +81,25 @@ export const CheckoutView: React.FC<CheckoutViewProps> = ({
         <div className="lg:col-span-2 space-y-6">
           
           {/* 1. Entrega e Endereço */}
-          <section className="bg-white rounded-3xl border border-slate-200 p-6 shadow-xs space-y-6">
+          <section className="bg-[#151E33] rounded-3xl border border-[#1C2D4A] p-6 shadow-xs space-y-6">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center border border-indigo-100">
                 <MapPin className="w-5 h-5 text-indigo-600" />
               </div>
-              <h3 className="font-bold text-slate-900 uppercase tracking-wider text-xs">Endereço de Entrega</h3>
+              <h3 className="font-bold text-[#E5E7EB] uppercase tracking-wider text-xs">Endereço de Entrega</h3>
             </div>
 
-            <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 flex items-start gap-4">
+            <div className="p-4 rounded-2xl bg-[#0B1020] border border-[#1C2D4A] flex items-start gap-4">
               <div className="p-2 rounded-full bg-indigo-100">
                 <MapPin className="w-4 h-4 text-indigo-600" />
               </div>
               <div className="flex-1">
-                <p className="text-sm font-bold text-slate-900">{customer.name}</p>
-                <p className="text-xs text-slate-600 mt-1 leading-relaxed">
+                <p className="text-sm font-bold text-[#E5E7EB]">{customer.name}</p>
+                <p className="text-xs text-[#94A3B8] mt-1 leading-relaxed">
                   {customer.address.street}, {customer.address.number}
                   {customer.address.complement && ` - ${customer.address.complement}`}
                 </p>
-                <p className="text-xs text-slate-600">
+                <p className="text-xs text-[#94A3B8]">
                   {customer.address.neighborhood} • {customer.address.city} - {customer.address.state}
                 </p>
                 <p className="text-xs text-slate-400 mt-1 font-mono">{customer.address.zipcode}</p>
@@ -111,12 +111,12 @@ export const CheckoutView: React.FC<CheckoutViewProps> = ({
           </section>
 
           {/* 2. Método de Envio */}
-          <section className="bg-white rounded-3xl border border-slate-200 p-6 shadow-xs space-y-6">
+          <section className="bg-[#151E33] rounded-3xl border border-[#1C2D4A] p-6 shadow-xs space-y-6">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-orange-50 flex items-center justify-center border border-orange-100">
-                <Truck className="w-5 h-5 text-orange-600" />
+                <Truck className="w-5 h-5 text-[#D97706]" />
               </div>
-              <h3 className="font-bold text-slate-900 uppercase tracking-wider text-xs">Método de Envio</h3>
+              <h3 className="font-bold text-[#E5E7EB] uppercase tracking-wider text-xs">Método de Envio</h3>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -125,18 +125,18 @@ export const CheckoutView: React.FC<CheckoutViewProps> = ({
                 className={`p-4 rounded-2xl border-2 text-left transition-all relative flex flex-col gap-2 ${
                   shippingMethod === 'motoboy' 
                     ? 'border-orange-500 bg-orange-50/30' 
-                    : 'border-slate-100 bg-slate-50/50 hover:border-slate-200'
+                    : 'border-slate-100 bg-[#0B1020]/50 hover:border-[#1C2D4A]'
                 }`}
               >
                 {shippingMethod === 'motoboy' && (
-                  <CheckCircle2 className="w-5 h-5 text-orange-500 absolute top-3 right-3" />
+                  <CheckCircle2 className="w-5 h-5 text-[#D97706] absolute top-3 right-3" />
                 )}
-                <Truck className={`w-6 h-6 ${shippingMethod === 'motoboy' ? 'text-orange-500' : 'text-slate-400'}`} />
+                <Truck className={`w-6 h-6 ${shippingMethod === 'motoboy' ? 'text-[#D97706]' : 'text-slate-400'}`} />
                 <div>
-                  <span className="block font-bold text-sm text-slate-900">Entrega por Motoboy</span>
+                  <span className="block font-bold text-sm text-[#E5E7EB]">Entrega por Motoboy</span>
                   <span className="text-[11px] text-slate-500 mt-0.5">Receba em seu endereço</span>
                 </div>
-                <span className="mt-2 text-xs font-black text-orange-600">R$ {deliveryFee.toFixed(2)}</span>
+                <span className="mt-2 text-xs font-black text-[#D97706]">R$ {deliveryFee.toFixed(2)}</span>
               </button>
 
               <button
@@ -144,15 +144,15 @@ export const CheckoutView: React.FC<CheckoutViewProps> = ({
                 className={`p-4 rounded-2xl border-2 text-left transition-all relative flex flex-col gap-2 ${
                   shippingMethod === 'pickup' 
                     ? 'border-orange-500 bg-orange-50/30' 
-                    : 'border-slate-100 bg-slate-50/50 hover:border-slate-200'
+                    : 'border-slate-100 bg-[#0B1020]/50 hover:border-[#1C2D4A]'
                 }`}
               >
                 {shippingMethod === 'pickup' && (
-                  <CheckCircle2 className="w-5 h-5 text-orange-500 absolute top-3 right-3" />
+                  <CheckCircle2 className="w-5 h-5 text-[#D97706] absolute top-3 right-3" />
                 )}
-                <Store className={`w-6 h-6 ${shippingMethod === 'pickup' ? 'text-orange-500' : 'text-slate-400'}`} />
+                <Store className={`w-6 h-6 ${shippingMethod === 'pickup' ? 'text-[#D97706]' : 'text-slate-400'}`} />
                 <div>
-                  <span className="block font-bold text-sm text-slate-900">Retirada Presencial</span>
+                  <span className="block font-bold text-sm text-[#E5E7EB]">Retirada Presencial</span>
                   <span className="text-[11px] text-slate-500 mt-0.5">Retire na loja física</span>
                 </div>
                 <span className="mt-2 text-xs font-black text-emerald-600 uppercase">Grátis</span>
@@ -161,18 +161,18 @@ export const CheckoutView: React.FC<CheckoutViewProps> = ({
           </section>
 
           {/* 3. Observações */}
-          <section className="bg-white rounded-3xl border border-slate-200 p-6 shadow-xs space-y-4">
+          <section className="bg-[#151E33] rounded-3xl border border-[#1C2D4A] p-6 shadow-xs space-y-4">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center border border-slate-100">
-                <MessageSquare className="w-5 h-5 text-slate-600" />
+              <div className="w-10 h-10 rounded-xl bg-[#0B1020] flex items-center justify-center border border-slate-100">
+                <MessageSquare className="w-5 h-5 text-[#94A3B8]" />
               </div>
-              <h3 className="font-bold text-slate-900 uppercase tracking-wider text-xs">Observações do Pedido</h3>
+              <h3 className="font-bold text-[#E5E7EB] uppercase tracking-wider text-xs">Observações do Pedido</h3>
             </div>
             <textarea
               value={observations}
               onChange={(e) => setObservations(e.target.value)}
               placeholder="Ex: Ponto de referência, campainha estragada, presente para alguém..."
-              className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500/20 min-h-[100px] resize-none"
+              className="w-full p-4 bg-[#0B1020] border border-[#1C2D4A] rounded-2xl text-sm text-[#E5E7EB] placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500/20 min-h-[100px] resize-none"
             />
           </section>
 
@@ -180,9 +180,9 @@ export const CheckoutView: React.FC<CheckoutViewProps> = ({
 
         {/* Resumo Sidebar */}
         <div className="space-y-6">
-          <div className="bg-white rounded-3xl border border-slate-200 shadow-lg overflow-hidden flex flex-col">
-            <div className="p-6 border-b border-slate-100 bg-slate-50/50">
-              <h3 className="font-black text-slate-900 tracking-tight">Resumo da Compra</h3>
+          <div className="bg-[#151E33] rounded-3xl border border-[#1C2D4A] shadow-lg overflow-hidden flex flex-col">
+            <div className="p-6 border-b border-slate-100 bg-[#0B1020]/50">
+              <h3 className="font-black text-[#E5E7EB] tracking-tight">Resumo da Compra</h3>
               <p className="text-[11px] text-slate-400 font-bold uppercase tracking-wider mt-1">{totalItems} {totalItems === 1 ? 'item' : 'itens'}</p>
             </div>
 
@@ -191,37 +191,37 @@ export const CheckoutView: React.FC<CheckoutViewProps> = ({
                 <div key={item.productId} className="flex gap-3">
                   <img src={item.photoUrl} alt={item.name} className="w-12 h-12 rounded-xl object-cover border border-slate-100 shrink-0" />
                   <div className="flex-1 min-w-0">
-                    <p className="text-xs font-bold text-slate-900 truncate">{item.name}</p>
+                    <p className="text-xs font-bold text-[#E5E7EB] truncate">{item.name}</p>
                     <div className="flex items-center justify-between mt-1">
                       <p className="text-[10px] text-slate-500">{item.quantity}x R$ {item.price.toFixed(2)}</p>
-                      <p className="text-[11px] font-black text-slate-900">R$ {(item.price * item.quantity).toFixed(2)}</p>
+                      <p className="text-[11px] font-black text-[#E5E7EB]">R$ {(item.price * item.quantity).toFixed(2)}</p>
                     </div>
                   </div>
                 </div>
               ))}
             </div>
 
-            <div className="p-6 bg-slate-50 border-t border-slate-100 space-y-3">
+            <div className="p-6 bg-[#0B1020] border-t border-slate-100 space-y-3">
               <div className="flex justify-between text-xs font-medium text-slate-500">
                 <span>Subtotal</span>
-                <span className="text-slate-900 tabular-nums">R$ {bag.total.toFixed(2)}</span>
+                <span className="text-[#E5E7EB] tabular-nums">R$ {bag.total.toFixed(2)}</span>
               </div>
               <div className="flex justify-between text-xs font-medium text-slate-500">
                 <span>Taxa de {shippingMethod === 'motoboy' ? 'Entrega' : 'Retirada'}</span>
-                <span className={finalDeliveryFee > 0 ? "text-slate-900 tabular-nums" : "text-emerald-600 font-bold uppercase"}>
+                <span className={finalDeliveryFee > 0 ? "text-[#E5E7EB] tabular-nums" : "text-emerald-600 font-bold uppercase"}>
                   {finalDeliveryFee > 0 ? `R$ ${finalDeliveryFee.toFixed(2)}` : 'Grátis'}
                 </span>
               </div>
-              <div className="pt-3 border-t border-slate-200 flex justify-between items-center">
-                <span className="text-base font-black text-slate-900">Total</span>
-                <span className="text-2xl font-black text-orange-500 tabular-nums">R$ {grandTotal.toFixed(2)}</span>
+              <div className="pt-3 border-t border-[#1C2D4A] flex justify-between items-center">
+                <span className="text-base font-black text-[#E5E7EB]">Total</span>
+                <span className="text-2xl font-black text-[#D97706] tabular-nums">R$ {grandTotal.toFixed(2)}</span>
               </div>
 
               <div className="pt-4 space-y-2">
                 <button
                   onClick={handleConfirmOrder}
                   disabled={isConfirming}
-                  className="w-full py-4 rounded-2xl bg-orange-500 hover:bg-orange-600 text-slate-950 font-black text-sm transition-all shadow-xl shadow-orange-500/10 active:scale-[0.98] disabled:opacity-70 flex items-center justify-center gap-2 cursor-pointer group"
+                  className="w-full py-4 rounded-2xl bg-[#D97706] hover:bg-orange-600 text-slate-950 font-black text-sm transition-all shadow-xl shadow-orange-500/10 active:scale-[0.98] disabled:opacity-70 flex items-center justify-center gap-2 cursor-pointer group"
                 >
                   {isConfirming ? (
                     <>

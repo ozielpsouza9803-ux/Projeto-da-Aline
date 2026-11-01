@@ -21,15 +21,15 @@ export const CommissionsView: React.FC<CommissionsViewProps> = ({ commissions, s
     <div className="space-y-6">
       {/* Top Summary Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs">
+        <div className="bg-[#151E33] p-6 rounded-2xl border border-[#1C2D4A] shadow-xs">
           <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Total Acumulado</div>
-          <div className="text-2xl font-bold text-slate-900 tabular-nums">
+          <div className="text-2xl font-bold text-[#E5E7EB] tabular-nums">
             R$ {totalEarned.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
           </div>
           <div className="text-xs text-emerald-600 font-medium mt-1">Disponível para saque</div>
         </div>
 
-        <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs">
+        <div className="bg-[#151E33] p-6 rounded-2xl border border-[#1C2D4A] shadow-xs">
           <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Comissões Pendentes</div>
           <div className="text-2xl font-bold text-amber-600 tabular-nums">
             R$ {pendingAmount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
@@ -37,9 +37,9 @@ export const CommissionsView: React.FC<CommissionsViewProps> = ({ commissions, s
           <div className="text-xs text-slate-500 font-medium mt-1">Aguardando confirmação de entrega</div>
         </div>
 
-        <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs">
+        <div className="bg-[#151E33] p-6 rounded-2xl border border-[#1C2D4A] shadow-xs">
           <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Taxa Média de Comissão</div>
-          <div className="text-2xl font-bold text-slate-900 tabular-nums">
+          <div className="text-2xl font-bold text-[#E5E7EB] tabular-nums">
             9.1%
           </div>
           <div className="text-xs text-blue-600 font-medium mt-1">Média entre Natura, Boticário e Eudora</div>
@@ -47,20 +47,20 @@ export const CommissionsView: React.FC<CommissionsViewProps> = ({ commissions, s
       </div>
 
       {/* Filter Bar */}
-      <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div className="bg-[#151E33] p-6 rounded-2xl border border-[#1C2D4A] shadow-xs flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h3 className="text-lg font-bold text-slate-900">Extrato de Comissões</h3>
+          <h3 className="text-lg font-bold text-[#E5E7EB]">Extrato de Comissões</h3>
           <p className="text-xs text-slate-500">Histórico detalhado de vendas comissionadas pelas redes de afiliados.</p>
         </div>
 
         <div className="flex items-center gap-3">
-          <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-700">
+          <div className="flex items-center gap-1.5 text-xs font-semibold text-[#E5E7EB]">
             <Filter className="w-3.5 h-3.5 text-slate-400" /> Status:
           </div>
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-orange-500/20"
+            className="px-3 py-2 bg-[#0B1020] border border-[#1C2D4A] rounded-xl text-xs font-semibold text-[#E5E7EB] focus:outline-none focus:ring-2 focus:ring-orange-500/20"
           >
             <option value="all">Todos os Status</option>
             <option value="Pago">Pago</option>
@@ -71,11 +71,11 @@ export const CommissionsView: React.FC<CommissionsViewProps> = ({ commissions, s
       </div>
 
       {/* Commissions Table */}
-      <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-xs">
+      <div className="bg-[#151E33] rounded-2xl border border-[#1C2D4A] overflow-hidden shadow-xs">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="bg-slate-50 border-b border-slate-200 text-slate-600 font-semibold text-xs">
+              <tr className="bg-[#0B1020] border-b border-[#1C2D4A] text-[#94A3B8] font-semibold text-xs">
                 <th className="py-3.5 px-6">Data</th>
                 <th className="py-3.5 px-6">Pedido ID</th>
                 <th className="py-3.5 px-6">Vitrine / Marca</th>
@@ -94,14 +94,14 @@ export const CommissionsView: React.FC<CommissionsViewProps> = ({ commissions, s
                   comm.status === 'Aprovado' ? 'bg-blue-100 text-blue-800' : 'bg-amber-100 text-amber-800';
 
                 return (
-                  <tr key={comm.id} className="hover:bg-slate-50/60 transition-colors">
+                  <tr key={comm.id} className="hover:bg-[#0B1020]/60 transition-colors">
                     <td className="py-3.5 px-6 font-mono text-slate-500 tabular-nums">{comm.date}</td>
-                    <td className="py-3.5 px-6 font-mono font-semibold text-slate-900">{comm.orderId}</td>
-                    <td className="py-3.5 px-6 font-semibold text-slate-900">{showcase?.name || 'Vitrine'}</td>
-                    <td className="py-3.5 px-6 text-slate-700 max-w-xs truncate">{comm.productName}</td>
-                    <td className="py-3.5 px-6 text-right font-medium text-slate-700 tabular-nums">R$ {comm.saleAmount.toFixed(2)}</td>
+                    <td className="py-3.5 px-6 font-mono font-semibold text-[#E5E7EB]">{comm.orderId}</td>
+                    <td className="py-3.5 px-6 font-semibold text-[#E5E7EB]">{showcase?.name || 'Vitrine'}</td>
+                    <td className="py-3.5 px-6 text-[#E5E7EB] max-w-xs truncate">{comm.productName}</td>
+                    <td className="py-3.5 px-6 text-right font-medium text-[#E5E7EB] tabular-nums">R$ {comm.saleAmount.toFixed(2)}</td>
                     <td className="py-3.5 px-6 text-right font-medium text-slate-500 tabular-nums">{comm.commissionRate}%</td>
-                    <td className="py-3.5 px-6 text-right font-bold text-slate-900 tabular-nums">R$ {comm.commissionAmount.toFixed(2)}</td>
+                    <td className="py-3.5 px-6 text-right font-bold text-[#E5E7EB] tabular-nums">R$ {comm.commissionAmount.toFixed(2)}</td>
                     <td className="py-3.5 px-6 text-center">
                       <span className={`inline-block px-2.5 py-1 rounded-full text-[10px] font-bold ${statusColor}`}>
                         {comm.status}

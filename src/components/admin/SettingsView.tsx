@@ -205,9 +205,9 @@ CREATE POLICY "Auth Upload Storage" ON storage.objects FOR INSERT WITH CHECK (bu
 
   return (
     <div className="space-y-6 max-w-4xl">
-      <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div className="bg-[#151E33] p-6 rounded-2xl border border-[#1C2D4A] shadow-xs flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h3 className="text-lg font-bold text-slate-900">Configurações do Sistema & Supabase</h3>
+          <h3 className="text-lg font-bold text-[#E5E7EB]">Configurações do Sistema & Supabase</h3>
           <p className="text-xs text-slate-500">Conecte seu banco de dados Supabase e configure o armazenamento em nuvem.</p>
         </div>
         <button
@@ -221,10 +221,10 @@ CREATE POLICY "Auth Upload Storage" ON storage.objects FOR INSERT WITH CHECK (bu
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Seção Aparência do Painel Administrativo */}
-        <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs space-y-6">
+        <div className="bg-[#151E33] p-6 rounded-2xl border border-[#1C2D4A] shadow-xs space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
             <div>
-              <h4 className="font-bold text-slate-900 text-sm flex items-center gap-2">
+              <h4 className="font-bold text-[#E5E7EB] text-sm flex items-center gap-2">
                 <Palette className="w-4 h-4 text-indigo-600" /> Aparência do Painel Administrativo
               </h4>
               <p className="text-xs text-slate-500 mt-0.5">
@@ -232,7 +232,7 @@ CREATE POLICY "Auth Upload Storage" ON storage.objects FOR INSERT WITH CHECK (bu
               </p>
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-[11px] px-2.5 py-1 rounded-full bg-slate-100 text-slate-700 font-semibold border border-slate-200">
+              <span className="text-[11px] px-2.5 py-1 rounded-full bg-[#0B1020] text-[#E5E7EB] font-semibold border border-[#1C2D4A]">
                 Tema Ativo: {ADMIN_THEMES[activeTheme.themeId]?.name} ({activeTheme.mode === 'dark' ? 'Escuro' : 'Claro'})
               </span>
             </div>
@@ -247,7 +247,7 @@ CREATE POLICY "Auth Upload Storage" ON storage.objects FOR INSERT WITH CHECK (bu
 
           {/* 1. Modo: Claro ou Escuro */}
           <div>
-            <label className="block text-xs font-bold text-slate-800 uppercase tracking-wider mb-2">
+            <label className="block text-xs font-bold text-[#E5E7EB] uppercase tracking-wider mb-2">
               1. Modo de Visualização:
             </label>
             <div className="grid grid-cols-2 gap-3 max-w-sm">
@@ -257,7 +257,7 @@ CREATE POLICY "Auth Upload Storage" ON storage.objects FOR INSERT WITH CHECK (bu
                 className={`flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border text-xs font-semibold transition-all ${
                   previewMode === 'dark'
                     ? 'bg-slate-900 text-white border-slate-900 shadow-sm ring-2 ring-indigo-500/30'
-                    : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
+                    : 'bg-[#0B1020] text-[#E5E7EB] border-[#1C2D4A] hover:bg-[#0B1020]'
                 }`}
               >
                 <Moon className="w-4 h-4 text-indigo-400" />
@@ -269,7 +269,7 @@ CREATE POLICY "Auth Upload Storage" ON storage.objects FOR INSERT WITH CHECK (bu
                 className={`flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border text-xs font-semibold transition-all ${
                   previewMode === 'light'
                     ? 'bg-amber-500 text-white border-amber-500 shadow-sm ring-2 ring-amber-500/30'
-                    : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
+                    : 'bg-[#0B1020] text-[#E5E7EB] border-[#1C2D4A] hover:bg-[#0B1020]'
                 }`}
               >
                 <Sun className="w-4 h-4 text-amber-500" />
@@ -280,7 +280,7 @@ CREATE POLICY "Auth Upload Storage" ON storage.objects FOR INSERT WITH CHECK (bu
 
           {/* 2. Temas Visuais (6 temas) */}
           <div>
-            <label className="block text-xs font-bold text-slate-800 uppercase tracking-wider mb-2">
+            <label className="block text-xs font-bold text-[#E5E7EB] uppercase tracking-wider mb-2">
               2. Escolha o Tema Visual:
             </label>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
@@ -295,7 +295,7 @@ CREATE POLICY "Auth Upload Storage" ON storage.objects FOR INSERT WITH CHECK (bu
                     className={`p-3.5 rounded-xl border-2 text-left transition-all flex flex-col justify-between ${
                       isSelected
                         ? 'border-indigo-600 bg-indigo-50/20 ring-2 ring-indigo-500/20'
-                        : 'border-slate-200 hover:border-slate-300 bg-slate-50/50'
+                        : 'border-[#1C2D4A] hover:border-slate-300 bg-[#0B1020]/50'
                     }`}
                   >
                     <div className="flex items-center justify-between mb-2">
@@ -304,7 +304,7 @@ CREATE POLICY "Auth Upload Storage" ON storage.objects FOR INSERT WITH CHECK (bu
                           style={{ backgroundColor: palette.bg, borderColor: palette.cardBorder }}
                           className="w-5 h-5 rounded-full border shadow-xs" 
                         />
-                        <span className="text-xs font-bold text-slate-900">{theme.name}</span>
+                        <span className="text-xs font-bold text-[#E5E7EB]">{theme.name}</span>
                       </div>
                       {isSelected && (
                         <Check className="w-4 h-4 text-indigo-600" />
@@ -321,7 +321,7 @@ CREATE POLICY "Auth Upload Storage" ON storage.objects FOR INSERT WITH CHECK (bu
 
           {/* 3. Cores de Destaque (6 cores) */}
           <div>
-            <label className="block text-xs font-bold text-slate-800 uppercase tracking-wider mb-2">
+            <label className="block text-xs font-bold text-[#E5E7EB] uppercase tracking-wider mb-2">
               3. Cor de Destaque dos Botões e Menus:
             </label>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
@@ -335,7 +335,7 @@ CREATE POLICY "Auth Upload Storage" ON storage.objects FOR INSERT WITH CHECK (bu
                     className={`p-3 rounded-xl border-2 flex flex-col items-center gap-2 transition-all ${
                       isSelected
                         ? 'border-indigo-600 bg-indigo-50/20 ring-2 ring-indigo-500/20'
-                        : 'border-slate-200 hover:border-slate-300 bg-slate-50/50'
+                        : 'border-[#1C2D4A] hover:border-slate-300 bg-[#0B1020]/50'
                     }`}
                   >
                     <span 
@@ -344,7 +344,7 @@ CREATE POLICY "Auth Upload Storage" ON storage.objects FOR INSERT WITH CHECK (bu
                     >
                       {isSelected && <Check className="w-4 h-4" />}
                     </span>
-                    <span className="text-xs font-bold text-slate-800">{accent.name}</span>
+                    <span className="text-xs font-bold text-[#E5E7EB]">{accent.name}</span>
                   </button>
                 );
               })}
@@ -354,11 +354,11 @@ CREATE POLICY "Auth Upload Storage" ON storage.objects FOR INSERT WITH CHECK (bu
           {/* 4. Pré-visualização Interativa em Tempo Real */}
           <div>
             <div className="flex items-center justify-between mb-2">
-              <label className="block text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
+              <label className="block text-xs font-bold text-[#E5E7EB] uppercase tracking-wider flex items-center gap-1.5">
                 <Eye className="w-4 h-4 text-indigo-600" /> 4. Pré-visualização em Tempo Real:
               </label>
               <span className="text-[11px] text-slate-500">
-                Prévia: <strong className="text-slate-800">{ADMIN_THEMES[previewThemeId]?.name}</strong> + <strong className="text-slate-800">{ADMIN_ACCENTS[previewAccentId]?.name}</strong> ({previewMode === 'dark' ? 'Modo Escuro' : 'Modo Claro'})
+                Prévia: <strong className="text-[#E5E7EB]">{ADMIN_THEMES[previewThemeId]?.name}</strong> + <strong className="text-[#E5E7EB]">{ADMIN_ACCENTS[previewAccentId]?.name}</strong> ({previewMode === 'dark' ? 'Modo Escuro' : 'Modo Claro'})
               </span>
             </div>
 
@@ -478,7 +478,7 @@ CREATE POLICY "Auth Upload Storage" ON storage.objects FOR INSERT WITH CHECK (bu
               <button
                 type="button"
                 onClick={handleResetTheme}
-                className="px-4 py-2.5 rounded-xl border border-slate-300 hover:bg-slate-100 text-slate-700 text-xs font-semibold transition-colors flex items-center gap-1.5"
+                className="px-4 py-2.5 rounded-xl border border-slate-300 hover:bg-[#0B1020] text-[#E5E7EB] text-xs font-semibold transition-colors flex items-center gap-1.5"
               >
                 <RotateCcw className="w-3.5 h-3.5" />
                 <span>Restaurar Padrão</span>
@@ -496,34 +496,34 @@ CREATE POLICY "Auth Upload Storage" ON storage.objects FOR INSERT WITH CHECK (bu
         </div>
 
         {/* General Settings */}
-        <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs space-y-4">
-          <h4 className="font-bold text-slate-900 text-sm flex items-center gap-2 border-b border-slate-100 pb-3">
-            <Settings className="w-4 h-4 text-orange-500" /> Configurações Gerais
+        <div className="bg-[#151E33] p-6 rounded-2xl border border-[#1C2D4A] shadow-xs space-y-4">
+          <h4 className="font-bold text-[#E5E7EB] text-sm flex items-center gap-2 border-b border-slate-100 pb-3">
+            <Settings className="w-4 h-4 text-[#D97706]" /> Configurações Gerais
           </h4>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">Nome do Aplicativo PWA</label>
+              <label className="block text-xs font-semibold text-[#E5E7EB] mb-1">Nome do Aplicativo PWA</label>
               <input
                 type="text"
                 required
                 value={siteName}
                 onChange={(e) => setSiteName(e.target.value)}
-                className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-orange-500/20"
+                className="w-full px-3.5 py-2.5 bg-[#0B1020] border border-[#1C2D4A] rounded-xl text-xs font-medium text-[#E5E7EB] focus:outline-none focus:ring-2 focus:ring-orange-500/20"
               />
             </div>
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">E-mail do Administrador</label>
+              <label className="block text-xs font-semibold text-[#E5E7EB] mb-1">E-mail do Administrador</label>
               <input
                 type="email"
                 required
                 value={adminEmail}
                 onChange={(e) => setAdminEmail(e.target.value)}
-                className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-orange-500/20"
+                className="w-full px-3.5 py-2.5 bg-[#0B1020] border border-[#1C2D4A] rounded-xl text-xs font-medium text-[#E5E7EB] focus:outline-none focus:ring-2 focus:ring-orange-500/20"
               />
             </div>
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">Taxa de Entrega Padrão (R$)</label>
+              <label className="block text-xs font-semibold text-[#E5E7EB] mb-1">Taxa de Entrega Padrão (R$)</label>
               <input
                 type="number"
                 step="0.01"
@@ -531,14 +531,14 @@ CREATE POLICY "Auth Upload Storage" ON storage.objects FOR INSERT WITH CHECK (bu
                 required
                 value={deliveryFee}
                 onChange={(e) => setDeliveryFee(parseFloat(e.target.value))}
-                className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-orange-500/20"
+                className="w-full px-3.5 py-2.5 bg-[#0B1020] border border-[#1C2D4A] rounded-xl text-xs font-medium text-[#E5E7EB] focus:outline-none focus:ring-2 focus:ring-orange-500/20"
               />
             </div>
           </div>
 
           {/* Button Color Configuration */}
           <div className="pt-2 border-t border-slate-100">
-            <label className="block text-xs font-semibold text-slate-700 mb-2">
+            <label className="block text-xs font-semibold text-[#E5E7EB] mb-2">
               Cor dos Botões de Destaque e Chamadas para Ação (CTA)
             </label>
             <div className="flex items-center gap-3">
@@ -546,13 +546,13 @@ CREATE POLICY "Auth Upload Storage" ON storage.objects FOR INSERT WITH CHECK (bu
                 type="color"
                 value={primaryButtonColor}
                 onChange={(e) => setPrimaryButtonColor(e.target.value)}
-                className="w-10 h-10 rounded-xl border border-slate-200 cursor-pointer p-0.5 bg-slate-50"
+                className="w-10 h-10 rounded-xl border border-[#1C2D4A] cursor-pointer p-0.5 bg-[#0B1020]"
               />
               <input
                 type="text"
                 value={primaryButtonColor}
                 onChange={(e) => setPrimaryButtonColor(e.target.value)}
-                className="w-32 px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono uppercase text-slate-800"
+                className="w-32 px-3 py-2 bg-[#0B1020] border border-[#1C2D4A] rounded-xl text-xs font-mono uppercase text-[#E5E7EB]"
                 placeholder="#f97316"
               />
               <div className="flex items-center gap-1.5 ml-2">
@@ -575,7 +575,7 @@ CREATE POLICY "Auth Upload Storage" ON storage.objects FOR INSERT WITH CHECK (bu
 
           {/* Showcase Buttons Position Setting */}
           <div className="pt-4 border-t border-slate-100 space-y-3">
-            <label className="block text-xs font-semibold text-slate-700">
+            <label className="block text-xs font-semibold text-[#E5E7EB]">
               Posição dos Botões de Navegação das Vitrines (Alternância de Marcas)
             </label>
             
@@ -583,7 +583,7 @@ CREATE POLICY "Auth Upload Storage" ON storage.objects FOR INSERT WITH CHECK (bu
               <label 
                 onClick={() => setShowcasePosition('below_banner')}
                 className={`p-4 rounded-xl border-2 cursor-pointer transition-all flex flex-col justify-between ${
-                  showcasePosition === 'below_banner' ? 'border-orange-500 bg-orange-50/40 shadow-xs' : 'border-slate-200 bg-slate-50/50 hover:border-slate-300'
+                  showcasePosition === 'below_banner' ? 'border-orange-500 bg-orange-50/40 shadow-xs' : 'border-[#1C2D4A] bg-[#0B1020]/50 hover:border-slate-300'
                 }`}
               >
                 <div className="flex items-start gap-3">
@@ -596,7 +596,7 @@ CREATE POLICY "Auth Upload Storage" ON storage.objects FOR INSERT WITH CHECK (bu
                     className="mt-1"
                   />
                   <div>
-                    <span className="font-bold text-slate-900 text-xs block">Abaixo do Banner (Padrão)</span>
+                    <span className="font-bold text-[#E5E7EB] text-xs block">Abaixo do Banner (Padrão)</span>
                     <span className="text-[11px] text-slate-500 leading-relaxed block mt-0.5">
                       A barra com os botões/marcas é exibida logo abaixo do carrossel de banners principal.
                     </span>
@@ -607,7 +607,7 @@ CREATE POLICY "Auth Upload Storage" ON storage.objects FOR INSERT WITH CHECK (bu
               <label 
                 onClick={() => setShowcasePosition('above_banner')}
                 className={`p-4 rounded-xl border-2 cursor-pointer transition-all flex flex-col justify-between ${
-                  showcasePosition === 'above_banner' ? 'border-orange-500 bg-orange-50/40 shadow-xs' : 'border-slate-200 bg-slate-50/50 hover:border-slate-300'
+                  showcasePosition === 'above_banner' ? 'border-orange-500 bg-orange-50/40 shadow-xs' : 'border-[#1C2D4A] bg-[#0B1020]/50 hover:border-slate-300'
                 }`}
               >
                 <div className="flex items-start gap-3">
@@ -620,7 +620,7 @@ CREATE POLICY "Auth Upload Storage" ON storage.objects FOR INSERT WITH CHECK (bu
                     className="mt-1"
                   />
                   <div>
-                    <span className="font-bold text-slate-900 text-xs block">Acima do Banner</span>
+                    <span className="font-bold text-[#E5E7EB] text-xs block">Acima do Banner</span>
                     <span className="text-[11px] text-slate-500 leading-relaxed block mt-0.5">
                       A barra com os botões/marcas é exibida no topo, antes do carrossel de banners principal.
                     </span>
@@ -650,9 +650,9 @@ CREATE POLICY "Auth Upload Storage" ON storage.objects FOR INSERT WITH CHECK (bu
                 {showcasePosition === 'above_banner' ? (
                   <>
                     {/* Mock Showcase Bar ABOVE */}
-                    <div className="p-2 bg-orange-500/20 border border-orange-500/40 rounded-lg flex items-center gap-2 text-[10px] text-orange-300 font-bold">
+                    <div className="p-2 bg-[#D97706]/20 border border-orange-500/40 rounded-lg flex items-center gap-2 text-[10px] text-orange-300 font-bold">
                       <span>[1] Botões de Marcas:</span>
-                      <span className="px-2 py-0.5 bg-orange-500 text-slate-950 rounded">Natura</span>
+                      <span className="px-2 py-0.5 bg-[#D97706] text-slate-950 rounded">Natura</span>
                       <span className="px-2 py-0.5 bg-slate-800 text-slate-300 rounded">O Boticário</span>
                       <span className="px-2 py-0.5 bg-slate-800 text-slate-300 rounded">Eudora</span>
                     </div>
@@ -670,9 +670,9 @@ CREATE POLICY "Auth Upload Storage" ON storage.objects FOR INSERT WITH CHECK (bu
                     </div>
 
                     {/* Mock Showcase Bar BELOW */}
-                    <div className="p-2 bg-orange-500/20 border border-orange-500/40 rounded-lg flex items-center gap-2 text-[10px] text-orange-300 font-bold">
+                    <div className="p-2 bg-[#D97706]/20 border border-orange-500/40 rounded-lg flex items-center gap-2 text-[10px] text-orange-300 font-bold">
                       <span>[2] Botões de Marcas:</span>
-                      <span className="px-2 py-0.5 bg-orange-500 text-slate-950 rounded">Natura</span>
+                      <span className="px-2 py-0.5 bg-[#D97706] text-slate-950 rounded">Natura</span>
                       <span className="px-2 py-0.5 bg-slate-800 text-slate-300 rounded">O Boticário</span>
                       <span className="px-2 py-0.5 bg-slate-800 text-slate-300 rounded">Eudora</span>
                     </div>
@@ -684,9 +684,9 @@ CREATE POLICY "Auth Upload Storage" ON storage.objects FOR INSERT WITH CHECK (bu
         </div>
 
         {/* Supabase Connection Settings */}
-        <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs space-y-4">
+        <div className="bg-[#151E33] p-6 rounded-2xl border border-[#1C2D4A] shadow-xs space-y-4">
           <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-            <h4 className="font-bold text-slate-900 text-sm flex items-center gap-2">
+            <h4 className="font-bold text-[#E5E7EB] text-sm flex items-center gap-2">
               <Database className="w-4 h-4 text-indigo-600" /> Conexão Real com Supabase
             </h4>
             <a 
@@ -706,23 +706,23 @@ CREATE POLICY "Auth Upload Storage" ON storage.objects FOR INSERT WITH CHECK (bu
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">Supabase Project URL</label>
+              <label className="block text-xs font-semibold text-[#E5E7EB] mb-1">Supabase Project URL</label>
               <input
                 type="text"
                 value={supabaseUrl}
                 onChange={(e) => setSupabaseUrl(e.target.value)}
                 placeholder="https://xyzcompany.supabase.co"
-                className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono text-slate-800 focus:outline-none focus:ring-2 focus:ring-orange-500/20"
+                className="w-full px-3.5 py-2.5 bg-[#0B1020] border border-[#1C2D4A] rounded-xl text-xs font-mono text-[#E5E7EB] focus:outline-none focus:ring-2 focus:ring-orange-500/20"
               />
             </div>
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">Supabase Anon / Public Key</label>
+              <label className="block text-xs font-semibold text-[#E5E7EB] mb-1">Supabase Anon / Public Key</label>
               <input
                 type="password"
                 value={supabaseAnonKey}
                 onChange={(e) => setSupabaseAnonKey(e.target.value)}
                 placeholder="eyJhbGciOi..."
-                className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono text-slate-800 focus:outline-none focus:ring-2 focus:ring-orange-500/20"
+                className="w-full px-3.5 py-2.5 bg-[#0B1020] border border-[#1C2D4A] rounded-xl text-xs font-mono text-[#E5E7EB] focus:outline-none focus:ring-2 focus:ring-orange-500/20"
               />
             </div>
           </div>
@@ -751,13 +751,13 @@ CREATE POLICY "Auth Upload Storage" ON storage.objects FOR INSERT WITH CHECK (bu
         </div>
 
         {/* Storage Provider */}
-        <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs space-y-4">
-          <h4 className="font-bold text-slate-900 text-sm flex items-center gap-2 border-b border-slate-100 pb-3">
+        <div className="bg-[#151E33] p-6 rounded-2xl border border-[#1C2D4A] shadow-xs space-y-4">
+          <h4 className="font-bold text-[#E5E7EB] text-sm flex items-center gap-2 border-b border-slate-100 pb-3">
             <ImageIcon className="w-4 h-4 text-emerald-600" /> Armazenamento de Imagens e Fotos (Supabase Storage)
           </h4>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <label className={`p-4 rounded-xl border-2 cursor-pointer transition-all flex items-start gap-3 ${storageProvider === 'local' ? 'border-orange-500 bg-orange-50/40' : 'border-slate-200 bg-slate-50/50'}`}>
+            <label className={`p-4 rounded-xl border-2 cursor-pointer transition-all flex items-start gap-3 ${storageProvider === 'local' ? 'border-orange-500 bg-orange-50/40' : 'border-[#1C2D4A] bg-[#0B1020]/50'}`}>
               <input
                 type="radio"
                 name="storageProvider"
@@ -767,12 +767,12 @@ CREATE POLICY "Auth Upload Storage" ON storage.objects FOR INSERT WITH CHECK (bu
                 className="mt-1"
               />
               <div>
-                <span className="font-bold text-slate-900 text-xs block">LocalStorage & Galeria Base64</span>
+                <span className="font-bold text-[#E5E7EB] text-xs block">LocalStorage & Galeria Base64</span>
                 <span className="text-[11px] text-slate-500 leading-relaxed block mt-0.5">Armazenamento local rápido com conversão de imagens da galeria.</span>
               </div>
             </label>
 
-            <label className={`p-4 rounded-xl border-2 cursor-pointer transition-all flex items-start gap-3 ${storageProvider === 'supabase' ? 'border-orange-500 bg-orange-50/40' : 'border-slate-200 bg-slate-50/50'}`}>
+            <label className={`p-4 rounded-xl border-2 cursor-pointer transition-all flex items-start gap-3 ${storageProvider === 'supabase' ? 'border-orange-500 bg-orange-50/40' : 'border-[#1C2D4A] bg-[#0B1020]/50'}`}>
               <input
                 type="radio"
                 name="storageProvider"
@@ -782,7 +782,7 @@ CREATE POLICY "Auth Upload Storage" ON storage.objects FOR INSERT WITH CHECK (bu
                 className="mt-1"
               />
               <div>
-                <span className="font-bold text-slate-900 text-xs block">Supabase Storage (`product-images`)</span>
+                <span className="font-bold text-[#E5E7EB] text-xs block">Supabase Storage (`product-images`)</span>
                 <span className="text-[11px] text-slate-500 leading-relaxed block mt-0.5">Upload em nuvem para fotos de produtos e banners.</span>
               </div>
             </label>
@@ -805,7 +805,7 @@ CREATE POLICY "Auth Upload Storage" ON storage.objects FOR INSERT WITH CHECK (bu
 
           <button
             type="submit"
-            className="px-6 py-2.5 rounded-xl bg-orange-500 hover:bg-orange-600 text-white text-xs font-semibold transition-colors shadow-md flex items-center gap-2"
+            className="px-6 py-2.5 rounded-xl bg-[#D97706] hover:bg-orange-600 text-white text-xs font-semibold transition-colors shadow-md flex items-center gap-2"
           >
             {savedSuccess ? <Check className="w-4 h-4 text-white" /> : <ShieldCheck className="w-4 h-4" />}
             {savedSuccess ? 'Configurações Salvas!' : 'Salvar Alterações'}
@@ -816,19 +816,19 @@ CREATE POLICY "Auth Upload Storage" ON storage.objects FOR INSERT WITH CHECK (bu
       {/* SQL Modal */}
       {showSqlModal && (
         <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-slate-200 p-6 space-y-4">
+          <div className="bg-[#151E33] rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-[#1C2D4A] p-6 space-y-4">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-              <h3 className="font-bold text-slate-900 text-base flex items-center gap-2">
+              <h3 className="font-bold text-[#E5E7EB] text-base flex items-center gap-2">
                 <Terminal className="w-5 h-5 text-indigo-600" /> Script SQL para o Supabase
               </h3>
               <button 
                 onClick={() => setShowSqlModal(false)}
-                className="p-1.5 rounded-lg text-slate-400 hover:bg-slate-100"
+                className="p-1.5 rounded-lg text-slate-400 hover:bg-[#0B1020]"
               >
                 ✕
               </button>
             </div>
-            <p className="text-xs text-slate-600">
+            <p className="text-xs text-[#94A3B8]">
               Copie o código abaixo e execute-o no <strong>SQL Editor</strong> do seu painel Supabase para criar as tabelas e políticas de segurança necessárias:
             </p>
             <textarea
@@ -849,7 +849,7 @@ CREATE POLICY "Auth Upload Storage" ON storage.objects FOR INSERT WITH CHECK (bu
               </button>
               <button
                 onClick={() => setShowSqlModal(false)}
-                className="px-4 py-2.5 rounded-xl border border-slate-200 text-slate-700 text-xs font-semibold"
+                className="px-4 py-2.5 rounded-xl border border-[#1C2D4A] text-[#E5E7EB] text-xs font-semibold"
               >
                 Fechar
               </button>

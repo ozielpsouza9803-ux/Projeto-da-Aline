@@ -26,8 +26,8 @@ export const ShoppingBagView: React.FC<ShoppingBagViewProps> = ({
         {/* Header */}
         <div className="p-5 sm:p-6 border-b border-slate-800 flex items-center justify-between bg-slate-900/50 backdrop-blur-md sticky top-0 z-10">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-orange-500/10 flex items-center justify-center border border-orange-500/20">
-              <ShoppingCart className="w-5 h-5 text-orange-500" />
+            <div className="w-10 h-10 rounded-xl bg-[#D97706]/10 flex items-center justify-center border border-orange-500/20">
+              <ShoppingCart className="w-5 h-5 text-[#D97706]" />
             </div>
             <div>
               <h2 className="text-xl font-black text-white tracking-tight flex items-center gap-2">
@@ -53,7 +53,7 @@ export const ShoppingBagView: React.FC<ShoppingBagViewProps> = ({
             {bag.items.length === 0 ? (
               <div className="h-full flex flex-col items-center justify-center text-center space-y-4 p-8">
                 <div className="w-20 h-20 rounded-full bg-slate-800/50 flex items-center justify-center mb-2">
-                  <BagIcon className="w-10 h-10 text-slate-600" />
+                  <BagIcon className="w-10 h-10 text-[#94A3B8]" />
                 </div>
                 <div>
                   <h3 className="text-lg font-bold text-white">Sua sacola está vazia</h3>
@@ -61,7 +61,7 @@ export const ShoppingBagView: React.FC<ShoppingBagViewProps> = ({
                 </div>
                 <button 
                   onClick={onClose}
-                  className="px-6 py-3 rounded-xl bg-orange-500 hover:bg-orange-600 text-slate-950 font-extrabold text-sm transition-all shadow-lg active:scale-95 cursor-pointer"
+                  className="px-6 py-3 rounded-xl bg-[#D97706] hover:bg-orange-600 text-slate-950 font-extrabold text-sm transition-all shadow-lg active:scale-95 cursor-pointer"
                 >
                   Ir às Compras
                 </button>
@@ -84,7 +84,7 @@ export const ShoppingBagView: React.FC<ShoppingBagViewProps> = ({
                             {item.name}
                           </h4>
                           <div className="flex items-center gap-1.5 mt-1">
-                            <span className="text-[10px] font-bold text-orange-500 uppercase tracking-wider">{item.showcaseName}</span>
+                            <span className="text-[10px] font-bold text-[#D97706] uppercase tracking-wider">{item.showcaseName}</span>
                             <span className="w-1 h-1 rounded-full bg-slate-700" />
                             <span className="text-[10px] font-medium text-slate-500">Unidade: R$ {item.price.toFixed(2)}</span>
                           </div>
@@ -148,7 +148,7 @@ export const ShoppingBagView: React.FC<ShoppingBagViewProps> = ({
                   <div className="pt-4 border-t border-slate-800 flex justify-between items-center">
                     <span className="text-base font-bold text-white">Valor Total</span>
                     <div className="text-right">
-                      <span className="text-2xl font-black text-orange-500 tabular-nums">
+                      <span className="text-2xl font-black text-[#D97706] tabular-nums">
                         R$ {bag.total.toFixed(2)}
                       </span>
                       <p className="text-[10px] text-slate-500 font-medium">Ou em até 10x s/ juros</p>
@@ -170,7 +170,7 @@ export const ShoppingBagView: React.FC<ShoppingBagViewProps> = ({
               <div className="space-y-3 mt-8">
                 <button 
                   onClick={onContinueToCheckout}
-                  className="w-full py-4 rounded-2xl bg-orange-500 hover:bg-orange-600 text-slate-950 font-black text-sm transition-all shadow-xl shadow-orange-500/10 active:scale-[0.98] cursor-pointer flex items-center justify-center gap-2"
+                  className="w-full py-4 rounded-2xl bg-[#D97706] hover:bg-orange-600 text-slate-950 font-black text-sm transition-all shadow-xl shadow-orange-500/10 active:scale-[0.98] cursor-pointer flex items-center justify-center gap-2"
                 >
                   Continuar para Finalizar Pedido
                   <ArrowRight className="w-4 h-4" />

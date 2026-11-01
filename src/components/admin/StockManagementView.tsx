@@ -165,7 +165,7 @@ export const StockManagementView: React.FC<StockManagementViewProps> = ({
           </p>
         </div>
 
-        <div className="bg-white/10 backdrop-blur-md border border-white/15 px-4 py-3 rounded-xl flex items-center gap-3 text-xs text-slate-200 shrink-0">
+        <div className="bg-[#151E33]/10 backdrop-blur-md border border-white/15 px-4 py-3 rounded-xl flex items-center gap-3 text-xs text-slate-200 shrink-0">
           <Bot className="w-5 h-5 text-emerald-400 shrink-0" />
           <div>
             <div className="font-semibold text-white">Preparação Chatbot IA</div>
@@ -176,18 +176,18 @@ export const StockManagementView: React.FC<StockManagementViewProps> = ({
 
       {/* Metric Cards Overview */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs flex items-center justify-between">
+        <div className="bg-[#151E33] p-5 rounded-2xl border border-[#1C2D4A] shadow-xs flex items-center justify-between">
           <div>
             <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total em Catálogo</span>
-            <div className="text-2xl font-bold text-slate-900 mt-1 tabular-nums">{totalProducts}</div>
+            <div className="text-2xl font-bold text-[#E5E7EB] mt-1 tabular-nums">{totalProducts}</div>
             <span className="text-[11px] text-slate-500 font-medium">Produtos cadastrados</span>
           </div>
-          <div className="w-12 h-12 rounded-xl bg-slate-100 flex items-center justify-center text-slate-700">
+          <div className="w-12 h-12 rounded-xl bg-[#0B1020] flex items-center justify-center text-[#E5E7EB]">
             <Package className="w-6 h-6" />
           </div>
         </div>
 
-        <div className="bg-white p-5 rounded-2xl border border-emerald-200 shadow-xs flex items-center justify-between bg-emerald-50/30">
+        <div className="bg-[#151E33] p-5 rounded-2xl border border-emerald-200 shadow-xs flex items-center justify-between bg-emerald-50/30">
           <div>
             <span className="text-xs font-semibold text-emerald-700 uppercase tracking-wider">Disponíveis</span>
             <div className="text-2xl font-bold text-emerald-900 mt-1 tabular-nums">{availableCount}</div>
@@ -198,7 +198,7 @@ export const StockManagementView: React.FC<StockManagementViewProps> = ({
           </div>
         </div>
 
-        <div className="bg-white p-5 rounded-2xl border border-amber-200 shadow-xs flex items-center justify-between bg-amber-50/30">
+        <div className="bg-[#151E33] p-5 rounded-2xl border border-amber-200 shadow-xs flex items-center justify-between bg-amber-50/30">
           <div>
             <span className="text-xs font-semibold text-amber-700 uppercase tracking-wider">Estoque Baixo</span>
             <div className="text-2xl font-bold text-amber-900 mt-1 tabular-nums">{lowStockCount}</div>
@@ -209,7 +209,7 @@ export const StockManagementView: React.FC<StockManagementViewProps> = ({
           </div>
         </div>
 
-        <div className="bg-white p-5 rounded-2xl border border-rose-200 shadow-xs flex items-center justify-between bg-rose-50/30">
+        <div className="bg-[#151E33] p-5 rounded-2xl border border-rose-200 shadow-xs flex items-center justify-between bg-rose-50/30">
           <div>
             <span className="text-xs font-semibold text-rose-700 uppercase tracking-wider">Esgotados</span>
             <div className="text-2xl font-bold text-rose-900 mt-1 tabular-nums">{outOfStockCount}</div>
@@ -222,7 +222,7 @@ export const StockManagementView: React.FC<StockManagementViewProps> = ({
       </div>
 
       {/* Filter and Search Bar */}
-      <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
+      <div className="bg-[#151E33] p-5 rounded-2xl border border-[#1C2D4A] shadow-xs flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
         {/* Search */}
         <div className="relative flex-1">
           <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
@@ -231,12 +231,12 @@ export const StockManagementView: React.FC<StockManagementViewProps> = ({
             value={localSearch}
             onChange={(e) => setLocalSearch(e.target.value)}
             placeholder="Buscar produto por nome, SKU ou categoria..."
-            className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-orange-500/20"
+            className="w-full pl-10 pr-4 py-2.5 bg-[#0B1020] border border-[#1C2D4A] rounded-xl text-xs font-medium text-[#E5E7EB] focus:outline-none focus:ring-2 focus:ring-orange-500/20"
           />
           {localSearch && (
             <button 
               onClick={() => setLocalSearch('')}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-1"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-[#94A3B8] p-1"
             >
               <X className="w-3.5 h-3.5" />
             </button>
@@ -250,7 +250,7 @@ export const StockManagementView: React.FC<StockManagementViewProps> = ({
             <select
               value={selectedBrandFilter}
               onChange={(e) => setSelectedBrandFilter(e.target.value)}
-              className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-orange-500/20"
+              className="px-3 py-2 bg-[#0B1020] border border-[#1C2D4A] rounded-xl text-xs font-semibold text-[#E5E7EB] focus:outline-none focus:ring-2 focus:ring-orange-500/20"
             >
               <option value="all">Todas as Marcas/Vitrines</option>
               {showcases.map(s => (
@@ -263,7 +263,7 @@ export const StockManagementView: React.FC<StockManagementViewProps> = ({
           <select
             value={selectedStatusFilter}
             onChange={(e) => setSelectedStatusFilter(e.target.value)}
-            className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-orange-500/20"
+            className="px-3 py-2 bg-[#0B1020] border border-[#1C2D4A] rounded-xl text-xs font-semibold text-[#E5E7EB] focus:outline-none focus:ring-2 focus:ring-orange-500/20"
           >
             <option value="all">Todas as Situações</option>
             <option value="available">Disponível (&gt; 5)</option>
@@ -276,27 +276,27 @@ export const StockManagementView: React.FC<StockManagementViewProps> = ({
       {/* Products Grouped by Brand */}
       <div className="space-y-8">
         {productsByBrand.length === 0 ? (
-          <div className="bg-white p-12 rounded-2xl border border-slate-200 text-center space-y-3">
+          <div className="bg-[#151E33] p-12 rounded-2xl border border-[#1C2D4A] text-center space-y-3">
             <Package className="w-10 h-10 text-slate-300 mx-auto" />
-            <h4 className="font-bold text-slate-800 text-base">Nenhum produto encontrado</h4>
+            <h4 className="font-bold text-[#E5E7EB] text-base">Nenhum produto encontrado</h4>
             <p className="text-xs text-slate-500">Tente ajustar seus filtros de busca, marca ou situação de estoque.</p>
           </div>
         ) : (
           productsByBrand.map(({ showcase, products: brandProducts }) => (
-            <div key={showcase.id} className="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
+            <div key={showcase.id} className="bg-[#151E33] rounded-2xl border border-[#1C2D4A] shadow-xs overflow-hidden">
               {/* Brand Section Header */}
-              <div className="px-6 py-4 bg-slate-50/80 border-b border-slate-200 flex items-center justify-between">
+              <div className="px-6 py-4 bg-[#0B1020]/80 border-b border-[#1C2D4A] flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <img
                     src={showcase.logoUrl}
                     alt={showcase.name}
-                    className="w-8 h-8 rounded-lg object-cover border border-slate-200 bg-white"
+                    className="w-8 h-8 rounded-lg object-cover border border-[#1C2D4A] bg-[#151E33]"
                     referrerPolicy="no-referrer"
                   />
                   <div>
-                    <h3 className="font-bold text-slate-900 text-sm flex items-center gap-2">
+                    <h3 className="font-bold text-[#E5E7EB] text-sm flex items-center gap-2">
                       <span>{showcase.name}</span>
-                      <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-slate-200/80 text-slate-700">
+                      <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-slate-200/80 text-[#E5E7EB]">
                         {brandProducts.length} {brandProducts.length === 1 ? 'produto' : 'produtos'}
                       </span>
                     </h3>
@@ -308,7 +308,7 @@ export const StockManagementView: React.FC<StockManagementViewProps> = ({
                   href={showcase.affiliateBaseUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-xs text-orange-600 hover:text-orange-700 font-semibold flex items-center gap-1 transition-colors"
+                  className="text-xs text-[#D97706] hover:text-orange-700 font-semibold flex items-center gap-1 transition-colors"
                 >
                   <span>Acessar Vitrine</span>
                   <ExternalLink className="w-3.5 h-3.5" />
@@ -324,7 +324,7 @@ export const StockManagementView: React.FC<StockManagementViewProps> = ({
                 <div className="overflow-x-auto">
                   <table className="w-full text-left border-collapse">
                     <thead>
-                      <tr className="border-b border-slate-100 bg-slate-50/40 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                      <tr className="border-b border-slate-100 bg-[#0B1020]/40 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
                         <th className="py-3 px-6">Produto</th>
                         <th className="py-3 px-4">SKU</th>
                         <th className="py-3 px-4">Preço (R$)</th>
@@ -333,39 +333,39 @@ export const StockManagementView: React.FC<StockManagementViewProps> = ({
                         <th className="py-3 px-6 text-right">Ações</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-100 text-xs text-slate-700">
+                    <tbody className="divide-y divide-slate-100 text-xs text-[#E5E7EB]">
                       {brandProducts.map((product) => {
                         const qty = product.stockQuantity ?? (product.isActive ? 10 : 0);
                         const status = calculateStockStatus(qty);
 
                         return (
-                          <tr key={product.id} className="hover:bg-slate-50/60 transition-colors">
+                          <tr key={product.id} className="hover:bg-[#0B1020]/60 transition-colors">
                             {/* Product Info */}
                             <td className="py-3.5 px-6">
                               <div className="flex items-center gap-3">
                                 <img
                                   src={product.photos?.[0] || 'https://images.unsplash.com/photo-1523293182086-7651a899d37f?w=600&auto=format&fit=crop&q=80'}
                                   alt={product.name}
-                                  className="w-10 h-10 rounded-lg object-cover border border-slate-200 shrink-0 bg-slate-100"
+                                  className="w-10 h-10 rounded-lg object-cover border border-[#1C2D4A] shrink-0 bg-[#0B1020]"
                                   referrerPolicy="no-referrer"
                                 />
                                 <div className="min-w-0">
-                                  <div className="font-bold text-slate-900 text-xs line-clamp-1">{product.name}</div>
+                                  <div className="font-bold text-[#E5E7EB] text-xs line-clamp-1">{product.name}</div>
                                   <div className="text-[11px] text-slate-400 font-medium">{product.category}</div>
                                 </div>
                               </div>
                             </td>
 
                             {/* SKU */}
-                            <td className="py-3.5 px-4 font-mono text-[11px] text-slate-600">
+                            <td className="py-3.5 px-4 font-mono text-[11px] text-[#94A3B8]">
                               {product.sku || `SKU-${product.id.substring(0, 6)}`}
                             </td>
 
                             {/* Price */}
-                            <td className="py-3.5 px-4 font-semibold text-slate-900 tabular-nums">
+                            <td className="py-3.5 px-4 font-semibold text-[#E5E7EB] tabular-nums">
                               {product.promotionalPrice ? (
                                 <div>
-                                  <span className="text-orange-600 font-bold">
+                                  <span className="text-[#D97706] font-bold">
                                     R$ {product.promotionalPrice.toFixed(2)}
                                   </span>
                                   <span className="text-[10px] text-slate-400 line-through block font-normal">
@@ -379,20 +379,20 @@ export const StockManagementView: React.FC<StockManagementViewProps> = ({
 
                             {/* Stock Quick Stepper */}
                             <td className="py-3.5 px-4">
-                              <div className="inline-flex items-center gap-1.5 bg-slate-100 p-1 rounded-xl border border-slate-200">
+                              <div className="inline-flex items-center gap-1.5 bg-[#0B1020] p-1 rounded-xl border border-[#1C2D4A]">
                                 <button
                                   onClick={() => handleStockStep(product, -1)}
-                                  className="p-1 rounded-lg hover:bg-white text-slate-600 hover:text-slate-900 transition-colors shadow-2xs"
+                                  className="p-1 rounded-lg hover:bg-[#151E33] text-[#94A3B8] hover:text-[#E5E7EB] transition-colors shadow-2xs"
                                   title="Diminuir 1"
                                 >
                                   <Minus className="w-3 h-3" />
                                 </button>
-                                <span className="w-8 text-center font-bold text-slate-900 text-xs tabular-nums">
+                                <span className="w-8 text-center font-bold text-[#E5E7EB] text-xs tabular-nums">
                                   {qty}
                                 </span>
                                 <button
                                   onClick={() => handleStockStep(product, 1)}
-                                  className="p-1 rounded-lg hover:bg-white text-slate-600 hover:text-slate-900 transition-colors shadow-2xs"
+                                  className="p-1 rounded-lg hover:bg-[#151E33] text-[#94A3B8] hover:text-[#E5E7EB] transition-colors shadow-2xs"
                                   title="Aumentar 1"
                                 >
                                   <Plus className="w-3 h-3" />
@@ -424,7 +424,7 @@ export const StockManagementView: React.FC<StockManagementViewProps> = ({
                             <td className="py-3.5 px-6 text-right">
                               <button
                                 onClick={() => handleOpenEdit(product)}
-                                className="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs transition-colors inline-flex items-center gap-1"
+                                className="px-3 py-1.5 rounded-lg bg-[#0B1020] hover:bg-slate-200 text-[#E5E7EB] font-semibold text-xs transition-colors inline-flex items-center gap-1"
                               >
                                 <Edit3 className="w-3.5 h-3.5 text-slate-500" />
                                 <span>Editar</span>
@@ -461,12 +461,12 @@ export const StockManagementView: React.FC<StockManagementViewProps> = ({
                 style={{ color: 'var(--admin-text-primary, #0f172a)' }}
                 className="font-bold text-sm flex items-center gap-2"
               >
-                <Package className="w-4 h-4 text-orange-500" />
+                <Package className="w-4 h-4 text-[#D97706]" />
                 <span>Ajustar Estoque & Informações</span>
               </h3>
               <button
                 onClick={() => setEditingProduct(null)}
-                className="p-1.5 rounded-lg text-slate-400 hover:bg-white/10 transition-colors"
+                className="p-1.5 rounded-lg text-slate-400 hover:bg-[#151E33]/10 transition-colors"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -630,7 +630,7 @@ export const StockManagementView: React.FC<StockManagementViewProps> = ({
                 <button
                   type="button"
                   onClick={() => setEditingProduct(null)}
-                  className="px-4 py-2 rounded-xl border border-slate-300 text-slate-400 hover:bg-white/10 text-xs font-semibold transition-colors"
+                  className="px-4 py-2 rounded-xl border border-slate-300 text-slate-400 hover:bg-[#151E33]/10 text-xs font-semibold transition-colors"
                 >
                   Cancelar
                 </button>

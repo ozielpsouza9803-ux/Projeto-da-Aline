@@ -15,25 +15,25 @@ export const FinanceView: React.FC<FinanceViewProps> = ({ commissions }) => {
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+        <div className="bg-[#151E33] p-5 rounded-2xl border border-[#1C2D4A] shadow-sm">
           <p className="text-xs text-slate-500 font-semibold">Total Acumulado</p>
-          <p className="text-xl font-bold text-slate-900">{formatBRL(total)}</p>
+          <p className="text-xl font-bold text-[#E5E7EB]">{formatBRL(total)}</p>
         </div>
-        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+        <div className="bg-[#151E33] p-5 rounded-2xl border border-[#1C2D4A] shadow-sm">
           <p className="text-xs text-slate-500 font-semibold">Pendente</p>
-          <p className="text-xl font-bold text-amber-600">{formatBRL(pending)}</p>
+          <p className="text-xl font-bold text-amber-400">{formatBRL(pending)}</p>
         </div>
-        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+        <div className="bg-[#151E33] p-5 rounded-2xl border border-[#1C2D4A] shadow-sm">
           <p className="text-xs text-slate-500 font-semibold">Pago</p>
-          <p className="text-xl font-bold text-emerald-600">{formatBRL(paid)}</p>
+          <p className="text-xl font-bold text-emerald-400">{formatBRL(paid)}</p>
         </div>
       </div>
 
-      <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-        <h3 className="font-bold text-slate-900 mb-4">Histórico de Comissões</h3>
+      <div className="bg-[#151E33] p-6 rounded-2xl border border-[#1C2D4A] shadow-sm">
+        <h3 className="font-bold text-[#E5E7EB] mb-4">Histórico de Comissões</h3>
         <div className="overflow-x-auto">
           <table className="w-full text-xs text-left">
-            <thead className="text-slate-500 uppercase border-b border-slate-100">
+            <thead className="text-slate-500 uppercase border-b border-[#1C2D4A]">
               <tr>
                 <th className="pb-3">Data</th>
                 <th className="pb-3">Produto</th>
@@ -42,7 +42,7 @@ export const FinanceView: React.FC<FinanceViewProps> = ({ commissions }) => {
                 <th className="pb-3">Status</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-[#1C2D4A]">
               {commissions.map(c => (
                 <tr key={c.id}>
                   <td className="py-3">{c.date}</td>
@@ -50,7 +50,7 @@ export const FinanceView: React.FC<FinanceViewProps> = ({ commissions }) => {
                   <td className="py-3">{formatBRL(c.saleAmount)}</td>
                   <td className="py-3 font-semibold">{formatBRL(c.commissionAmount)}</td>
                   <td className="py-3">
-                    <span className={`px-2 py-0.5 rounded-full font-bold ${c.status === 'Pago' ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'}`}>
+                    <span className={`px-2 py-0.5 rounded-full font-bold ${c.status === 'Pago' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-amber-500/10 text-amber-400'}`}>
                       {c.status}
                     </span>
                   </td>

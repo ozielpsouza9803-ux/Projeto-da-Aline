@@ -41,7 +41,7 @@ export const OverviewView: React.FC<OverviewViewProps> = ({
       <div className="bg-gradient-to-r from-slate-900 via-slate-800 to-indigo-950 rounded-2xl p-6 lg:p-8 text-white shadow-xl relative overflow-hidden">
         <div className="absolute right-0 top-0 bottom-0 w-1/3 bg-radial from-orange-500/20 via-transparent to-transparent pointer-events-none" />
         <div className="relative z-10 max-w-2xl">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-500/20 border border-orange-500/30 text-orange-400 text-xs font-semibold mb-4">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#D97706]/20 border border-orange-500/30 text-orange-400 text-xs font-semibold mb-4">
             <Sparkles className="w-3.5 h-3.5" /> PWA Afiliados Multimarcas Ativo
           </div>
           <h2 className="text-2xl lg:text-3xl font-bold tracking-tight mb-2">
@@ -53,7 +53,7 @@ export const OverviewView: React.FC<OverviewViewProps> = ({
           <div className="flex flex-wrap gap-3">
             <button
               onClick={() => onNavigate('showcases')}
-              className="px-4 py-2.5 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-semibold text-xs transition-colors shadow-md flex items-center gap-2"
+              className="px-4 py-2.5 rounded-xl bg-[#D97706] hover:bg-orange-600 text-white font-semibold text-xs transition-colors shadow-md flex items-center gap-2"
             >
               <Store className="w-4 h-4" /> Gerenciar Vitrines
             </button>
@@ -112,7 +112,7 @@ export const OverviewView: React.FC<OverviewViewProps> = ({
         <div style={{ backgroundColor: 'var(--admin-card-bg)', borderColor: 'var(--admin-card-border)' }} className="p-6 rounded-2xl border shadow-xs flex flex-col justify-between">
           <div className="flex items-center justify-between mb-4">
             <span style={{ color: 'var(--admin-text-secondary)' }} className="text-xs font-semibold uppercase tracking-wider">Comissões Acumuladas</span>
-            <div className="w-10 h-10 rounded-xl bg-orange-50 text-orange-600 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-xl bg-orange-50 text-[#D97706] flex items-center justify-center">
               <DollarSign className="w-5 h-5" />
             </div>
           </div>
@@ -147,12 +147,12 @@ export const OverviewView: React.FC<OverviewViewProps> = ({
       {/* Two-Column Section: Active Showcases & Recent Activity */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Showcases Status */}
-        <div className="lg:col-span-2 bg-white rounded-2xl border border-slate-200 p-6 shadow-xs">
+        <div className="lg:col-span-2 bg-[#151E33] rounded-2xl border border-[#1C2D4A] p-6 shadow-xs">
           <div className="flex items-center justify-between mb-6">
-            <h3 className="text-base font-bold text-slate-900">Vitrines Multimarcas Cadastradas</h3>
+            <h3 className="text-base font-bold text-[#E5E7EB]">Vitrines Multimarcas Cadastradas</h3>
             <button
               onClick={() => onNavigate('showcases')}
-              className="text-xs font-semibold text-orange-600 hover:text-orange-700 transition-colors"
+              className="text-xs font-semibold text-[#D97706] hover:text-orange-700 transition-colors"
             >
               Ver todas &rarr;
             </button>
@@ -162,19 +162,19 @@ export const OverviewView: React.FC<OverviewViewProps> = ({
             {showcases.map((showcase) => (
               <div 
                 key={showcase.id} 
-                className="flex items-center justify-between p-4 rounded-xl border border-slate-100 bg-slate-50/50 hover:bg-slate-50 transition-colors"
+                className="flex items-center justify-between p-4 rounded-xl border border-slate-100 bg-[#0B1020]/50 hover:bg-[#0B1020] transition-colors"
               >
                 <div className="flex items-center gap-4">
                   <img 
                     src={showcase.logoUrl} 
                     alt={showcase.name} 
-                    className="w-12 h-12 rounded-xl object-cover border border-slate-200 shadow-xs"
+                    className="w-12 h-12 rounded-xl object-cover border border-[#1C2D4A] shadow-xs"
                     referrerPolicy="no-referrer"
                   />
                   <div>
                     <div className="flex items-center gap-2">
-                      <h4 className="font-bold text-slate-900 text-sm">{showcase.name}</h4>
-                      <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${showcase.isActive ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-200 text-slate-600'}`}>
+                      <h4 className="font-bold text-[#E5E7EB] text-sm">{showcase.name}</h4>
+                      <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${showcase.isActive ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-200 text-[#94A3B8]'}`}>
                         {showcase.isActive ? 'Ativa' : 'Inativa'}
                       </span>
                     </div>
@@ -183,7 +183,7 @@ export const OverviewView: React.FC<OverviewViewProps> = ({
                 </div>
 
                 <div className="text-right shrink-0">
-                  <div className="text-xs font-bold text-slate-900 tabular-nums">{showcase.commissionRate}% comissão</div>
+                  <div className="text-xs font-bold text-[#E5E7EB] tabular-nums">{showcase.commissionRate}% comissão</div>
                   <div className="text-[11px] text-slate-400 font-medium">/{showcase.slug}</div>
                 </div>
               </div>
@@ -192,13 +192,13 @@ export const OverviewView: React.FC<OverviewViewProps> = ({
         </div>
 
         {/* Recent Clicks & Traffic Log */}
-        <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs flex flex-col justify-between">
+        <div className="bg-[#151E33] rounded-2xl border border-[#1C2D4A] p-6 shadow-xs flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-base font-bold text-slate-900">Últimos Cliques</h3>
+              <h3 className="text-base font-bold text-[#E5E7EB]">Últimos Cliques</h3>
               <button
                 onClick={() => onNavigate('clicks')}
-                className="text-xs font-semibold text-orange-600 hover:text-orange-700 transition-colors"
+                className="text-xs font-semibold text-[#D97706] hover:text-orange-700 transition-colors"
               >
                 Detalhes &rarr;
               </button>
@@ -208,9 +208,9 @@ export const OverviewView: React.FC<OverviewViewProps> = ({
               {clicks.slice(0, 4).map((click) => {
                 const showcase = showcases.find(s => s.id === click.showcaseId);
                 return (
-                  <div key={click.id} className="p-3 rounded-xl border border-slate-100 bg-slate-50 flex items-center justify-between text-xs">
+                  <div key={click.id} className="p-3 rounded-xl border border-slate-100 bg-[#0B1020] flex items-center justify-between text-xs">
                     <div>
-                      <div className="font-semibold text-slate-900">{showcase?.name || 'Vitrine'}</div>
+                      <div className="font-semibold text-[#E5E7EB]">{showcase?.name || 'Vitrine'}</div>
                       <div className="text-slate-500 truncate max-w-[160px]">{click.productName || 'Acesso à Vitrine'}</div>
                     </div>
                     <div className="text-right">
