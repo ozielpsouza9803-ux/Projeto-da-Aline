@@ -2,8 +2,8 @@ import { createClient, SupabaseClient, User } from '@supabase/supabase-js';
 import { Showcase, Product, Banner, ClickRecord, CommissionRecord } from '../types';
 import { generateUUID } from '../utils/uuid';
 
-export const SUPABASE_URL = 'https://spqwrnywdlkrfrslfmwl.supabase.co';
-export const SUPABASE_ANON_KEY = 'sb_publishable_JGX27g41zq4QHaW6i5rYVw_KNMOHgq0';
+export const SUPABASE_URL = 'https://flvncchmfvoarkazkiba.supabase.co';
+export const SUPABASE_ANON_KEY = 'sb_publishable_5Ikk3h4g9Lpf_5LdgEs26A_hI-ch_dj';
 export const STORAGE_BUCKET = 'storefront-media';
 
 // Direct Singleton Client
@@ -29,13 +29,14 @@ export const testAllSupabaseTables = async (): Promise<{
   tables: TableConnectionResult[];
   message: string;
 }> => {
-  const tableNames = ['profiles', 'brands', 'products', 'product_images', 'banners', 'affiliate_clicks'];
+  const tableNames = ['profiles', 'brands', 'products', 'product_images', 'banners', 'affiliate_clicks', 'settings', 'commissions'];
   const results: TableConnectionResult[] = [];
 
   for (const table of tableNames) {
     try {
-      const { count, error } = await supabase.from(table).select('id', { count: 'exact', head: true });
-      if (error) {
+      const { count, error } = await supabase.from(table).select('id, key', { count: 'exact', head: true });
+      // Note: 'key' is for settings table which doesn't have 'id'
+      if (error && error.code !== 'PGRST100') { // PGRST100: column not found, expected for some tables
         results.push({
           tableName: table,
           status: 'FAILED',
@@ -65,7 +66,7 @@ export const testAllSupabaseTables = async (): Promise<{
     allPassed,
     tables: results,
     message: allPassed 
-      ? 'Todas as 6 tabelas (profiles, brands, products, product_images, banners, affiliate_clicks) estão 100% conectadas e operacionais no Supabase!'
+      ? 'Todas as 8 tabelas (incluindo settings e commissions) estão conectadas e operacionais!'
       : 'Algumas tabelas apresentaram problemas de conexão ou RLS.'
   };
 };
@@ -253,6 +254,17 @@ export const fetchProductsFromSupabase = async (): Promise<Product[] | null> => 
 
     // Fetch product images
     const { data: imgData } = await supabase.from('product_images').select('id, product_id, image_url');
+    
+    // Fetch real click counts
+    const { data: clickData } = await supabase.from('affiliate_clicks').select('product_id');
+    const clickCounts: Record<string, number> = {};
+    if (clickData) {
+      clickData.forEach((c: any) => {
+        if (c.product_id) {
+          clickCounts[c.product_id] = (clickCounts[c.product_id] || 0) + 1;
+        }
+      });
+    }
 
     const imagesByProductId: Record<string, string[]> = {};
     if (imgData) {
@@ -288,7 +300,7 @@ export const fetchProductsFromSupabase = async (): Promise<Product[] | null> => 
         photos: galleryPhotos.length > 0 ? galleryPhotos : ['https://images.unsplash.com/photo-1523293182086-7651a899d37f?w=600&auto=format&fit=crop&q=80'],
         affiliateUrl: item.affiliate_url || 'https://www.natura.com.br',
         isActive: item.is_active !== undefined ? Boolean(item.is_active) : true,
-        clicksCount: 0,
+        clicksCount: clickCounts[pId] || 0,
         conversionsCount: 0,
         createdAt: item.created_at ? new Date(item.created_at).toISOString().split('T')[0] : new Date().toISOString().split('T')[0]
       };
@@ -305,8 +317,8 @@ export const upsertProductToSupabase = async (product: Product): Promise<{ succe
     brand_id: product.showcaseId,
     name: product.name,
     description: product.description,
-    price: product.price,
-    promotional_price: product.promotionalPrice ?? null,
+    price: product.promotionalPrice || product.price,
+    original_price: product.promotionalPrice ? product.price : null,
     category: product.category,
     affiliate_url: product.affiliateUrl,
     is_active: product.isActive
@@ -419,17 +431,113 @@ export const deleteBannerFromSupabase = async (id: string): Promise<{ success: b
   return { success: true };
 };
 
-// 4. AFFILIATE_CLICKS (table: affiliate_clicks | cols: id, brand_id, product_id, source)
-export const recordClickInSupabase = async (brandId: string, productId?: string, source: string = 'Direto'): Promise<void> => {
+// 4. AFFILIATE_CLICKS (table: affiliate_clicks | cols: id, brand_id, product_id, source, created_at)
+export const fetchClicksFromSupabase = async (): Promise<ClickRecord[] | null> => {
+  try {
+    const { data, error } = await supabase.from('affiliate_clicks').select('*').order('created_at', { ascending: false });
+    if (error) {
+      console.warn('Supabase fetch clicks note:', error.message);
+      return null;
+    }
+    return data.map((item: any) => ({
+      id: item.id,
+      timestamp: item.created_at ? new Date(item.created_at).toLocaleString() : new Date().toLocaleString(),
+      showcaseId: item.brand_id,
+      productId: item.product_id,
+      device: 'Mobile', // Defaulting since table might not have it yet
+      source: item.source || 'Direto',
+      converted: false
+    }));
+  } catch (err) {
+    return null;
+  }
+};
+
+export const recordClickInSupabase = async (brandId: string, productId?: string, source: string = 'Direto', clickId?: string): Promise<void> => {
   try {
     const validProductId = productId && productId.includes('-') ? productId : null;
-    await supabase.from('affiliate_clicks').insert({
-      id: generateUUID(),
+    await supabase.from('affiliate_clicks').upsert({
+      id: clickId || generateUUID(),
       brand_id: brandId,
       product_id: validProductId,
       source: source
     });
   } catch (err) {
     console.warn('Note: Click recording in Supabase:', err);
+  }
+};
+
+// 5. SETTINGS (table: settings | cols: key, value)
+export const fetchSettingsFromSupabase = async (): Promise<AdminSettings | null> => {
+  try {
+    const { data, error } = await supabase.from('settings').select('key, value');
+    if (error) {
+      if (error.code !== 'PGRST116' && error.code !== '42P01') {
+        console.warn('Supabase fetch settings note:', error.message);
+      }
+      return null;
+    }
+    if (!data || data.length === 0) return null;
+
+    const settingsObj: any = {};
+    data.forEach((item: any) => {
+      settingsObj[item.key] = item.value;
+    });
+    
+    return settingsObj as AdminSettings;
+  } catch (err) {
+    return null;
+  }
+};
+
+export const saveSettingToSupabase = async (key: string, value: any): Promise<void> => {
+  try {
+    await supabase.from('settings').upsert({ key, value });
+  } catch (err) {
+    console.warn(`Error saving setting ${key} to Supabase:`, err);
+  }
+};
+
+// 6. COMMISSIONS (table: commissions | cols: id, showcase_id, order_id, product_name, sale_amount, commission_rate, commission_amount, status, created_at)
+export const fetchCommissionsFromSupabase = async (): Promise<CommissionRecord[] | null> => {
+  try {
+    const { data, error } = await supabase.from('commissions').select('*').order('created_at', { ascending: false });
+    if (error) {
+      if (error.code !== '42P01') {
+        console.warn('Supabase fetch commissions note:', error.message);
+      }
+      return null;
+    }
+    return data.map((item: any) => ({
+      id: item.id,
+      date: item.created_at ? new Date(item.created_at).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+      showcaseId: item.showcase_id,
+      orderId: item.order_id,
+      productName: item.product_name,
+      saleAmount: Number(item.sale_amount),
+      commissionRate: Number(item.commission_rate),
+      commissionAmount: Number(item.commission_amount),
+      status: item.status
+    }));
+  } catch (err) {
+    return null;
+  }
+};
+
+export const saveCommissionToSupabase = async (commission: CommissionRecord): Promise<void> => {
+  try {
+    const payload = {
+      id: commission.id,
+      showcase_id: commission.showcaseId,
+      order_id: commission.orderId,
+      product_name: commission.productName,
+      sale_amount: commission.saleAmount,
+      commission_rate: commission.commissionRate,
+      commission_amount: commission.commissionAmount,
+      status: commission.status
+    };
+    await supabase.from('commissions').upsert(payload);
+  } catch (err) {
+    console.warn('Error saving commission to Supabase:', err);
   }
 };

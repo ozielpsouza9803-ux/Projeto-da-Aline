@@ -17,7 +17,8 @@ import {
   Lock,
   LogOut,
   Bot,
-  Crown
+  Crown,
+  Wallet
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -53,7 +54,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
     { id: 'stock', label: 'Estoque e Produtos', icon: Boxes },
     { id: 'banners', label: 'Banners e Carrosséis', icon: ImageIcon },
     { id: 'clicks', label: 'Cliques', icon: MousePointerClick },
-    { id: 'commissions', label: 'Comissões', icon: DollarSign },
+    { id: 'finance', label: 'Financeiro', icon: DollarSign },
+    { id: 'pix_settings', label: 'Configurações PIX', icon: Wallet },
     { id: 'reports', label: 'Relatórios', icon: FileText },
     { id: 'charts', label: 'Gráficos', icon: BarChart3 },
     { id: 'security', label: 'Segurança e Acesso', icon: Lock },

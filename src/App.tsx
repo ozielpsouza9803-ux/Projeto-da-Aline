@@ -11,15 +11,13 @@ import {
   ShoppingBag
 } from './types';
 import { 
-  fetchProductsFromSupabase, 
-  upsertProductToSupabase, 
-  deleteProductFromSupabase,
-  fetchBannersFromSupabase,
-  upsertBannerToSupabase,
-  deleteBannerFromSupabase,
-  fetchShowcasesFromSupabase,
-  upsertShowcaseToSupabase,
   deleteShowcaseFromSupabase,
+  fetchSettingsFromSupabase,
+  saveSettingToSupabase,
+  fetchCommissionsFromSupabase,
+  saveCommissionToSupabase,
+  fetchClicksFromSupabase,
+  recordClickInSupabase,
   getCurrentUser,
   checkIsAdminRole,
   signOutAdmin,
@@ -37,6 +35,8 @@ import { ProductsView } from './components/admin/ProductsView';
 import { BannersView } from './components/admin/BannersView';
 import { ClicksView } from './components/admin/ClicksView';
 import { CommissionsView } from './components/admin/CommissionsView';
+import { FinanceView } from './components/admin/FinanceView';
+import { PixSettingsView } from './components/admin/PixSettingsView';
 import { ReportsView } from './components/admin/ReportsView';
 import { ChartsView } from './components/admin/ChartsView';
 import { SecurityView } from './components/admin/SecurityView';
@@ -112,17 +112,19 @@ export default function App() {
 
     const loadSupabaseData = async () => {
       try {
-        const [sbShowcases, sbProducts, sbBanners] = await Promise.all([
+        const [sbShowcases, sbProducts, sbBanners, sbSettings, sbCommissions, sbClicks] = await Promise.all([
           fetchShowcasesFromSupabase(),
           fetchProductsFromSupabase(),
-          fetchBannersFromSupabase()
+          fetchBannersFromSupabase(),
+          fetchSettingsFromSupabase(),
+          fetchCommissionsFromSupabase(),
+          fetchClicksFromSupabase()
         ]);
 
         if (sbShowcases && sbShowcases.length > 0) {
           setShowcases(sbShowcases);
           storageService.saveShowcases(sbShowcases);
         } else {
-          // Seed showcases (brands) first to satisfy FK constraints
           const localShowcases = storageService.getShowcases();
           for (const s of localShowcases) {
             await upsertShowcaseToSupabase(s).catch(() => {});
@@ -133,7 +135,6 @@ export default function App() {
           setProducts(sbProducts);
           storageService.saveProducts(sbProducts);
         } else {
-          // Seed products to Supabase if empty
           const localProds = storageService.getProducts();
           for (const p of localProds) {
             await upsertProductToSupabase(p).catch(() => {});
@@ -144,10 +145,38 @@ export default function App() {
           setBanners(sbBanners);
           storageService.saveBanners(sbBanners);
         } else {
-          // Seed banners to Supabase if empty
           const localBanners = storageService.getBanners();
           for (const b of localBanners) {
             await upsertBannerToSupabase(b).catch(() => {});
+          }
+        }
+
+        if (sbSettings) {
+          setSettings(sbSettings);
+          storageService.saveSettings(sbSettings);
+        } else {
+          const localSettings = storageService.getSettings();
+          Object.entries(localSettings).forEach(([key, value]) => {
+            saveSettingToSupabase(key, value).catch(() => {});
+          });
+        }
+
+        if (sbCommissions && sbCommissions.length > 0) {
+          setCommissions(sbCommissions);
+          storageService.saveCommissions(sbCommissions);
+        } else {
+          const localCommissions = storageService.getCommissions();
+          for (const c of localCommissions) {
+            await saveCommissionToSupabase(c).catch(() => {});
+          }
+        }
+
+        if (sbClicks && sbClicks.length > 0) {
+          setClicks(sbClicks);
+          storageService.saveClicks(sbClicks);
+        } else {
+          for (const c of localClicks) {
+            await recordClickInSupabase(c.showcaseId, c.productId, c.source, c.id).catch(() => {});
           }
         }
       } catch (err) {
@@ -258,6 +287,11 @@ export default function App() {
   const handleSaveSettings = (newSettings: AdminSettings) => {
     setSettings(newSettings);
     storageService.saveSettings(newSettings);
+    
+    // Persist each key to Supabase
+    Object.entries(newSettings).forEach(([key, value]) => {
+      saveSettingToSupabase(key, value).catch(() => {});
+    });
   };
 
   const handleResetDefaults = () => {
@@ -550,13 +584,12 @@ export default function App() {
                 />
               )}
 
-              {currentTab === 'commissions' && (
-                <CommissionsView
-                  commissions={commissions}
-                  showcases={showcases}
-                />
+              {currentTab === 'finance' && (
+                <FinanceView commissions={commissions} />
               )}
-
+              {currentTab === 'pix_settings' && (
+                <PixSettingsView settings={settings} onSaveSettings={handleSaveSettings} />
+              )}
               {currentTab === 'reports' && (
                 <ReportsView
                   showcases={showcases}
@@ -604,6 +637,7 @@ export default function App() {
           setIsAdminRole(isAdmin);
           if (isAdmin && isExplicitLogin) {
             setViewMode('admin');
+            setIsAuthModalOpen(false); // Fix: Ensure modal closes when entering admin panel
           }
         }}
       />

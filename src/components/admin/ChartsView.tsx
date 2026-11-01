@@ -11,19 +11,37 @@ interface ChartsViewProps {
 }
 
 export const ChartsView: React.FC<ChartsViewProps> = ({ showcases, products, commissions }) => {
+  const [selectedBrandId, setSelectedBrandId] = React.useState('all');
+
   // Dados para Gráficos
-  const clicksData = useMemo(() => showcases.map(s => ({
-    name: s.name,
-    clicks: products.filter(p => p.showcaseId === s.id).reduce((acc, p) => acc + (p.clicksCount || 0), 0)
-  })), [showcases, products]);
+  const filteredProducts = useMemo(() => 
+    products.filter(p => selectedBrandId === 'all' || p.showcaseId === selectedBrandId),
+    [products, selectedBrandId]
+  );
 
-  const commissionData = useMemo(() => showcases.map(s => ({
-    name: s.name,
-    amount: commissions.filter(c => c.showcaseId === s.id).reduce((acc, c) => acc + c.commissionAmount, 0)
-  })), [showcases, commissions]);
+  const clicksData = useMemo(() => showcases
+    .filter(s => selectedBrandId === 'all' || s.id === selectedBrandId)
+    .map(s => ({
+      name: s.name,
+      clicks: filteredProducts.filter(p => p.showcaseId === s.id).reduce((acc, p) => acc + (p.clicksCount || 0), 0)
+    })), [showcases, filteredProducts, selectedBrandId]);
 
-  const totalCommissions = useMemo(() => commissions.reduce((sum, c) => sum + c.commissionAmount, 0), [commissions]);
-  const pendingCommissions = useMemo(() => commissions.filter(c => c.status === 'Pendente').reduce((sum, c) => sum + c.commissionAmount, 0), [commissions]);
+  const commissionData = useMemo(() => showcases
+    .filter(s => selectedBrandId === 'all' || s.id === selectedBrandId)
+    .map(s => ({
+      name: s.name,
+      amount: commissions.filter(c => c.showcaseId === s.id).reduce((acc, c) => acc + c.commissionAmount, 0)
+    })), [showcases, commissions, selectedBrandId]);
+
+  const totalCommissions = useMemo(() => commissions
+    .filter(c => selectedBrandId === 'all' || c.showcaseId === selectedBrandId)
+    .reduce((sum, c) => sum + c.commissionAmount, 0), [commissions, selectedBrandId]);
+    
+  const pendingCommissions = useMemo(() => commissions
+    .filter(c => (selectedBrandId === 'all' || c.showcaseId === selectedBrandId) && c.status === 'Pendente')
+    .reduce((sum, c) => sum + c.commissionAmount, 0), [commissions, selectedBrandId]);
+
+  const totalClicks = useMemo(() => filteredProducts.reduce((acc, p) => acc + (p.clicksCount || 0), 0), [filteredProducts]);
 
   if (products.length === 0 && commissions.length === 0) {
     return (
@@ -35,6 +53,19 @@ export const ChartsView: React.FC<ChartsViewProps> = ({ showcases, products, com
 
   return (
     <div className="space-y-6">
+      {/* Filtros */}
+      <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4">
+        <label className="text-xs font-bold text-slate-700">Filtrar por Vitrine:</label>
+        <select 
+          value={selectedBrandId} 
+          onChange={(e) => setSelectedBrandId(e.target.value)}
+          className="bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-xs font-semibold"
+        >
+          <option value="all">Todas as Marcas</option>
+          {showcases.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+        </select>
+      </div>
+
       {/* Cards Financeiros */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4">
@@ -55,7 +86,7 @@ export const ChartsView: React.FC<ChartsViewProps> = ({ showcases, products, com
           <div className="p-3 rounded-xl bg-blue-50 text-blue-600"><MousePointerClick className="w-6 h-6" /></div>
           <div>
             <p className="text-xs text-slate-500 font-semibold">Total de Cliques</p>
-            <p className="text-xl font-bold text-slate-900">{products.reduce((acc, p) => acc + (p.clicksCount || 0), 0)}</p>
+            <p className="text-xl font-bold text-slate-900">{totalClicks}</p>
           </div>
         </div>
       </div>
